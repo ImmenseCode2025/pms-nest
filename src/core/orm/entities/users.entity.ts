@@ -1,7 +1,7 @@
 import { Mapping } from 'src/core/orm/sql.model';
 
 export class Users extends Mapping {
-  static table = 'users';
+  static table = 'user';
 
   static userSelect = [
     'id',
