@@ -32,8 +32,8 @@ async function bootstrap() {
       },
     }),
   );
-  await app.listen(8082, '0.0.0.0', () => {
-    console.log(`Server is running on http://0.0.0.0:8082`);
+  await app.listen(8104, '0.0.0.0', () => {
+    console.log(`Server is running on http://0.0.0.0:8104 `);
   });
   if (module.hot) {
     module.hot.accept();
