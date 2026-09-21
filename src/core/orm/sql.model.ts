@@ -6,14 +6,19 @@ import { Model, QueryBuilder } from 'objection';
 dotenv.config();
 
 const db = knex({
-  client: 'pg',
+  client: 'mysql',
   connection: {
     host: process.env.DATABASE_HOST,
-    port: parseInt(process.env.DATABASE_PORT),
+    port: Number(process.env.DATABASE_PORT || 3306),
     user: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,
     database: process.env.DATABASE_NAME,
-    timezone: 'UTC',
+    timezone: 'Z',
+    charset: 'utf8mb4',
+  },
+  pool: {
+    min: 2,
+    max: 10,
   },
 });
 

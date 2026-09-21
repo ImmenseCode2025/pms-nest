@@ -50,12 +50,8 @@ export class GlobalQueryHelper {
       return;
     }
 
-    if (this.isNumeric(filter.value)) {
-      let searchValue = this.parseNumeric(filter.value);
-      if (searchValue) {
-        query.whereRaw('CAST(id AS TEXT) ilike ?', [`%${searchValue}%`]);
-      }
-    }
+    const searchValue = this.parseNumeric(filter.value);
+    query.whereRaw('CAST(?? AS CHAR) LIKE ?', [column, `%${searchValue}%`]);
 
     if (!filter?.value) return;
 
@@ -136,7 +132,10 @@ export class GlobalQueryHelper {
         query.whereRaw(`LOWER(??) = LOWER(?)`, [column, filter.value]);
         break;
       case 'contains':
-        query.where(column, 'ilike', `%${filter.value}%`);
+        query.whereRaw('LOWER(??) LIKE LOWER(?)', [
+          column,
+          `%${filter.value}%`,
+        ]);
         break;
       case 'one_of':
         const values = Array.isArray(filter.value)
@@ -161,6 +160,6 @@ export class GlobalQueryHelper {
   }
 
   static parseNumeric(value) {
-    return parseFloat(value.replace(/,/g, '').trim()) || 0;
+    return parseFloat(String(value).replace(/,/g, '').trim()) || 0;
   }
 }

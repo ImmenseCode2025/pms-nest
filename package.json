@@ -18,7 +18,10 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "db:migrate": "knex migrate:latest",
+    "db:rollback": "knex migrate:rollback",
+    "db:seed": "knex seed:run"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1117.0",
@@ -57,6 +60,7 @@
     "knex": "^3.3.0",
     "lodash": "^4.18.1",
     "moment": "^2.30.1",
+    "mysql2": "^3.15.3",
     "nest-winston": "^1.10.2",
     "objection": "^3.1.5",
     "openai": "^7.5.0",
@@ -64,8 +68,6 @@
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "path": "^0.12.7",
-    "pg": "^8.23.0",
-    "pg-hstore": "^2.3.4",
     "puppeteer": "^25.9.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",

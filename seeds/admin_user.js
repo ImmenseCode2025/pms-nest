@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 /**
  * @param { import("knex").Knex } knex
@@ -24,7 +24,7 @@ exports.seed = async function (knex) {
       auth_platform: 'app',
     });
 
-    console.log('Admin user seeded: admin@grc.com / admin123');
+    console.log('Admin user seeded.');
   } else {
     console.log('Admin user already exists.');
   }
