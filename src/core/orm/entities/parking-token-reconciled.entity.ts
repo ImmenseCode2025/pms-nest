@@ -1,12 +1,24 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
+import { ScratchCard } from './scratch-card.entity';
 
 export class ParkingTokenReconciled extends Mapping {
-  static table = 'parking_token_reconciled_5';
+    static get tableName() {
+    return 'parking_token_reconciled_5';
+  }
 
   tokenNumber?: string;
   paymentReference?: string;
 
-  static get relationMappings() {
-    return {};
+    static get relationMappings() {
+    return {
+      scratchCardToken: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: ScratchCard,
+        join: {
+          from: 'parking_token_reconciled_5.paymentReference',
+          to: 'scratch_card.id',
+        },
+      },
+    };
   }
 }

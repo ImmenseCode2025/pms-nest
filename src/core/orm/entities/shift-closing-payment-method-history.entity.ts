@@ -1,7 +1,9 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
 
 export class ShiftClosingPaymentMethodHistory extends Mapping {
-  static table = 'shift_closing_payment_method_history';
+    static get tableName() {
+    return 'shift_closing_payment_method_history';
+  }
 
   shiftClosingId?: number;
   paymentMethodType?: "Scratch Card" | "Credit/Debit Card" | "Parking Receipt" | "App & Others";

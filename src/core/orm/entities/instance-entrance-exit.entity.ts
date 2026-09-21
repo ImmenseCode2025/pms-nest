@@ -1,7 +1,11 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
+import { Users } from './users.entity';
+import { ParkingGate } from './parking-gate.entity';
 
 export class InstanceEntranceExit extends Mapping {
-  static table = 'instance_entrance_or_exit';
+    static get tableName() {
+    return 'instance_entrance_or_exit';
+  }
 
   name?: string;
   siteCode?: string;
@@ -12,7 +16,24 @@ export class InstanceEntranceExit extends Mapping {
   createdAt?: Date | string;
   updatedAt?: Date | string;
 
-  static get relationMappings() {
-    return {};
+    static get relationMappings() {
+    return {
+      instanceEntranceExitUsers: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: Users,
+        join: {
+          from: 'instance_entrance_or_exit.user',
+          to: 'user.id',
+        },
+      },
+      instanceEntranceExitParkingGates: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: ParkingGate,
+        join: {
+          from: 'instance_entrance_or_exit.gate',
+          to: 'parking_gate.id',
+        },
+      },
+    };
   }
 }

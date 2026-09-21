@@ -1,7 +1,10 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
+import { Customer } from './customer.entity';
 
 export class Notifications extends Mapping {
-  static table = 'notification';
+    static get tableName() {
+    return 'notification';
+  }
 
   title?: string;
   message?: string;
@@ -9,7 +12,16 @@ export class Notifications extends Mapping {
   createdAt?: Date | string;
   updatedAt?: Date | string;
 
-  static get relationMappings() {
-    return {};
+    static get relationMappings() {
+    return {
+      notificationsCustomers: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: Customer,
+        join: {
+          from: 'notification.customer',
+          to: 'customer.id',
+        },
+      },
+    };
   }
 }

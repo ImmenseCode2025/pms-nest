@@ -1,7 +1,11 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
+import { Corporate } from './corporate.entity';
+import { CorporateInvoice } from './corporate-invoice.entity';
 
 export class CorporateBillingPlan extends Mapping {
-  static table = 'corporate_billing_plans';
+    static get tableName() {
+    return 'corporate_billing_plans';
+  }
 
   id?: number;
   corporateId?: number;
@@ -12,7 +16,24 @@ export class CorporateBillingPlan extends Mapping {
   createdAt?: Date | string;
   updatedAt?: Date | string;
 
-  static get relationMappings() {
-    return {};
+    static get relationMappings() {
+    return {
+      billingPlanCorporate: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: Corporate,
+        join: {
+          from: 'corporate_billing_plans.corporateId',
+          to: 'corporates.id',
+        },
+      },
+      planInvoices: {
+        relation: Mapping.HasManyRelation,
+        modelClass: CorporateInvoice,
+        join: {
+          from: 'corporate_billing_plans.id',
+          to: 'corporate_invoices.billingPlanId',
+        },
+      },
+    };
   }
 }

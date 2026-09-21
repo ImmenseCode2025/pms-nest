@@ -1,7 +1,10 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
+import { CorporateInvoice } from './corporate-invoice.entity';
 
 export class CorporateInvoiceLog extends Mapping {
-  static table = 'corporate_invoice_logs';
+    static get tableName() {
+    return 'corporate_invoice_logs';
+  }
 
   id?: number;
   invoiceId?: number;
@@ -14,7 +17,16 @@ export class CorporateInvoiceLog extends Mapping {
   createdAt?: Date | string;
   updatedAt?: Date | string;
 
-  static get relationMappings() {
-    return {};
+    static get relationMappings() {
+    return {
+      logInvoice: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: CorporateInvoice,
+        join: {
+          from: 'corporate_invoice_logs.invoiceId',
+          to: 'corporate_invoices.id',
+        },
+      },
+    };
   }
 }

@@ -1,7 +1,10 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
+import { VehicleType } from './vehicle-type.entity';
 
 export class ParkingReceipt extends Mapping {
-  static table = 'parking_receipt';
+    static get tableName() {
+    return 'parking_receipt';
+  }
 
   vehicleNumber?: string;
   deviceId?: string;
@@ -13,7 +16,16 @@ export class ParkingReceipt extends Mapping {
   onlinePaymentReference?: string;
   ticketNumber?: string;
 
-  static get relationMappings() {
-    return {};
+    static get relationMappings() {
+    return {
+      receiptVehicleTypes: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: VehicleType,
+        join: {
+          from: 'parking_receipt.vehicleType',
+          to: 'vehicle_type.id',
+        },
+      },
+    };
   }
 }

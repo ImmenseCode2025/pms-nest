@@ -1,7 +1,10 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
+import { ParkingToken } from './parking-token.entity';
 
 export class PaymentMethod extends Mapping {
-  static table = 'payment_method';
+    static get tableName() {
+    return 'payment_method';
+  }
 
   name?: string;
   status?: string;
@@ -10,7 +13,16 @@ export class PaymentMethod extends Mapping {
   createdAt?: Date | string;
   updatedAt?: Date | string;
 
-  static get relationMappings() {
-    return {};
+    static get relationMappings() {
+    return {
+      paymentMethodParkingTokens: {
+        relation: Mapping.HasManyRelation,
+        modelClass: ParkingToken,
+        join: {
+          from: 'payment_method.id',
+          to: 'parking_token.paymentMethod',
+        },
+      },
+    };
   }
 }

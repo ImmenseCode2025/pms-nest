@@ -1,7 +1,11 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
+import { Users } from './users.entity';
+import { Room } from './room.entity';
 
 export class Message extends Mapping {
-  static table = 'messages';
+    static get tableName() {
+    return 'messages';
+  }
 
   roomId?: number;
   sender?: string;
@@ -11,7 +15,24 @@ export class Message extends Mapping {
   createdAt?: Date | string;
   updatedAt?: Date | string;
 
-  static get relationMappings() {
-    return {};
+    static get relationMappings() {
+    return {
+      msgSender: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: Users,
+        join: {
+          from: 'messages.userId',
+          to: 'user.id',
+        },
+      },
+      roomMessages: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: Room,
+        join: {
+          from: 'messages.roomId',
+          to: 'rooms.id',
+        },
+      },
+    };
   }
 }

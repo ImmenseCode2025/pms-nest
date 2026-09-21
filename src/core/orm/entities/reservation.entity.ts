@@ -1,7 +1,12 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
+import { Customer } from './customer.entity';
+import { ParkingToken } from './parking-token.entity';
+import { ParkingSite } from './parking-site.entity';
 
 export class Reservation extends Mapping {
-  static table = 'reservation';
+    static get tableName() {
+    return 'reservation';
+  }
 
   customerId?: number;
   parkingSiteId?: number;
@@ -13,7 +18,32 @@ export class Reservation extends Mapping {
   createdAt?: Date | string;
   updatedAt?: Date | string;
 
-  static get relationMappings() {
-    return {};
+    static get relationMappings() {
+    return {
+      reservationCustomer: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: Customer,
+        join: {
+          from: 'reservation.customer',
+          to: 'customer.id',
+        },
+      },
+      reservationParkingToken: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: ParkingToken,
+        join: {
+          from: 'reservation.token',
+          to: 'parking_token.id',
+        },
+      },
+      reservationParkingSite: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: ParkingSite,
+        join: {
+          from: 'reservation.site',
+          to: 'parking_site.id',
+        },
+      },
+    };
   }
 }

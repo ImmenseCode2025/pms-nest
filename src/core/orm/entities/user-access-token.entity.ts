@@ -1,8 +1,10 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
 import { Users } from './users.entity';
 
 export class UserAccessToken extends Mapping {
-  static table = 'user_access_token';
+    static get tableName() {
+    return 'user_access_token';
+  }
 
   id: number;
   user: number;
@@ -15,9 +17,9 @@ export class UserAccessToken extends Mapping {
   // Relations
   user_detail?: Users;
 
-  static get relationMappings() {
+    static get relationMappings() {
     return {
-      user_detail: {
+      userAccessTokens: {
         relation: Mapping.BelongsToOneRelation,
         modelClass: Users,
         join: {

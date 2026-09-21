@@ -1,7 +1,9 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
 
 export class ParkingShiftClosingHistory extends Mapping {
-  static table = 'parking_shift_closing_history';
+    static get tableName() {
+    return 'parking_shift_closing_history';
+  }
 
   shiftClosingId?: number;
   parkingSiteId?: number;

@@ -1,7 +1,9 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
 
 export class ParkingReceiptBacklog extends Mapping {
-  static table = 'parking_receipt_backlog';
+    static get tableName() {
+    return 'parking_receipt_backlog';
+  }
 
   vehicleNumber?: string;
   deviceId?: string;

@@ -1,7 +1,9 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
 
 export class RoomMember extends Mapping {
-  static table = 'room_members';
+    static get tableName() {
+    return 'room_members';
+  }
 
   roomId?: number;
   userId?: number;

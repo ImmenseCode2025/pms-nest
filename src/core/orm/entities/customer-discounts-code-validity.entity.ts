@@ -1,7 +1,9 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
 
 export class CustomerDiscountsCodeValidity extends Mapping {
-  static table = 'customer_discount_codes_validity';
+    static get tableName() {
+    return 'customer_discount_codes_validity';
+  }
 
   customerId?: number;
   discountCode?: string;

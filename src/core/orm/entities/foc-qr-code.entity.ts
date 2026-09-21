@@ -1,7 +1,12 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
+import { ParkingSite } from './parking-site.entity';
+import { Hardware } from './hardware.entity';
+import { FOC } from './foc.entity';
 
 export class FocQrCode extends Mapping {
-  static table = 'foc_qr_code';
+    static get tableName() {
+    return 'foc_qr_code';
+  }
 
   id?: number;
   employeeId?: string;
@@ -10,7 +15,32 @@ export class FocQrCode extends Mapping {
   createdDateTime?: Date | string;
   tokenNumber?: string;
 
-  static get relationMappings() {
-    return {};
+    static get relationMappings() {
+    return {
+      focQrParkingSite: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: ParkingSite,
+        join: {
+          from: 'foc_qr_code.site',
+          to: 'parking_site.id',
+        },
+      },
+      focQrHardware: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: Hardware,
+        join: {
+          from: 'foc_qr_code.hardware',
+          to: 'hardware.id',
+        },
+      },
+      focCardFOC: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: FOC,
+        join: {
+          from: 'foc_qr_code.employeeId',
+          to: 'foc_card.id',
+        },
+      },
+    };
   }
 }

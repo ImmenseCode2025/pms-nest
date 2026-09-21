@@ -1,7 +1,11 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
+import { Customer } from './customer.entity';
+import { TopUp } from './top-up.entity';
 
 export class Wallet extends Mapping {
-  static table = 'wallet';
+    static get tableName() {
+    return 'wallet';
+  }
 
   customerId?: number;
   cent?: number;
@@ -9,7 +13,24 @@ export class Wallet extends Mapping {
   createdAt?: Date | string;
   updatedAt?: Date | string;
 
-  static get relationMappings() {
-    return {};
+    static get relationMappings() {
+    return {
+      walletCustomers: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: Customer,
+        join: {
+          from: 'wallet.customer',
+          to: 'customer.id',
+        },
+      },
+      walletTopUps: {
+        relation: Mapping.HasManyRelation,
+        modelClass: TopUp,
+        join: {
+          from: 'wallet.id',
+          to: 'topup.wallet',
+        },
+      },
+    };
   }
 }

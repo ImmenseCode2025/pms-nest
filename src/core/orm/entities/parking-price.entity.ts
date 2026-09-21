@@ -1,7 +1,12 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
+import { VehicleType } from './vehicle-type.entity';
+import { Users } from './users.entity';
+import { ParkingSite } from './parking-site.entity';
 
 export class ParkingPrice extends Mapping {
-  static table = 'parking_price';
+    static get tableName() {
+    return 'parking_price';
+  }
 
   vehicleTypeId?: number;
   amount?: number;
@@ -14,7 +19,32 @@ export class ParkingPrice extends Mapping {
   createdAt?: Date | string;
   updatedAt?: Date | string;
 
-  static get relationMappings() {
-    return {};
+    static get relationMappings() {
+    return {
+      priceVehicleType: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: VehicleType,
+        join: {
+          from: 'parking_price.vehicleType',
+          to: 'vehicle_type.id',
+        },
+      },
+      priceUsers: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: Users,
+        join: {
+          from: 'parking_price.user',
+          to: 'user.id',
+        },
+      },
+      priceParkingSites: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: ParkingSite,
+        join: {
+          from: 'parking_price.siteId',
+          to: 'parking_site.id',
+        },
+      },
+    };
   }
 }

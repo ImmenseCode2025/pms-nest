@@ -1,7 +1,11 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
+import { ParkingShiftClosing } from './parking-shift-closing.entity';
+import { VehicleType } from './vehicle-type.entity';
 
 export class ShiftClosingCollectionDetail extends Mapping {
-  static table = 'shift_closing_collection';
+    static get tableName() {
+    return 'shift_closing_collection';
+  }
 
   shiftClosingId?: number;
   vehicleType?: number;
@@ -11,7 +15,24 @@ export class ShiftClosingCollectionDetail extends Mapping {
   createdAt?: Date | string;
   updatedAt?: Date | string;
 
-  static get relationMappings() {
-    return {};
+    static get relationMappings() {
+    return {
+      shiftClosingCollectionDetails: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: ParkingShiftClosing,
+        join: {
+          from: 'shift_closing_collection.shiftClosing',
+          to: 'parking_shift_closing.id',
+        },
+      },
+      shiftClosingCollectionDetailsVehicleTypes: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: VehicleType,
+        join: {
+          from: 'shift_closing_collection.vehicleType',
+          to: 'vehicle_type.id',
+        },
+      },
+    };
   }
 }

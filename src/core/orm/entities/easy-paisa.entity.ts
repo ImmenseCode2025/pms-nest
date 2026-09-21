@@ -1,7 +1,10 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
+import { Customer } from './customer.entity';
 
 export class EasyPaisa extends Mapping {
-  static table = 'easypaisa';
+    static get tableName() {
+    return 'easypaisa';
+  }
 
   customerId?: number;
   accountNumber?: string;
@@ -10,7 +13,16 @@ export class EasyPaisa extends Mapping {
   createdAt?: Date | string;
   updatedAt?: Date | string;
 
-  static get relationMappings() {
-    return {};
+    static get relationMappings() {
+    return {
+      easyPaisaCustomers: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: Customer,
+        join: {
+          from: 'easypaisa.customer',
+          to: 'customer.id',
+        },
+      },
+    };
   }
 }

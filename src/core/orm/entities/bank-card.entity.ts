@@ -1,7 +1,10 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
+import { Customer } from './customer.entity';
 
 export class BankCard extends Mapping {
-  static table = 'bank_card';
+    static get tableName() {
+    return 'bank_card';
+  }
 
   customerId?: number;
   cardNumber?: string;
@@ -12,7 +15,16 @@ export class BankCard extends Mapping {
   createdAt?: Date | string;
   updatedAt?: Date | string;
 
-  static get relationMappings() {
-    return {};
+    static get relationMappings() {
+    return {
+      cardCustomer: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: Customer,
+        join: {
+          from: 'bank_card.customer',
+          to: 'customer.id',
+        },
+      },
+    };
   }
 }

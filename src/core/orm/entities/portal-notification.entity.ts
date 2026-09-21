@@ -1,7 +1,11 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
+import { Users } from './users.entity';
+import { Corporate } from './corporate.entity';
 
 export class PortalNotification extends Mapping {
-  static table = 'portal_notifications';
+    static get tableName() {
+    return 'portal_notifications';
+  }
 
   title?: string;
   message?: string;
@@ -12,7 +16,32 @@ export class PortalNotification extends Mapping {
   data?: any;
   read?: boolean;
 
-  static get relationMappings() {
-    return {};
+    static get relationMappings() {
+    return {
+      NotificationForUser: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: Users,
+        join: {
+          from: 'portal_notifications.user',
+          to: 'user.id',
+        },
+      },
+      NotificationByUser: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: Users,
+        join: {
+          from: 'portal_notifications.createdBy',
+          to: 'user.id',
+        },
+      },
+      NotificationByCorporate: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: Corporate,
+        join: {
+          from: 'portal_notifications.corporateId',
+          to: 'corporates.id',
+        },
+      },
+    };
   }
 }

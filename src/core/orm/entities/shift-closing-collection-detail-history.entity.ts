@@ -1,7 +1,9 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
 
 export class ShiftClosingCollectionDetailHistory extends Mapping {
-  static table = 'shift_closing_collection_history';
+    static get tableName() {
+    return 'shift_closing_collection_history';
+  }
 
   shiftClosingId?: number;
   vehicleType?: number;

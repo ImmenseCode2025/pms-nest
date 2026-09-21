@@ -1,7 +1,12 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
+import { ScratchCards } from './scratch-cards.entity';
+import { ParkingSite } from './parking-site.entity';
+import { Users } from './users.entity';
 
 export class ScratchCardsHistory extends Mapping {
-  static table = 'scratch_cards_history';
+    static get tableName() {
+    return 'scratch_cards_history';
+  }
 
   scratchCardsId?: number;
   siteId?: number;
@@ -11,7 +16,40 @@ export class ScratchCardsHistory extends Mapping {
   createdAt?: Date | string;
   updatedAt?: Date | string;
 
-  static get relationMappings() {
-    return {};
+    static get relationMappings() {
+    return {
+      ScratchCardsEventHistory: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: ScratchCards,
+        join: {
+          from: 'scratch_cards_history.scratch_card_id',
+          to: 'scratch_cards.id',
+        },
+      },
+      ScratchCardsEventSite: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: ParkingSite,
+        join: {
+          from: 'scratch_cards_history.site_id',
+          to: 'parking_site.id',
+        },
+      },
+      ScratchCardAssignedBy: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: Users,
+        join: {
+          from: 'scratch_cards_history.assign_by',
+          to: 'user.id',
+        },
+      },
+      ScratchCardAssignedTo: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: Users,
+        join: {
+          from: 'scratch_cards_history.assign_to',
+          to: 'user.id',
+        },
+      },
+    };
   }
 }

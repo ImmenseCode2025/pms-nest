@@ -1,7 +1,9 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
 
 export class DiscountsAndOffers extends Mapping {
-  static table = 'discounts_and_offers';
+    static get tableName() {
+    return 'discounts_and_offers';
+  }
 
   description?: string;
   discountCode?: string;

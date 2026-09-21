@@ -1,7 +1,9 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
 
 export class ParkingReceiptOfflineLog extends Mapping {
-  static table = 'parking_receipt_offline_data_logs';
+    static get tableName() {
+    return 'parking_receipt_offline_data_logs';
+  }
 
   deviceId?: string;
   createdAt?: Date | string;

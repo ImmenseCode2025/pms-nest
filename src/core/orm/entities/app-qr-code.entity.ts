@@ -1,7 +1,12 @@
-import { Mapping } from 'src/core/orm/sql.model';
+import { Mapping } from '../sql.model';
+import { ParkingSite } from './parking-site.entity';
+import { Customer } from './customer.entity';
+import { Hardware } from './hardware.entity';
 
 export class AppQrCode extends Mapping {
-  static table = 'app_qr_code';
+    static get tableName() {
+    return 'app_qr_code';
+  }
 
   id?: number;
   tokenNumber?: string;
@@ -12,7 +17,32 @@ export class AppQrCode extends Mapping {
   hardware?: number;
   createdDateTime?: Date | string;
 
-  static get relationMappings() {
-    return {};
+    static get relationMappings() {
+    return {
+      appQrParkingSite: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: ParkingSite,
+        join: {
+          from: 'app_qr_code.site',
+          to: 'parking_site.id',
+        },
+      },
+      appQrCustomer: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: Customer,
+        join: {
+          from: 'app_qr_code.customer',
+          to: 'customer.id',
+        },
+      },
+      appQrHardware: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: Hardware,
+        join: {
+          from: 'app_qr_code.hardware',
+          to: 'hardware.id',
+        },
+      },
+    };
   }
 }
