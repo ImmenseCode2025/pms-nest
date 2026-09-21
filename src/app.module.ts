@@ -20,7 +20,6 @@ import { RequestContextMiddleware } from './core/middleware/request-context.midd
 import { SocketGatewayModule } from './core/socket-gateway/socket-gateway.module';
 import { TasksModule } from './core/tasks/tasks.module';
 import { UsersModule } from './users/users.module';
-import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -53,7 +52,6 @@ import { NotificationsModule } from './notifications/notifications.module';
     AppCacheModule,
     CustomLoggerModule,
     AppConfigModule,
-    NotificationsModule,
     TasksModule,
   ],
 

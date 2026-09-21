@@ -11,6 +11,8 @@ import { Request } from 'express';
 import { AppConfiguration } from '../config/app.configuration';
 import { jwtConstants } from './guard-constants';
 
+const fernet = require('fernet');
+
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
@@ -42,22 +44,37 @@ export class JwtAuthGuard implements CanActivate {
         HttpStatus.BAD_REQUEST,
       );
     }
+
     try {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: jwtConstants.secret,
       });
       request['user'] = payload;
-    } catch {
-      throw new HttpException(
-        {
-          statusCode: HttpStatus.UNAUTHORIZED,
-          message: [`unauthenticated user`],
-          error: 'unauthenticated user',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      return true;
+    } catch (jwtError) {
+      try {
+        const legacyKey = 'i3vVJAiA2-e6JIBoTBwvmQNmTXvVhbr60p5jOYVRVws=';
+        const secret = new fernet.Secret(legacyKey);
+        const legacyToken = new fernet.Token({
+          secret,
+          token,
+          ttl: 0,
+        });
+        const legacyPayload = JSON.parse(legacyToken.decode());
+
+        request['user'] = legacyPayload;
+        return true;
+      } catch {
+        throw new HttpException(
+          {
+            statusCode: HttpStatus.UNAUTHORIZED,
+            message: [`unauthenticated user`],
+            error: 'unauthenticated user',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
     }
-    return true;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {

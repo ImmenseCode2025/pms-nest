@@ -53,6 +53,7 @@
     "csrf-csrf": "^4.0.3",
     "csurf": "^1.11.0",
     "express-session": "^1.19.0",
+    "fernet": "^0.3.3",
     "firebase-admin": "^14.3.0",
     "fs": "^0.0.1-security",
     "handlebars": "^4.7.9",

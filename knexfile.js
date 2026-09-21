@@ -15,7 +15,6 @@ const createConfig = () => ({
     password: process.env.DATABASE_PASSWORD,
     database: process.env.DATABASE_NAME,
     timezone: 'Z',
-    charset: 'utf8mb4',
   },
   pool: {
     min: 2,

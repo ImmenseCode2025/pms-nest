@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import fs from 'fs';
 import { join } from 'path';
-import { DeviceTokens } from '../orm/entities/device-tokens.entity';
 import { Users } from '../orm/entities/users.entity';
 
 var dotenv = require('dotenv');
@@ -72,29 +71,6 @@ export class GlobalHelper {
     return findOne ? findOne : null;
   }
 
-  static async updateDeviceToken({ userId, deviceId, token }) {
-    let findOne: any = await DeviceTokens.query()
-      .where({
-        user_id: userId,
-        device_id: deviceId,
-      })
-      .first();
-
-    if (findOne) {
-      await DeviceTokens.query().updateAndFetchById(findOne.id, {
-        token: token,
-      });
-      return true;
-    }
-
-    await DeviceTokens.query().insertAndFetch({
-      user_id: userId,
-      device_id: deviceId,
-      token: token,
-    });
-
-    return true;
-  }
   static async generateOtp() {
     return Math.floor(1000 + Math.random() * 9000).toString();
   }
@@ -116,18 +92,10 @@ export class GlobalHelper {
     }
     callback(null, true);
   }
+
   static async userGet({ userId }) {
     let findOne: any = await Users.query().findById(userId);
-
     return findOne ? findOne : null;
-  }
-
-  static async multipleDeviceTokenByUsers({ ids }) {
-    let items: any = await DeviceTokens.query().whereIn('user_id', ids);
-    let userIdsArray: any[] = items
-      .map((x: any) => x.token)
-      .filter((token: any) => token !== null);
-    return userIdsArray;
   }
 
   static async deleteFile({ filePath }) {

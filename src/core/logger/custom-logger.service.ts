@@ -1,7 +1,6 @@
 import { Injectable, LoggerService } from '@nestjs/common';
 import { createLogger, format, transports } from 'winston';
 import { RequestContextService } from '../middleware/request-context.service';
-import { ErrorLogs } from '../orm/entities/error-logs.entity';
 
 @Injectable()
 export class CustomLoggerService implements LoggerService {
@@ -71,23 +70,12 @@ export class CustomLoggerService implements LoggerService {
     const req: any = this.context.getRequest();
     this.logger.info(`url:${req.url}`);
     this.logger.info(`functionName:${functionName}`);
-    // this.logger.info(
-    //   `url:${req.url} | message:${message} | location:${location}`,
-    // );
   }
 
   static async errorStatic({ userId, method, url, message, body }: any) {
     const location = await this.getCallerDetailsStatic();
     const errorMsg = `message:${message} | location:${location}`;
     CustomLoggerService.staticLogger.error(`url:${url} | ${errorMsg}`);
-    await ErrorLogs.query().insertAndFetch({
-      user_id: userId,
-      method: method,
-      status_code: 0,
-      url: url,
-      body: body ? (typeof body === 'string' ? body : JSON.stringify(body)) : null,
-      error: errorMsg,
-    });
   }
 
   async error(message: any) {
@@ -95,14 +83,6 @@ export class CustomLoggerService implements LoggerService {
     const req: any = this.context.getRequest();
     const errorMsg = `message:${message} | location:${location}`;
     this.logger.error(`url:${req.url} | ${errorMsg}`);
-    await ErrorLogs.query().insertAndFetch({
-      user_id: req?.auth?.user?.id ? req?.auth?.user?.id : null,
-      method: req?.method,
-      status_code: 0,
-      url: req?.url,
-      body: req?.body ? JSON.stringify(req.body) : null,
-      error: errorMsg,
-    });
   }
 
   async warn(message: string) {

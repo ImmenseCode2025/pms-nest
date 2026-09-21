@@ -5,12 +5,10 @@ import { QueueNamesEnum } from 'src/core/helper/enum/global.enum';
 import { AppQueueProcessor } from './app-queue.processor';
 import { AppQueueService } from './app-queue.service';
 
-import { NotificationsModule } from 'src/notifications/notifications.module';
 
 @Global()
 @Module({
   imports: [
-    NotificationsModule,
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
