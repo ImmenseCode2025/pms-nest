@@ -3,6 +3,6 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class AppService {
   async getHello(): Promise<any> {
-    return 'Tic Rock API is running';
+    return 'PMS NEST JS  API is running';
   }
 }
