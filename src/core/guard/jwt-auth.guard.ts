@@ -60,7 +60,7 @@ export class JwtAuthGuard implements CanActivate {
       const userToken = await UserAccessToken.query()
         .where('token', decryptedToken)
         .where((qb) => {
-          qb.where('status', 'active').orWhere('status', '1').orWhere('status', 1);
+          qb.where('status', 'active').orWhere('status', 1);
         })
         .withGraphFetched('user_detail')
         .first();
