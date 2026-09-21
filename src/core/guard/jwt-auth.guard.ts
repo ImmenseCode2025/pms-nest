@@ -6,22 +6,16 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { Model } from 'objection';
-import { AppConfiguration } from '../config/app.configuration';
-import { jwtConstants } from './guard-constants';
+import { UserAccessToken } from '../orm/entities/user-access-token.entity';
 import { UserRole } from './user-role.enum';
 
 const fernet = require('fernet');
+const FERNET_KEY = 'i3vVJAiA2-e6JIBoTBwvmQNmTXvVhbr60p5jOYVRVws=';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(
-    private appConfiguration: AppConfiguration,
-    private jwtService: JwtService,
-    private reflector: Reflector,
-  ) {}
+  constructor(private reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -34,138 +28,74 @@ export class JwtAuthGuard implements CanActivate {
       return true;
     }
 
-    const token = this.extractTokenFromHeader(request);
+    const rawToken = this.extractTokenFromHeader(request);
 
-    if (!token) {
+    if (!rawToken) {
       throw new HttpException(
         {
           statusCode: HttpStatus.UNAUTHORIZED,
-          message: [`unauthenticated user`],
+          message: ['unauthenticated user'],
           error: 'unauthenticated user',
         },
         HttpStatus.UNAUTHORIZED,
       );
     }
 
-        console.log(token ,'sssssssssss')
-
-    // 1. Try standard JWT verification
     try {
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret: jwtConstants.secret,
-      });
-      payload
-              console.log(payload ,'payload')
-
-      request['user'] = payload;
-      return true;
-    } catch (jwtError) {
-      // 2. Try Flask Fernet token decryption
+      // 1. Fernet token decrypt (Flask token)
+      let decryptedToken = rawToken;
       try {
-        const legacyKey = 'i3vVJAiA2-e6JIBoTBwvmQNmTXvVhbr60p5jOYVRVws=';
-        const secret = new fernet.Secret(legacyKey);
-        const legacyToken = new fernet.Token({
+        const secret = new fernet.Secret(FERNET_KEY);
+        const tokenObj = new fernet.Token({
           secret,
-          token,
+          token: rawToken,
           ttl: 0,
         });
-        const decodedRaw = legacyToken.decode();
-
-        // Check if decoded is JSON payload
-        let payload: any = null;
-        try {
-          payload = JSON.parse(decodedRaw);
-        } catch {
-          payload = null;
-        }
-
-        if (payload && (payload.id || payload.userId)) {
-
-          console.log(payload ,'payload')
-          // const userId = payload.id || payload.userId;
-          // const knex = Model.knex();
-          // const user = await knex('user').where('id', userId).where('isDeleted', 0).first();
-          // request['user'] = {
-          //   ...(user || {}),
-          //   ...payload,
-          //   id: userId,
-          //   role: (user?.access === 'admin' || payload.access === 'admin' || payload.role === 'admin') ? UserRole.Admin : UserRole.User,
-          // };
-          return true;
-        }
-
-        // Otherwise decodedRaw is a 16-character token string from Flask
-        const rawToken = typeof decodedRaw === 'string' ? decodedRaw.trim() : String(decodedRaw);
-        const knex = Model.knex();
-
-        // Check user_access_token table
-        const userTokenRecord = await knex('user_access_token')
-          .where('token', rawToken)
-          .where((qb) => {
-            qb.where('status', 'active').orWhere('status', '1').orWhere('status', 1);
-          })
-          .first();
-
-        if (userTokenRecord) {
-          const user = await knex('user')
-            .where('id', userTokenRecord.user)
-            .where('isDeleted', 0)
-            .first();
-
-          if (!user) {
-            throw new Error('User not found or deleted');
-          }
-
-          request['user'] = {
-            ...user,
-            id: user.id,
-            role: user.access === 'admin' ? UserRole.Admin : UserRole.User,
-          };
-          return true;
-        }
-
-        // Check customer_access_token table
-        const customerTokenRecord = await knex('customer_access_token')
-          .where('token', rawToken)
-          .where((qb) => {
-            qb.where('status', 'active').orWhere('status', '1').orWhere('status', 1);
-          })
-          .first();
-
-        if (customerTokenRecord) {
-          const customer = await knex('customer')
-            .where('id', customerTokenRecord.customer)
-            .first();
-
-          if (!customer) {
-            throw new Error('Customer not found');
-          }
-
-          request['user'] = {
-            ...customer,
-            id: customer.id,
-            role: 'customer',
-          };
-          return true;
-        }
-
-        throw new Error('Token not found in user_access_token or customer_access_token');
-      } catch (err) {
-        throw new HttpException(
-          {
-            statusCode: HttpStatus.UNAUTHORIZED,
-            message: [`unauthenticated user`],
-            error: 'unauthenticated user',
-          },
-          HttpStatus.UNAUTHORIZED,
-        );
+        decryptedToken = tokenObj.decode();
+      } catch (e) {
+        // Agar already decrypted raw token ho
       }
+
+      // 2. user_access_token table se check karo (using Objection Entity)
+      const userToken = await UserAccessToken.query()
+        .where('token', decryptedToken)
+        .where((qb) => {
+          qb.where('status', 'active').orWhere('status', '1').orWhere('status', 1);
+        })
+        .withGraphFetched('user_detail')
+        .first();
+
+      if (userToken && userToken.user_detail && !userToken.user_detail.isDeleted) {
+        const user = userToken.user_detail;
+        request['user'] = {
+          ...user,
+          id: user.id,
+          role: user.access === 'admin' ? UserRole.Admin : UserRole.User,
+        };
+        request['userId'] = user.id;
+        return true;
+      }
+
+      throw new Error('Invalid token');
+    } catch (err) {
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.UNAUTHORIZED,
+          message: ['unauthenticated user'],
+          error: 'unauthenticated user',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
     }
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
+    const authHeader = request.headers.authorization;
+    if (!authHeader) return undefined;
+
+    if (authHeader.startsWith('Bearer ')) {
+      return authHeader.substring(7).trim();
+    }
+    return authHeader.trim();
   }
 }
-
