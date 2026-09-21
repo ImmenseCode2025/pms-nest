@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Navigate to the project directory
-cd /var/www/html/grc/
+cd /var/www/html/pms/pms-nest/
 
 # Ensure dependencies are installed
 npm install --force
