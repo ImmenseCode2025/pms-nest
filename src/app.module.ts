@@ -19,6 +19,7 @@ import { CustomLoggerModule } from './core/logger/custom-logger.module';
 import { RequestContextMiddleware } from './core/middleware/request-context.middleware';
 import { SocketGatewayModule } from './core/socket-gateway/socket-gateway.module';
 import { TasksModule } from './core/tasks/tasks.module';
+import { FilesUploadModule } from './files-upload/files-upload.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -53,6 +54,7 @@ import { UsersModule } from './users/users.module';
     CustomLoggerModule,
     AppConfigModule,
     TasksModule,
+    FilesUploadModule,
   ],
 
   controllers: [AppController],

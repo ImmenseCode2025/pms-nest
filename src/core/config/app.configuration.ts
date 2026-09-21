@@ -38,4 +38,32 @@ export class AppConfiguration {
     parse: (value: any) => parseInt(value),
   })
   appPort: string;
+
+  @IsOptional()
+  @Value('CLOUDFLARE_R2_ACCOUNT_ID')
+  r2AccountId: string;
+
+  @IsOptional()
+  @Value('CLOUDFLARE_R2_ACCESS_KEY_ID')
+  r2AccessKeyId: string;
+
+  @IsOptional()
+  @Value('CLOUDFLARE_R2_SECRET_ACCESS_KEY')
+  r2SecretAccessKey: string;
+
+  @IsOptional()
+  @Value('CLOUDFLARE_R2_BUCKET_NAME')
+  r2BucketName: string;
+
+  @IsOptional()
+  @Value('CLOUDFLARE_R2_ENDPOINT')
+  r2Endpoint: string;
+
+  @IsOptional()
+  @Value('CLOUDFLARE_R2_PUBLIC_URL')
+  r2PublicUrl: string;
+
+  @IsOptional()
+  @Value('CLOUDFLARE_R2_API_TOKEN')
+  r2ApiToken: string;
 }

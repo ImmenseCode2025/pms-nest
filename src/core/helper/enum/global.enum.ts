@@ -5,6 +5,11 @@ export enum FileExtensionsEnum {
   Video = 'mp4|avi|mov|webm|MP4|AVI|MOV|WEBM',
 }
 
+export enum FileUploadLimitEnum {
+  MaxFileSize = 52428800, // 50MB
+  MaxFilesCount = 10,
+}
+
 export enum ApiResponseEnum {
   Success = 'success',
 }

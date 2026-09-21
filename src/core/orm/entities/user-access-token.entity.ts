@@ -2,7 +2,7 @@ import { Mapping } from '../sql.model';
 import { Users } from './users.entity';
 
 export class UserAccessToken extends Mapping {
-    static get tableName() {
+  static get tableName() {
     return 'user_access_token';
   }
 
@@ -17,8 +17,16 @@ export class UserAccessToken extends Mapping {
   // Relations
   user_detail?: Users;
 
-    static get relationMappings() {
+  static get relationMappings() {
     return {
+      user_detail: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: Users,
+        join: {
+          from: 'user_access_token.user',
+          to: 'user.id',
+        },
+      },
       userAccessTokens: {
         relation: Mapping.BelongsToOneRelation,
         modelClass: Users,
