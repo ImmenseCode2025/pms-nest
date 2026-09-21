@@ -22,4 +22,18 @@ export class AppController {
       return ResponseHelper.error({ res, req, error });
     }
   }
+  
+  @Get("test")
+  async productionTest(@Req() req: Request, @Res() res: Response) {
+    try {
+      const data = await this.appService.productionTest();
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'success',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
 }
