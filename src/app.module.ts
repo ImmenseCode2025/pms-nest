@@ -20,6 +20,7 @@ import { RequestContextMiddleware } from './core/middleware/request-context.midd
 import { SocketGatewayModule } from './core/socket-gateway/socket-gateway.module';
 import { TasksModule } from './core/tasks/tasks.module';
 import { FilesUploadModule } from './files-upload/files-upload.module';
+import { ParkingTicketsModule } from './parking-tickets/parking-tickets.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -49,6 +50,7 @@ import { UsersModule } from './users/users.module';
     SocketGatewayModule,
     UsersModule,
     AuthModule,
+    ParkingTicketsModule,
     AppQueueModule,
     AppCacheModule,
     CustomLoggerModule,

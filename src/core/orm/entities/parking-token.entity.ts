@@ -1,11 +1,11 @@
 import { Mapping } from '../sql.model';
-import { ParkingSite } from './parking-site.entity';
+import { EntranceExitMonitor } from './entrance-exit-monitor.entity';
 import { Hardware } from './hardware.entity';
 import { ParkingLot } from './parking-lot.entity';
-import { VehicleType } from './vehicle-type.entity';
+import { ParkingSite } from './parking-site.entity';
 import { PaymentMethod } from './payment-method.entity';
 import { Reservation } from './reservation.entity';
-import { EntranceExitMonitor } from './entrance-exit-monitor.entity';
+import { VehicleType } from './vehicle-type.entity';
 
 export class ParkingToken extends Mapping {
     static get tableName() {
@@ -30,9 +30,12 @@ export class ParkingToken extends Mapping {
 
     static get relationMappings() {
     return {
-      tokenParkingSite: {
+      parking_site: {
         relation: Mapping.BelongsToOneRelation,
         modelClass: ParkingSite,
+        modify(query) {
+          query.select('id','name')
+        },
         join: {
           from: 'parking_token.site',
           to: 'parking_site.id',
@@ -54,9 +57,12 @@ export class ParkingToken extends Mapping {
           to: 'parking_lot.id',
         },
       },
-      tokenVehicleType: {
+      vehicle_type: {
         relation: Mapping.BelongsToOneRelation,
         modelClass: VehicleType,
+        modify(query) {
+          query.select('id','name')
+        },
         join: {
           from: 'parking_token.vehicleType',
           to: 'vehicle_type.id',
