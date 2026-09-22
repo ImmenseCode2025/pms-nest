@@ -180,3 +180,21 @@ export enum GlobalSearchTypeEnum {
   POSTS = 'posts',
   ROOMS = 'rooms',
 }
+
+export enum PaymentMethodEnum {
+  POS = 1,
+  App = 12,
+  Website = 13,
+  FOC = 14,
+  Cash = 16,
+  CorporateCard = 17,
+}
+
+export const PaymentMethodLabelMap = {
+  [PaymentMethodEnum.POS]: 'POS',
+  [PaymentMethodEnum.App]: 'App',
+  [PaymentMethodEnum.Website]: 'Website',
+  [PaymentMethodEnum.FOC]: 'FOC (Free of Cost)',
+  [PaymentMethodEnum.Cash]: 'Cash',
+  [PaymentMethodEnum.CorporateCard]: 'Corporate Card',
+} as const;
