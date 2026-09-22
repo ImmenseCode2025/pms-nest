@@ -21,6 +21,7 @@ import { SocketGatewayModule } from './core/socket-gateway/socket-gateway.module
 import { TasksModule } from './core/tasks/tasks.module';
 import { FilesUploadModule } from './files-upload/files-upload.module';
 import { ParkingTicketsModule } from './parking-tickets/parking-tickets.module';
+import { PaymentGatewayModule } from './payment-gateway/payment-gateway.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -51,6 +52,7 @@ import { UsersModule } from './users/users.module';
     UsersModule,
     AuthModule,
     ParkingTicketsModule,
+    PaymentGatewayModule,
     AppQueueModule,
     AppCacheModule,
     CustomLoggerModule,
