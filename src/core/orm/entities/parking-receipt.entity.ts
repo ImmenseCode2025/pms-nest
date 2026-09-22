@@ -1,4 +1,5 @@
 import { Mapping } from '../sql.model';
+import { Hardware } from './hardware.entity';
 import { VehicleType } from './vehicle-type.entity';
 
 export class ParkingReceipt extends Mapping {
@@ -24,6 +25,14 @@ export class ParkingReceipt extends Mapping {
         join: {
           from: 'parking_receipt.vehicleType',
           to: 'vehicle_type.id',
+        },
+      },
+      hardware: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: Hardware,
+        join: {
+          from: 'parking_receipt.deviceId',
+          to: 'hardware.ipOrApi',
         },
       },
     };

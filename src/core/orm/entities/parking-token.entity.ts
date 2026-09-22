@@ -7,6 +7,7 @@ import { ParkingSite } from './parking-site.entity';
 import { PaymentMethod } from './payment-method.entity';
 import { Reservation } from './reservation.entity';
 import { VehicleType } from './vehicle-type.entity';
+import { ParkingReceipt } from './parking-receipt.entity';
 
 export class ParkingToken extends Mapping {
     static get tableName() {
@@ -47,7 +48,7 @@ export class ParkingToken extends Mapping {
         relation: Mapping.BelongsToOneRelation,
         modelClass: ParkingPrice,
         modify(query) {
-          query.select('id','amount')
+          query.select('id', 'amount', 'vehicleType', 'siteId');
         },
         join: {
           from: [
@@ -60,9 +61,20 @@ export class ParkingToken extends Mapping {
           ],
         },
       },
-      hardware: {
+      parking_receipt: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: ParkingReceipt,
+        join: {
+          from: 'parking_token.tokenNumber',
+          to: 'parking_receipt.ticketNumber',
+        },
+      },
+      tokenHardware: {
         relation: Mapping.BelongsToOneRelation,
         modelClass: Hardware,
+        modify(query) {
+          // query.select('id', 'partName', 'type', 'uniqueId');
+        },
         join: {
           from: 'parking_token.hardware',
           to: 'hardware.id',
