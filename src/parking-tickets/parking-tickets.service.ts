@@ -6,10 +6,9 @@ import { ParkingTicketsPaginatedDto } from './dto/parking-tickets-paginated.dto'
 export class ParkingTicketsService {
   async paginated(data: any = {}) {
     const dto: ParkingTicketsPaginatedDto = data.dto || {};
-    const query = ParkingToken.query()
-    query.withGraphFetched('vehicle_type');
-    query.withGraphFetched('parking_site');
-    query.orderBy('id','desc')
+    const query = ParkingToken.query();
+    query.withGraphFetched('[vehicle_type, parking_site, parking_price]');
+    query.orderBy('id', 'desc');
     const result = await ParkingToken.pagination(query, data);
     return result;
   }

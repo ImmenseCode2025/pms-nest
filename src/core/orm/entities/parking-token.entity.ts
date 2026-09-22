@@ -2,6 +2,7 @@ import { Mapping } from '../sql.model';
 import { EntranceExitMonitor } from './entrance-exit-monitor.entity';
 import { Hardware } from './hardware.entity';
 import { ParkingLot } from './parking-lot.entity';
+import { ParkingPrice } from './parking-price.entity';
 import { ParkingSite } from './parking-site.entity';
 import { PaymentMethod } from './payment-method.entity';
 import { Reservation } from './reservation.entity';
@@ -40,6 +41,23 @@ export class ParkingToken extends Mapping {
         join: {
           from: 'parking_token.site',
           to: 'parking_site.id',
+        },
+      },
+      parking_price: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: ParkingPrice,
+        modify(query) {
+          query.select('id','amount')
+        },
+        join: {
+          from: [
+            'parking_token.vehicleType',
+            'parking_token.site',
+          ],
+          to: [
+            'parking_price.vehicleType',
+            'parking_price.siteId',
+          ],
         },
       },
       hardware: {
