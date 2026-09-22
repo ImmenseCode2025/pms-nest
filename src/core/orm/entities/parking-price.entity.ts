@@ -1,7 +1,7 @@
 import { Mapping } from '../sql.model';
-import { VehicleType } from './vehicle-type.entity';
-import { Users } from './users.entity';
 import { ParkingSite } from './parking-site.entity';
+import { Users } from './users.entity';
+import { VehicleType } from './vehicle-type.entity';
 
 export class ParkingPrice extends Mapping {
     static get tableName() {
@@ -21,7 +21,7 @@ export class ParkingPrice extends Mapping {
 
     static get relationMappings() {
     return {
-      priceVehicleType: {
+      price_vehicle_type: {
         relation: Mapping.BelongsToOneRelation,
         modelClass: VehicleType,
         join: {

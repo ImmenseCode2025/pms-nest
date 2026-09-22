@@ -1,15 +1,15 @@
 import { Mapping } from '../sql.model';
-import { ParkingShiftClosing } from './parking-shift-closing.entity';
-import { Users } from './users.entity';
-import { ParkingToken } from './parking-token.entity';
-import { EntranceExitMonitor } from './entrance-exit-monitor.entity';
-import { HardwareAssignLogs } from './hardware-assign-logs.entity';
 import { AppQrCode } from './app-qr-code.entity';
-import { CompanyQrCode } from './company-qr-code.entity';
-import { FocQrCode } from './foc-qr-code.entity';
 import { CashQrCode } from './cash-qr-code.entity';
-import { PosQrCode } from './pos-qr-code.entity';
+import { CompanyQrCode } from './company-qr-code.entity';
 import { CorporateQrCode } from './corporate-qr-code.entity';
+import { EntranceExitMonitor } from './entrance-exit-monitor.entity';
+import { FocQrCode } from './foc-qr-code.entity';
+import { HardwareAssignLogs } from './hardware-assign-logs.entity';
+import { ParkingShiftClosing } from './parking-shift-closing.entity';
+import { ParkingToken } from './parking-token.entity';
+import { PosQrCode } from './pos-qr-code.entity';
+import { Users } from './users.entity';
 
 export class Hardware extends Mapping {
     static get tableName() {

@@ -18,11 +18,12 @@ export class ParkingToken extends Mapping {
   checkOutDateTime?: Date | string;
   parkingSiteId?: number;
   status?: "active" | "inactive" | "expired";
-  hardwareId?: number;
+  hardware: number;
   customerId?: number;
   parkingLotId?: number;
   vehicleTypeId?: number;
   vehicleNumber?: string;
+  carNo?: string;
   paymentMethod?: number;
   isExited?: boolean;
   createdAt?: Date | string;
@@ -41,7 +42,7 @@ export class ParkingToken extends Mapping {
           to: 'parking_site.id',
         },
       },
-      tokenHardware: {
+      hardware: {
         relation: Mapping.BelongsToOneRelation,
         modelClass: Hardware,
         join: {
