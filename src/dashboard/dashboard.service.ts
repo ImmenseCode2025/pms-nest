@@ -5,7 +5,7 @@ import { DashboardFilterDto } from './dto/dashboard-filter.dto';
 
 @Injectable()
 export class DashboardService {
-  async getDashboardData(dto: DashboardFilterDto) {
+  async getDashboardData(dto: DashboardFilterDto = {}) {
     const [statCards, dailyParkingTrend, recentTransactions] = await Promise.all([
       this.getStatCards(dto),
       this.getDailyParkingTrend(dto),
