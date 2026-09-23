@@ -92,11 +92,14 @@ export class DashboardService {
         'id',
         'tokenNumber',
         'site',
+        'vehicleType',
+        'vehicleNumber',
+        'carNo',
         'checkInDateTime',
         'checkOutDateTime',
         'status',
       )
-      .withGraphFetched('[parking_site, parking_receipt]')
+      .withGraphFetched('[parking_site, parking_receipt, vehicle_type]')
       .orderBy('checkInDateTime', 'desc')
       .limit(10);
     this.applyFilters(query, dto);
