@@ -22,9 +22,9 @@ export class DashboardService {
   }
 
   private async getRecentTransactions() {
-  let result  = await      ParkingToken.query()
+  let result  = await ParkingToken.query()
         .select('id', 'tokenNumber', 'checkInDateTime', 'checkOutDateTime', 'status')
-        .withGraphFetched('parking_site')
+        .withGraphFetched('[parking_site,parking_receipt]')
         .orderBy('checkInDateTime', 'desc')
         .limit(10)
 
