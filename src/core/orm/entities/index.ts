@@ -1,4 +1,5 @@
 export * from './address.entity';
+export * from './all-parking-transactions.entity';
 export * from './app-qr-code.entity';
 export * from './bank-card.entity';
 export * from './cash-qr-code.entity';
