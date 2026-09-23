@@ -93,7 +93,6 @@ export class DashboardService {
         'tokenNumber',
         'site',
         'vehicleType',
-        'vehicleNumber',
         'carNo',
         'checkInDateTime',
         'checkOutDateTime',
