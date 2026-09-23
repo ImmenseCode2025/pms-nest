@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import knex from 'knex';
 import { Model, QueryBuilder } from 'objection';
+import { LodashHelper } from '../helper/lodash-helper';
 
 dotenv.config();
 
@@ -125,4 +126,82 @@ export class Mapping extends Model {
       return this.query().insertAndFetch(data);
     }
   }
+
+  static rawQuery(sql: string, bindings?: any) {
+    return this.knex().raw(sql, bindings);
+  }
+
+  static getPaginationParams(req: any = {}) {
+    const pageVal = Number(
+      LodashHelper.get(
+        req,
+        'query.page',
+        LodashHelper.get(req, 'dto.page', req?.page),
+      ),
+    );
+    const limitVal = Number(
+      LodashHelper.get(
+        req,
+        'query.limit',
+        LodashHelper.get(
+          req,
+          'dto.limit',
+          LodashHelper.get(req, 'dto.resultsPerPage', req?.limit),
+        ),
+      ),
+    );
+
+    const currentPage = Number.isInteger(pageVal) && pageVal > 0 ? pageVal : 1;
+    const perPage = Number.isInteger(limitVal) && limitVal > 0 ? limitVal : 10;
+
+    return { currentPage, perPage, page: currentPage, limit: perPage };
+  }
+
+  static paginationResponse(data: any = {}, req: any = {}) {
+    const { currentPage, perPage } = this.getPaginationParams(req);
+    const routePath = LodashHelper.get(req, 'req.route.path', '');
+    const baseUrl = (process.env.BASE_URL || '') + routePath;
+
+    const results = Array.isArray(data.results) ? data.results : [];
+    const total = Number(data.total || 0);
+    const totalPages = Math.ceil(total / perPage);
+
+    const extraData = LodashHelper.omit(data, [
+      'results',
+      'total',
+      'page',
+      'meta',
+      'links',
+    ]);
+
+    return {
+      ...extraData,
+      results,
+      total,
+      page: currentPage,
+      meta: {
+        itemCount: results.length,
+        totalItems: total,
+        itemsPerPage: perPage,
+        totalPages,
+        currentPage,
+      },
+      links: {
+        first: `${baseUrl}/?page=1&limit=${perPage}`,
+        previous:
+          currentPage > 1
+            ? `${baseUrl}/?page=${currentPage - 1}&limit=${perPage}`
+            : null,
+        next:
+          currentPage < totalPages
+            ? `${baseUrl}/?page=${currentPage + 1}&limit=${perPage}`
+            : null,
+        last:
+          totalPages > 0
+            ? `${baseUrl}/?page=${totalPages}&limit=${perPage}`
+            : null,
+      },
+    };
+  }
 }
+

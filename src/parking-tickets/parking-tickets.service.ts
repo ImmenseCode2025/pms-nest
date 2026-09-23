@@ -6,11 +6,27 @@ import { ParkingTicketsPaginatedDto } from './dto/parking-tickets-paginated.dto'
 export class ParkingTicketsService {
   async paginated(data: any = {}) {
     const dto: ParkingTicketsPaginatedDto = data.dto || {};
-    const query = ParkingToken.query();
-    query.withGraphFetched('[vehicle_type, parking_site, parking_price]');
-    query.orderBy('id', 'desc');
-    const result = await ParkingToken.pagination(query, data);
-    return result;
-  }
+    const { currentPage, perPage } = ParkingToken.getPaginationParams(data);
 
+    const dbResult: any = await ParkingToken.knex().raw(
+      `CALL sp_get_parking_tickets(?, ?, ?)`,
+      [currentPage, perPage, dto.search?.trim() || null],
+    );
+
+    const raw = dbResult?.[0] || [];
+    const rows = Array.isArray(raw[0]) ? raw[0] : raw;
+
+    const total =
+      dbResult?.[1]?.[0]?.total ??
+      rows?.[0]?.total_count ??
+      rows?.[0]?.total ??
+      rows.length;
+
+    const storedResult = {
+      results: rows,
+      total,
+    };
+
+    return ParkingToken.paginationResponse(storedResult, data);
+  }
 }
