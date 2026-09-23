@@ -3,6 +3,8 @@ import { raw } from 'objection';
 import { ParkingSite, ParkingToken } from 'src/core/orm/entities';
 import { DashboardFilterDto } from './dto/dashboard-filter.dto';
 
+const COMPANY_ID = 7;
+
 @Injectable()
 export class DashboardService {
   async getDashboardData(dto: DashboardFilterDto = {}) {
@@ -16,6 +18,10 @@ export class DashboardService {
   }
 
   private applyFilters(query, dto: DashboardFilterDto) {
+    query.whereIn(
+      'parking_token.site',
+      ParkingSite.query().select('id').where('company', COMPANY_ID),
+    );
     if (dto.siteId) query.where('parking_token.site', dto.siteId);
     if (dto.paymentMethod)
       query.where('parking_token.paymentMethod', dto.paymentMethod);
@@ -30,7 +36,7 @@ export class DashboardService {
   }
 
   private async getStatCards(dto: DashboardFilterDto) {
-    const siteQuery = ParkingSite.query();
+    const siteQuery = ParkingSite.query().where('company', COMPANY_ID);
     if (dto.siteId) siteQuery.where('id', dto.siteId);
 
     // Revenue only counts checked-out tokens parked for more than 15 minutes
