@@ -11,7 +11,7 @@ export class UsersService {
   // ─── GET PROFILE ─────────────────────────────────────────────────────────────
 
   async getProfile(userId: number) {
-    const user = await Users.query().withGraphFetched('[address]').findById(userId);
+    const user = await Users.query().withGraphFetched('[userAddress]').findById(userId);
     if (!user) {
       throw new HttpException(
         { statusCode: HttpStatus.NOT_FOUND, message: ['User not found'], error: 'Not Found' },
