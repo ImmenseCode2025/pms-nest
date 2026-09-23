@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import fs from 'fs';
+import moment from 'moment';
 import { join } from 'path';
 import { Users } from '../orm/entities/users.entity';
 
@@ -108,5 +109,14 @@ export class GlobalHelper {
       return false;
     }
     return true;
+  }
+
+  // The DB connection uses timezone 'Z', so format in UTC to keep the stored wall-clock time
+  static formatDate(value: Date | string | null): string | null {
+    return value ? moment.utc(value).format('YYYY-MM-DD') : null;
+  }
+
+  static formatTime(value: Date | string | null): string | null {
+    return value ? moment.utc(value).format('HH:mm:ss') : null;
   }
 }

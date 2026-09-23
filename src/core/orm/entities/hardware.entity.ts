@@ -7,6 +7,7 @@ import { EntranceExitMonitor } from './entrance-exit-monitor.entity';
 import { FocQrCode } from './foc-qr-code.entity';
 import { HardwareAssignLogs } from './hardware-assign-logs.entity';
 import { ParkingShiftClosing } from './parking-shift-closing.entity';
+import { ParkingSite } from './parking-site.entity';
 import { ParkingToken } from './parking-token.entity';
 import { PosQrCode } from './pos-qr-code.entity';
 import { Users } from './users.entity';
@@ -125,6 +126,17 @@ export class Hardware extends Mapping {
         join: {
           from: 'hardware.id',
           to: 'corporate_qr_code.hardware',
+        },
+      },
+      parkingSite: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: ParkingSite,
+        modify(query) {
+          query.select('id', 'name');
+        },
+        join: {
+          from: 'hardware.asignee',
+          to: 'parking_site.id',
         },
       },
     };

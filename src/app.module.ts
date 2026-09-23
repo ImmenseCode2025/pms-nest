@@ -19,6 +19,7 @@ import { CustomLoggerModule } from './core/logger/custom-logger.module';
 import { RequestContextMiddleware } from './core/middleware/request-context.middleware';
 import { SocketGatewayModule } from './core/socket-gateway/socket-gateway.module';
 import { TasksModule } from './core/tasks/tasks.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { FilesUploadModule } from './files-upload/files-upload.module';
 import { ParkingTicketsModule } from './parking-tickets/parking-tickets.module';
 import { PaymentGatewayModule } from './payment-gateway/payment-gateway.module';
@@ -52,6 +53,7 @@ import { UsersModule } from './users/users.module';
     UsersModule,
     AuthModule,
     ParkingTicketsModule,
+    DashboardModule,
     PaymentGatewayModule,
     AppQueueModule,
     AppCacheModule,
