@@ -1,4 +1,4 @@
-import { Controller, Get, Req, Res } from '@nestjs/common';
+import { Controller, Post, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ResponseHelper } from 'src/core/helper/response.helper';
 import { DashboardService } from './dashboard.service';
@@ -7,7 +7,7 @@ import { DashboardService } from './dashboard.service';
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 
-  @Get('admin')
+  @Post('admin')
   async getDashboardData(@Req() req: Request, @Res() res: Response) {
     try {
       const data = await this.dashboardService.getDashboardData();

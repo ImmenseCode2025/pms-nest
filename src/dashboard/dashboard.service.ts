@@ -1,14 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { raw } from 'objection';
-import { ParkingToken } from 'src/core/orm/entities';
+import { ParkingSite, ParkingToken } from 'src/core/orm/entities';
 @Injectable()
 export class DashboardService {
   async getDashboardData() {
-    const [dailyParkingTrend, recentTransactions] = await Promise.all([
-      this.getDailyParkingTrend(),
-      this.getRecentTransactions(),
-    ]);
-    return { dailyParkingTrend, recentTransactions };
+    const [statCards, dailyParkingTrend, recentTransactions] =
+      await Promise.all([
+        this.getStatCards(),
+        this.getDailyParkingTrend(),
+        this.getRecentTransactions(),
+      ]);
+    return { statCards, dailyParkingTrend, recentTransactions };
+  }
+
+  private async getStatCards() {
+    const totalParkingSites = await ParkingSite.query().resultSize();
+    return { totalParkingSites };
   }
 
   private async getDailyParkingTrend() {
