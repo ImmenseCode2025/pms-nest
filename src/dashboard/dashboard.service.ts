@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { raw } from 'objection';
-import { ParkingSite, ParkingToken } from 'src/core/orm/entities';
+import { ParkingToken } from 'src/core/orm/entities';
 import { DashboardFilterDto } from './dto/dashboard-filter.dto';
 
 const COMPANY_ID = 7;
@@ -8,101 +7,45 @@ const COMPANY_ID = 7;
 @Injectable()
 export class DashboardService {
   async getDashboardData(dto: DashboardFilterDto = {}) {
-    const [statCards, dailyParkingTrend, recentTransactions] =
-      await Promise.all([
-        this.getStatCards(dto),
-        this.getDailyParkingTrend(dto),
-        this.getRecentTransactions(dto),
-      ]);
-    return { statCards, dailyParkingTrend, recentTransactions };
-  }
+    const siteId = dto.siteId ? Number(dto.siteId) : null;
+    const paymentMethod = dto.paymentMethod ? Number(dto.paymentMethod) : null;
+    const vehicleType = dto.vehicleType ? Number(dto.vehicleType) : null;
+    const startDate = dto.startDate?.trim() || null;
+    const endDate = dto.endDate?.trim() || null;
 
-  private applyFilters(query, dto: DashboardFilterDto) {
-    query.whereIn(
-      'parking_token.site',
-      ParkingSite.query().select('id').where('company', COMPANY_ID),
+    const dbResult: any = await ParkingToken.knex().raw(
+      `CALL sp_get_admin_dashboard(?, ?, ?, ?, ?, ?)`,
+      [COMPANY_ID, siteId, paymentMethod, vehicleType, startDate, endDate],
     );
-    if (dto.siteId) query.where('parking_token.site', dto.siteId);
-    if (dto.paymentMethod)
-      query.where('parking_token.paymentMethod', dto.paymentMethod);
-    if (dto.vehicleType)
-      query.where('parking_token.vehicleType', dto.vehicleType);
-    if (dto.startDate)
-      query.whereRaw('DATE(parking_token.checkInDateTime) BETWEEN ? AND ?', [
-        dto.startDate,
-        dto.endDate || dto.startDate,
-      ]);
-    return query;
-  }
 
-  private async getStatCards(dto: DashboardFilterDto) {
-    const siteQuery = ParkingSite.query().where('company', COMPANY_ID);
-    if (dto.siteId) siteQuery.where('id', dto.siteId);
-
-    // Revenue only counts checked-out tokens parked for more than 15 minutes
-    const vehicleQuery = ParkingToken.query()
-      .leftJoinRelated('parking_price')
-      .select('parking_token.vehicleType')
-      .count({ totalParking: 'parking_token.id' })
-      .select(
-        raw(`SUM(CASE
-          WHEN parking_token.checkOutDateTime IS NOT NULL
-            AND TIMESTAMPDIFF(MINUTE, parking_token.checkInDateTime, parking_token.checkOutDateTime) > 15
-          THEN parking_price.amount ELSE 0 END)`).as('totalRevenue'),
-      )
-      .withGraphFetched('vehicle_type')
-      .groupBy('parking_token.vehicleType');
-    this.applyFilters(vehicleQuery, dto);
-
-    const [totalParkingSites, rows] = await Promise.all([
-      siteQuery.resultSize(),
-      ParkingToken.findAllCustom(vehicleQuery),
-    ]);
-
-    const vehicleTypes = rows.map((row) => ({
-      id: row.vehicleType,
-      name: row.vehicle_type?.name,
-      totalParking: Number(row.totalParking),
-      totalRevenue: Number(row.totalRevenue ?? 0),
+    const resultSets = dbResult?.[0] || [];
+    const totalSitesSet = resultSets[0] || [];
+    const vehicleTypes = (resultSets[1] || []).map((row: any) => ({
+      id: row.id,
+      name: row.name,
+      totalParking: Number(row.totalParking || 0),
+      totalRevenue: Number(row.totalRevenue || 0),
     }));
+    const dailyParkingTrend = (resultSets[2] || []).map((row: any) => ({
+      label: row.label,
+      value: Number(row.value || 0),
+    }));
+    const recentTransactions = resultSets[3] || [];
+
+    const totalParkingSites = Number(totalSitesSet[0]?.total_sites || 0);
+    const totalParking = vehicleTypes.reduce((sum, v) => sum + v.totalParking, 0);
+    const totalRevenue = vehicleTypes.reduce((sum, v) => sum + v.totalRevenue, 0);
 
     return {
-      totalParkingSites,
-      totalParking: vehicleTypes.reduce((sum, v) => sum + v.totalParking, 0),
-      totalRevenue: vehicleTypes.reduce((sum, v) => sum + v.totalRevenue, 0),
-      vehicleTypes,
+      statCards: {
+        totalParkingSites,
+        totalParking,
+        totalRevenue,
+        vehicleTypes,
+      },
+      dailyParkingTrend,
+      recentTransactions,
     };
   }
-
-  private async getDailyParkingTrend(dto: DashboardFilterDto) {
-    const query = ParkingToken.query()
-      .select(raw(`DATE_FORMAT(checkInDateTime, '%Y-%m-%d')`).as('day'))
-      .count({ total: 'id' })
-      .groupBy('day')
-      .orderBy('day');
-    this.applyFilters(query, dto);
-
-    const rows: any[] = await ParkingToken.findAllCustom(query);
-    return rows.map((row) => ({ label: row.day, value: Number(row.total) }));
-  }
-
-  private async getRecentTransactions(dto: DashboardFilterDto) {
-    const query = ParkingToken.query()
-      .select(
-        'id',
-        'tokenNumber',
-        'site',
-        'vehicleType',
-        'carNo',
-        'checkInDateTime',
-        'checkOutDateTime',
-        'status',
-      )
-      .withGraphFetched('[parking_site, parking_receipt, vehicle_type]')
-      .orderBy('checkInDateTime', 'desc')
-      .limit(10);
-    this.applyFilters(query, dto);
-
-    return ParkingToken.findAllCustom(query);
-  }
 }
+
