@@ -3,7 +3,6 @@ import { ExternalApiService } from 'src/core/external-api/external-api.service';
 import { Address, Users } from 'src/core/orm/entities';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
-
 @Injectable()
 export class UsersService {
   constructor(private readonly externalApiService: ExternalApiService) {}
@@ -24,19 +23,26 @@ export class UsersService {
   // ─── UPDATE PROFILE ───────────────────────────────────────────────────────────
 
   async updateProfile(userId: number, dto: UpdateProfileDto) {
-    let resolveAddressId:any = null;
-   if(dto?.latitude & dto?.longitude){
-     resolveAddressId = await this.resolveAddressId(dto.latitude, dto.longitude);
-   }
-  
-
-    return Users.query().patchAndFetchById(userId, {
+    const patchPayload: Record<string, any> = {
       username: dto.username,
       email: dto.email,
       contact: dto.contact,
       profile: dto.profile,
-      address:resolveAddressId,
-    });
+    };
+
+    if (
+      dto?.latitude !== undefined &&
+      dto?.latitude !== null &&
+      dto?.longitude !== undefined &&
+      dto?.longitude !== null
+    ) {
+      const addressId = await this.resolveAddressId(dto.latitude, dto.longitude);
+      if (addressId) {
+        patchPayload.address = addressId;
+      }
+    }
+
+    return Users.query().patchAndFetchById(userId, patchPayload);
   }
 
   private async resolveAddressId(latitude: number, longitude: number): Promise<number> {
@@ -47,7 +53,7 @@ export class UsersService {
 
     if (existing) return existing.id;
 
-    // Step 2: reverse-geocode OUTSIDE transaction to avoid holding DB connection
+    // Step 2: reverse-geocode
     const geoData = await this.externalApiService.reverseGeocode(latitude, longitude);
     const addr = geoData.address ?? {};
 
@@ -61,14 +67,13 @@ export class UsersService {
       longitude,
     };
 
-        const doubleCheck: any = await Address.query()
-        .where('latitude', latitude)
-        .where('longitude', longitude)
-        .first();
-              if (doubleCheck) return doubleCheck;
+    const doubleCheck: any = await Address.query()
+      .where('latitude', latitude)
+      .where('longitude', longitude)
+      .first();
+    if (doubleCheck) return doubleCheck.id;
 
-              let newAddress:any = Address.query().insertAndFetch(addressPayload);
-      return newAddress?.id;
-
+    const newAddress: any = await Address.query().insertAndFetch(addressPayload);
+    return newAddress?.id;
   }
 }
