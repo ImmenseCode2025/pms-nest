@@ -3,7 +3,6 @@ import { ExternalApiService } from 'src/core/external-api/external-api.service';
 import { Address, Users } from 'src/core/orm/entities';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
-const PROFILE_SELECT = ['id', 'username', 'email', 'contact', 'profile', 'address'] as const;
 
 @Injectable()
 export class UsersService {
@@ -12,7 +11,7 @@ export class UsersService {
   // ─── GET PROFILE ─────────────────────────────────────────────────────────────
 
   async getProfile(userId: number) {
-    const user = await Users.query().findById(userId).select(...PROFILE_SELECT);
+    const user = await Users.query().withGraphFetched('[address]').findById(userId);
     if (!user) {
       throw new HttpException(
         { statusCode: HttpStatus.NOT_FOUND, message: ['User not found'], error: 'Not Found' },
