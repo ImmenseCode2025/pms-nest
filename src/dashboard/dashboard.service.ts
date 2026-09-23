@@ -6,24 +6,66 @@ import { DashboardFilterDto } from './dto/dashboard-filter.dto';
 @Injectable()
 export class DashboardService {
   async getDashboardData(dto: DashboardFilterDto = {}) {
-    const [statCards, dailyParkingTrend, recentTransactions] = await Promise.all([
-      this.getStatCards(dto),
-      this.getDailyParkingTrend(dto),
-      this.getRecentTransactions(dto),
-    ]);
+    const [statCards, dailyParkingTrend, recentTransactions] =
+      await Promise.all([
+        this.getStatCards(dto),
+        this.getDailyParkingTrend(dto),
+        this.getRecentTransactions(dto),
+      ]);
     return { statCards, dailyParkingTrend, recentTransactions };
+  }
+
+  private applyFilters(query, dto: DashboardFilterDto) {
+    if (dto.siteId) query.where('parking_token.site', dto.siteId);
+    if (dto.paymentMethod)
+      query.where('parking_token.paymentMethod', dto.paymentMethod);
+    if (dto.vehicleType)
+      query.where('parking_token.vehicleType', dto.vehicleType);
+    if (dto.startDate)
+      query.whereRaw('DATE(parking_token.checkInDateTime) BETWEEN ? AND ?', [
+        dto.startDate,
+        dto.endDate || dto.startDate,
+      ]);
+    return query;
   }
 
   private async getStatCards(dto: DashboardFilterDto) {
     const siteQuery = ParkingSite.query();
     if (dto.siteId) siteQuery.where('id', dto.siteId);
-    const totalParkingSites = await siteQuery.resultSize();
 
-    const tokenQuery = ParkingToken.query();
-    if (dto.siteId) tokenQuery.where('site', dto.siteId);
-    const totalTokens = await tokenQuery.resultSize();
+    // Revenue only counts checked-out tokens parked for more than 15 minutes
+    const vehicleQuery = ParkingToken.query()
+      .leftJoinRelated('parking_price')
+      .select('parking_token.vehicleType')
+      .count({ totalParking: 'parking_token.id' })
+      .select(
+        raw(`SUM(CASE
+          WHEN parking_token.checkOutDateTime IS NOT NULL
+            AND TIMESTAMPDIFF(MINUTE, parking_token.checkInDateTime, parking_token.checkOutDateTime) > 15
+          THEN parking_price.amount ELSE 0 END)`).as('totalRevenue'),
+      )
+      .withGraphFetched('vehicle_type')
+      .groupBy('parking_token.vehicleType');
+    this.applyFilters(vehicleQuery, dto);
 
-    return { totalParkingSites, totalTokens };
+    const [totalParkingSites, rows] = await Promise.all([
+      siteQuery.resultSize(),
+      ParkingToken.findAllCustom(vehicleQuery),
+    ]);
+
+    const vehicleTypes = rows.map((row) => ({
+      id: row.vehicleType,
+      name: row.vehicle_type?.name,
+      totalParking: Number(row.totalParking),
+      totalRevenue: Number(row.totalRevenue ?? 0),
+    }));
+
+    return {
+      totalParkingSites,
+      totalParking: vehicleTypes.reduce((sum, v) => sum + v.totalParking, 0),
+      totalRevenue: vehicleTypes.reduce((sum, v) => sum + v.totalRevenue, 0),
+      vehicleTypes,
+    };
   }
 
   private async getDailyParkingTrend(dto: DashboardFilterDto) {
@@ -32,8 +74,7 @@ export class DashboardService {
       .count({ total: 'id' })
       .groupBy('day')
       .orderBy('day');
-
-    if (dto.siteId) query.where('site', dto.siteId);
+    this.applyFilters(query, dto);
 
     const rows: any[] = await ParkingToken.findAllCustom(query);
     return rows.map((row) => ({ label: row.day, value: Number(row.total) }));
@@ -41,12 +82,18 @@ export class DashboardService {
 
   private async getRecentTransactions(dto: DashboardFilterDto) {
     const query = ParkingToken.query()
-      .select('id', 'tokenNumber', 'checkInDateTime', 'checkOutDateTime', 'status')
+      .select(
+        'id',
+        'tokenNumber',
+        'site',
+        'checkInDateTime',
+        'checkOutDateTime',
+        'status',
+      )
       .withGraphFetched('[parking_site, parking_receipt]')
       .orderBy('checkInDateTime', 'desc')
       .limit(10);
-
-    if (dto.siteId) query.where('site', dto.siteId);
+    this.applyFilters(query, dto);
 
     return ParkingToken.findAllCustom(query);
   }

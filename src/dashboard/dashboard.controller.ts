@@ -16,7 +16,11 @@ export class DashboardController {
   ) {
     try {
       const data = await this.dashboardService.getDashboardData(dto);
-      return ResponseHelper.success({ res, data, message: 'Fetched Successfully' });
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Fetched Successfully',
+      });
     } catch (error) {
       return ResponseHelper.error({ res, req, error });
     }
