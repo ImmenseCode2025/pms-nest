@@ -131,48 +131,78 @@ export class Mapping extends Model {
     return this.knex().raw(sql, bindings);
   }
 
-  static getPaginationParams(req: any = {}) {
-    const pageVal = Number(
-      LodashHelper.get(
-        req,
-        'query.page',
-        LodashHelper.get(req, 'dto.page', req?.page),
-      ),
-    );
+  static getPaginationParams(data: any = {}) {
+    const params = data?.query || data?.dto || data || {};
+    const pageVal = Number(data?.query?.page || data?.dto?.page || params?.page || 1);
     const limitVal = Number(
-      LodashHelper.get(
-        req,
-        'query.limit',
-        LodashHelper.get(
-          req,
-          'dto.limit',
-          LodashHelper.get(req, 'dto.resultsPerPage', req?.limit),
-        ),
-      ),
+      data?.query?.limit ||
+      data?.query?.resultsPerPage ||
+      data?.dto?.resultsPerPage ||
+      data?.dto?.limit ||
+      params?.resultsPerPage ||
+      params?.limit ||
+      10,
     );
-
     const currentPage = Number.isInteger(pageVal) && pageVal > 0 ? pageVal : 1;
     const perPage = Number.isInteger(limitVal) && limitVal > 0 ? limitVal : 10;
-
     return { currentPage, perPage, page: currentPage, limit: perPage };
   }
 
   static paginationResponse(data: any = {}, req: any = {}) {
     const { currentPage, perPage } = this.getPaginationParams(req);
     const routePath = LodashHelper.get(req, 'req.route.path', '');
-    const baseUrl = (process.env.BASE_URL || '') + routePath;
+    const baseUrl = `${process.env.BASE_URL || ''}${routePath}`;
 
-    const results = Array.isArray(data.results) ? data.results : [];
-    const total = Number(data.total || 0);
-    const totalPages = Math.ceil(total / perPage);
+    let results: any[] = [];
+    let total = 0;
 
-    const extraData = LodashHelper.omit(data, [
-      'results',
-      'total',
-      'page',
-      'meta',
-      'links',
-    ]);
+    // Handle MySQL raw multi-result sets: [ [ rows, totalSet, okPacket ], fieldPackets ]
+    if (Array.isArray(data?.[0])) {
+      const firstSet = data[0][0] ?? data[0];
+      results = Array.isArray(firstSet) ? firstSet : [firstSet];
+
+      const secondSet = data[0][1] ?? data[1];
+      if (Array.isArray(secondSet) && secondSet.length > 0) {
+        const totalObj = secondSet[0];
+        total = Number(
+          totalObj?.total_count ??
+          totalObj?.total ??
+          totalObj?.count ??
+          Object.values(totalObj || {})[0] ??
+          0,
+        );
+      }
+    } else {
+      results = LodashHelper.get(data, 'results', data);
+      total = Number(data?.total || 0);
+    }
+
+    // Unwrap nested arrays if any
+    while (
+      Array.isArray(results) &&
+      results.length > 0 &&
+      Array.isArray(results[0])
+    ) {
+      results = results[0];
+    }
+    results = Array.isArray(results) ? results : [];
+
+    if (!total) {
+      total = Number(
+        data?.total ??
+        results?.[0]?.total_count ??
+        results?.[0]?.total ??
+        results.length,
+      );
+    }
+
+    const totalPages = Math.ceil(total / perPage) || 1;
+    const previous = currentPage > 1 ? currentPage - 1 : null;
+    const next = currentPage < totalPages ? currentPage + 1 : null;
+
+    const extraData = LodashHelper.isPlainObject(data)
+      ? LodashHelper.omit(data, ['results', 'total', 'page', 'meta', 'links'])
+      : {};
 
     return {
       ...extraData,
@@ -180,7 +210,6 @@ export class Mapping extends Model {
       total,
       page: currentPage,
       meta: {
-        itemCount: results.length,
         totalItems: total,
         itemsPerPage: perPage,
         totalPages,
@@ -188,20 +217,15 @@ export class Mapping extends Model {
       },
       links: {
         first: `${baseUrl}/?page=1&limit=${perPage}`,
-        previous:
-          currentPage > 1
-            ? `${baseUrl}/?page=${currentPage - 1}&limit=${perPage}`
-            : null,
-        next:
-          currentPage < totalPages
-            ? `${baseUrl}/?page=${currentPage + 1}&limit=${perPage}`
-            : null,
-        last:
-          totalPages > 0
-            ? `${baseUrl}/?page=${totalPages}&limit=${perPage}`
-            : null,
+        previous: previous
+          ? `${baseUrl}/?page=${currentPage - 1}&limit=${perPage}`
+          : null,
+        next: next ? `${baseUrl}/?page=${currentPage + 1}&limit=${perPage}` : null,
+        last: `${baseUrl}/?page=${totalPages}&limit=${perPage}`,
       },
     };
   }
 }
+
+
 

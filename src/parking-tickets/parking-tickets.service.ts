@@ -13,20 +13,6 @@ export class ParkingTicketsService {
       [currentPage, perPage, dto.search?.trim() || null],
     );
 
-    const raw = dbResult?.[0] || [];
-    const rows = Array.isArray(raw[0]) ? raw[0] : raw;
-
-    const total =
-      dbResult?.[1]?.[0]?.total ??
-      rows?.[0]?.total_count ??
-      rows?.[0]?.total ??
-      rows.length;
-
-    const storedResult = {
-      results: rows,
-      total,
-    };
-
-    return ParkingToken.paginationResponse(storedResult, data);
+    return ParkingToken.paginationResponse(dbResult, data);
   }
 }
