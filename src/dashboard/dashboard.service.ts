@@ -24,6 +24,7 @@ export class DashboardService {
       id: row.id,
       name: row.name,
       totalParking: Number(row.totalParking || 0),
+      totalFoc: Number(row.totalFoc || 0),
       totalRevenue: Number(row.totalRevenue || 0),
     }));
     const dailyParkingTrend = (resultSets[2] || []).map((row: any) => ({
@@ -34,12 +35,14 @@ export class DashboardService {
 
     const totalParkingSites = Number(totalSitesSet[0]?.total_sites || 0);
     const totalParking = vehicleTypes.reduce((sum, v) => sum + v.totalParking, 0);
+    const totalFoc = vehicleTypes.reduce((sum, v) => sum + v.totalFoc, 0);
     const totalRevenue = vehicleTypes.reduce((sum, v) => sum + v.totalRevenue, 0);
 
     return {
       statCards: {
         totalParkingSites,
         totalParking,
+        totalFoc,
         totalRevenue,
         vehicleTypes,
       },
