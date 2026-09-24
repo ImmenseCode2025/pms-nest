@@ -55,4 +55,22 @@ export class ParkingTicketsController {
       return ResponseHelper.error({ res, req, error });
     }
   }
+
+  @Post('/parking-tickets-excel')
+  async parkingTicketsExcel(
+    @Body() dto: ParkingTicketsPaginatedDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const url = await this.parkingTicketsService.parkingTicketsExcel(dto);
+      return ResponseHelper.success({
+        res,
+        data: { url },
+        message: 'Excel Generated Successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
 }
