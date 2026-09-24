@@ -237,7 +237,7 @@ export class ParkingTicketsService {
 
     const totalColumns = headers.length;
     const lastColLetter = String.fromCharCode(65 + totalColumns - 1);
-    const reportDate = GlobalHelper.formatDateTime(GlobalHelper.getDateTime());
+    const reportDate = GlobalHelper.getDateTime();
 
     // Row 1: Metadata
     const metaRow = worksheet.addRow([`Generated At: ${reportDate}`, `Total Records: ${cleanRows.length}`]);

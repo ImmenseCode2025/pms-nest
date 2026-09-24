@@ -125,7 +125,20 @@ export class GlobalHelper {
     format: string = 'DD-MM-YYYY hh:mm A',
   ): string {
     if (!value) return '-';
-    return moment(value).format(format);
+    if (moment.isMoment(value)) {
+      return value.format(format);
+    }
+    const m = moment(value, [
+      moment.ISO_8601,
+      'YYYY-MM-DD HH:mm:ss',
+      'YYYY-MM-DD HH:mm:ss.SSS',
+      'YYYY-MM-DDTHH:mm:ss.SSSZ',
+      'DD-MM-YYYY hh:mm A',
+      'DD-MM-YYYY HH:mm:ss',
+      'YYYY-MM-DD',
+      'DD-MM-YYYY',
+    ]);
+    return m.isValid() ? m.format(format) : '-';
   }
 
   static getDateTime(format: string = 'DD-MM-YYYY hh:mm A'): string {
