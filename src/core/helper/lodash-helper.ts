@@ -67,4 +67,8 @@ export class LodashHelper {
   static isPlainObject(value: any): boolean {
     return isPlainObject(value);
   }
+
+  static map<T, R>(array: T[], iteratee: (item: T, index: number) => R): R[] {
+    return (array || []).map(iteratee);
+  }
 }

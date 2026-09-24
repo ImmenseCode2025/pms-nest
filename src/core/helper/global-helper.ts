@@ -112,11 +112,23 @@ export class GlobalHelper {
   }
 
   // The DB connection uses timezone 'Z', so format in UTC to keep the stored wall-clock time
-  static formatDate(value: Date | string | null): string | null {
-    return value ? moment.utc(value).format('YYYY-MM-DD') : null;
+  static formatDate(value: Date | string | null, format: string = 'YYYY-MM-DD'): string | null {
+    return value ? moment.utc(value).format(format) : null;
   }
 
   static formatTime(value: Date | string | null): string | null {
     return value ? moment.utc(value).format('HH:mm:ss') : null;
+  }
+
+  static formatDateTime(
+    value?: Date | string | null,
+    format: string = 'DD-MM-YYYY hh:mm A',
+  ): string {
+    if (!value) return '-';
+    return moment(value).format(format);
+  }
+
+  static getDateTime(format: string = 'DD-MM-YYYY hh:mm A'): string {
+    return moment().format(format);
   }
 }
