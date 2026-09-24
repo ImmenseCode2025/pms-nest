@@ -6,4 +6,19 @@ export class ParkingTicketsPaginatedDto {
 
   @IsOptional()
   resultsPerPage?: number;
+
+  @IsOptional()
+  site?: number;
+
+  @IsOptional()
+  vehicleType?: number;
+
+  @IsOptional()
+  deviceType?: string; // 'system' | 'handheld' | null (both)
+
+  @IsOptional()
+  startDate?: string;
+
+  @IsOptional()
+  endDate?: string;
 }
