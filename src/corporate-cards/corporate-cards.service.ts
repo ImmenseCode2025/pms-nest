@@ -7,6 +7,7 @@ export class CorporateCardsService {
   
   async list(dto: CorporateCardsPaginatedDto) {
     const query = CorporateCards.query();
+    query.select('id','status','vehicleNumber')
     query.orderBy('id', 'desc');
     return await CorporateCards.findAllCustom(query);
   }
