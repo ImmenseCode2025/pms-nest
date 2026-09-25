@@ -1,10 +1,9 @@
 import {
-  Body,
   Controller,
-  Post,
+  Get,
   Query,
   Req,
-  Res,
+  Res
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Public } from 'src/core/guard/public.decorator';
@@ -18,10 +17,9 @@ export class CorporateCardsController {
 
   // LIST (POST)
   @Public()
-  @Post('/list')
+  @Get('/list')
   async list(
-    @Body() dto: CorporateCardsPaginatedDto,
-    @Query() query: any,
+    @Query() dto: CorporateCardsPaginatedDto,
     @Req() req: Request,
     @Res() res: Response,
   ) {
