@@ -1,23 +1,23 @@
 import { Mapping } from '../sql.model';
-import { Users } from './users.entity';
-import { FOC } from './foc.entity';
-import { ParkingShiftClosing } from './parking-shift-closing.entity';
-import { ParkingBlock } from './parking-block.entity';
 import { Address } from './address.entity';
-import { Company } from './company.entity';
-import { ParkingToken } from './parking-token.entity';
-import { Reservation } from './reservation.entity';
-import { ParkingPrice } from './parking-price.entity';
-import { Discount } from './discount.entity';
-import { ParkingPriceLogs } from './parking-price-logs.entity';
-import { ETAGLOGS } from './etaglogs.entity';
-import { ScratchCardsHistory } from './scratch-cards-history.entity';
-import { CompanyCards } from './company-cards.entity';
 import { AppQrCode } from './app-qr-code.entity';
-import { CompanyQrCode } from './company-qr-code.entity';
-import { FocQrCode } from './foc-qr-code.entity';
 import { CashQrCode } from './cash-qr-code.entity';
+import { CompanyCards } from './company-cards.entity';
+import { CompanyQrCode } from './company-qr-code.entity';
+import { Company } from './company.entity';
+import { Discount } from './discount.entity';
+import { ETAGLOGS } from './etaglogs.entity';
+import { FocQrCode } from './foc-qr-code.entity';
+import { FOC } from './foc.entity';
+import { ParkingBlock } from './parking-block.entity';
+import { ParkingPriceLogs } from './parking-price-logs.entity';
+import { ParkingPrice } from './parking-price.entity';
+import { ParkingShiftClosing } from './parking-shift-closing.entity';
+import { ParkingToken } from './parking-token.entity';
 import { PosQrCode } from './pos-qr-code.entity';
+import { Reservation } from './reservation.entity';
+import { ScratchCardsHistory } from './scratch-cards-history.entity';
+import { Users } from './users.entity';
 
 export class ParkingSite extends Mapping {
     static get tableName() {
@@ -26,6 +26,7 @@ export class ParkingSite extends Mapping {
 
   name?: string;
   siteCode?: string;
+  sgi?: string;
   addressId?: number;
   status?: "pending" | "active" | "inactive" | "outOfService" | "blocked";
   userId?: number;
@@ -34,6 +35,7 @@ export class ParkingSite extends Mapping {
   companyId?: number;
   isValetParkingAvailable?: boolean;
   collectionPoint?: boolean;
+  creationDateTime?: Date | string;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 
@@ -79,7 +81,7 @@ export class ParkingSite extends Mapping {
           to: 'user.id',
         },
       },
-      siteParkingAddresses: {
+      site_address: {
         relation: Mapping.BelongsToOneRelation,
         modelClass: Address,
         join: {
