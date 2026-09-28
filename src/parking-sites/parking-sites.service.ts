@@ -8,20 +8,8 @@ export class ParkingSitesService {
     const dto: SearchParkingSitesDto = data.dto || {};
     const query = ParkingSite.query();
     query.where('company', 7);
-    query
-      .withGraphFetched('[site_address]')
-      .modifyGraph('site_address', (builder) => {
-        builder.select('id', 'name');
-      });
-
-    // query.select(
-    //   'parking_site.*',
-    //   ParkingSite.raw(
-    //     "CONCAT(COALESCE(parking_site.area, ''), ' ', COALESCE(parking_site.unitOfMeasure, '')) as totalArea",
-    //   ),
-    // );
-
-    if (dto.search) {
+    query.withGraphFetched('[site_address]')
+     if (dto.search) {
       const searchText = `%${dto.search}%`;
       query.where((builder) => {
         builder
