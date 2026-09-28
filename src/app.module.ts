@@ -25,6 +25,7 @@ import { FilesUploadModule } from './files-upload/files-upload.module';
 import { ParkingTicketsModule } from './parking-tickets/parking-tickets.module';
 import { ParkingShiftClosingModule } from './parking-shift-closing/parking-shift-closing.module';
 import { ParkingSitesModule } from './parking-sites/parking-sites.module';
+import { CorporatesModule } from './corporates/corporates.module';
 import { PaymentGatewayModule } from './payment-gateway/payment-gateway.module';
 import { UsersModule } from './users/users.module';
 
@@ -59,6 +60,7 @@ import { UsersModule } from './users/users.module';
     ParkingTicketsModule,
     ParkingShiftClosingModule,
     ParkingSitesModule,
+    CorporatesModule,
     DashboardModule,
     PaymentGatewayModule,
     AppQueueModule,

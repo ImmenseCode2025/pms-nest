@@ -19,6 +19,7 @@ export class Corporate extends Mapping {
   contactPersonName?: string;
   contactNumber?: string;
   password?: string;
+  status?: "pending" | "approved" | "rejected";
   statusCorporate?: "pending" | "approved" | "rejected";
   createdAt?: Date | string;
   updatedAt?: Date | string;
