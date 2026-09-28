@@ -84,6 +84,7 @@ export class ParkingSite extends Mapping {
       site_address: {
         relation: Mapping.BelongsToOneRelation,
         modelClass: Address,
+        filter: Mapping.selectFields('id', 'name'),
         join: {
           from: 'parking_site.address',
           to: 'address.id',

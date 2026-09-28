@@ -144,4 +144,9 @@ export class GlobalHelper {
   static getDateTime(format: string = 'DD-MM-YYYY hh:mm A'): string {
     return moment().format(format);
   }
+
+  // Global relation filter helpers
+  static selectIdName = (query: any) => query.select('id', 'name');
+  static selectFields = (...fields: string[]) => (query: any) =>
+    query.select(...fields);
 }

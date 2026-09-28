@@ -98,6 +98,10 @@ export class Mapping extends Model {
     return query.pagination(req);
   }
 
+  // Global relation filter helpers
+  static selectFields = (...fields: string[]) => (query: any) =>
+    query.select(...fields);
+
   static async findOneCustom(query: any) {
     return query.findOneCustom();
   }
