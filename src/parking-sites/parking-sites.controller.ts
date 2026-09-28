@@ -1,10 +1,13 @@
 import {
   Body,
   Controller,
+  Delete,
+  Param,
+  ParseIntPipe,
   Post,
   Query,
   Req,
-  Res
+  Res,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ResponseHelper } from 'src/core/helper/response.helper';
@@ -32,6 +35,24 @@ export class ParkingSitesController {
         res,
         data,
         message: 'Fetched Successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
+  @Delete('/delete/:id')
+  async delete(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const data = await this.parkingSitesService.delete(id);
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Parking site and related configuration deleted successfully',
       });
     } catch (error) {
       return ResponseHelper.error({ res, req, error });

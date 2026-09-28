@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ParkingShiftClosingHistory } from 'src/core/orm/entities/parking-shift-closing-history.entity';
 import { ParkingShiftClosing } from 'src/core/orm/entities/parking-shift-closing.entity';
 import { ShiftClosingCollectionDetailHistory } from 'src/core/orm/entities/shift-closing-collection-detail-history.entity';
@@ -16,12 +16,14 @@ export class ParkingShiftClosingService {
       );
 
     if (!record) {
-      throw new NotFoundException(`Shift closing record #${id} not found`);
+      throw new HttpException(
+        `Shift closing record #${id} not found`,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     return record;
   }
-
 
   /**
    * Delete complete Shift Closing (Main record + Details + History records)
@@ -29,7 +31,10 @@ export class ParkingShiftClosingService {
   async delete(id: number) {
     const existing = await ParkingShiftClosing.query().findById(id);
     if (!existing) {
-      throw new NotFoundException(`Shift closing record #${id} not found`);
+      throw new HttpException(
+        `Shift closing record #${id} not found`,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     await ParkingShiftClosing.transaction(async (trx) => {
