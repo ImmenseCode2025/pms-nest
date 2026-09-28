@@ -20,8 +20,17 @@ import { ScratchCardsHistory } from './scratch-cards-history.entity';
 import { Users } from './users.entity';
 
 export class ParkingSite extends Mapping {
-    static get tableName() {
+  static get tableName() {
     return 'parking_site';
+  }
+
+  static withSiteEntryCounts(query: any, siteTable: string = 'parking_site') {
+    return query.select(
+      `${siteTable}.*`,
+      Mapping.raw(
+        `((SELECT COUNT(id) FROM parking_token WHERE parking_token.site = ${siteTable}.id) + (SELECT COUNT(pr.id) FROM parking_receipt pr INNER JOIN hardware hw ON pr.deviceId = hw.ipOrApi WHERE hw.asignee = ${siteTable}.id)) AS totalEntries`,
+      ),
+    );
   }
 
   name?: string;

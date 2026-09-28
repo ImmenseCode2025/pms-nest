@@ -8,7 +8,8 @@ export class ParkingSitesService {
     const dto: SearchParkingSitesDto = data.dto || {};
     const query = ParkingSite.query();
     query.where('company', 7);
-    query.withGraphFetched('[site_address]')
+    query.withGraphFetched('[site_address]');
+    ParkingSite.withSiteEntryCounts(query);
      if (dto.search) {
       const searchText = `%${dto.search}%`;
       query.where((builder) => {
@@ -17,7 +18,6 @@ export class ParkingSitesService {
           .orWhere('sgi', 'like', searchText);
       });
     }
-
     query.orderBy('id', 'desc');
     const result = await ParkingSite.pagination(query, data);
     return result;

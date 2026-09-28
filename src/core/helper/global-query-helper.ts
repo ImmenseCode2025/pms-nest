@@ -162,4 +162,13 @@ export class GlobalQueryHelper {
   static parseNumeric(value) {
     return parseFloat(String(value).replace(/,/g, '').trim()) || 0;
   }
+
+  static withSiteEntryCounts(query: any, siteTable: string = 'parking_site') {
+    return query.select(
+      `${siteTable}.*`,
+      query.client.raw(
+        `((SELECT COUNT(id) FROM parking_token WHERE parking_token.site = ${siteTable}.id) + (SELECT COUNT(pr.id) FROM parking_receipt pr INNER JOIN hardware hw ON pr.deviceId = hw.ipOrApi WHERE hw.asignee = ${siteTable}.id)) AS totalEntries`,
+      ),
+    );
+  }
 }
