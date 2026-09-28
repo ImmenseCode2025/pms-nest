@@ -55,7 +55,7 @@ export class ParkingSitesService {
     // 1. Check if Parking Site exists
     const site = await ParkingSite.query().findById(id);
     if (!site) {
-     AppException.badRequest({message: `Parking site #${id} not found`,})
+      AppException.notFound({ message: `Parking site #${id} not found` });
     }
 
     // 2. Check if any tokens exist for this site
@@ -64,10 +64,9 @@ export class ParkingSitesService {
       .resultSize();
 
     if (tokenCount > 0) {
-      throw new HttpException(
-        `Cannot delete parking site: ${tokenCount} parking token(s) are already generated for this site.`,
-        HttpStatus.BAD_REQUEST,
-      );
+      AppException.badRequest({
+        message: `Cannot delete parking site: ${tokenCount} parking token(s) are already generated for this site.`,
+      });
     }
 
     // Check if handheld receipts exist on hardware assigned to this site
@@ -84,10 +83,9 @@ export class ParkingSitesService {
         .resultSize();
 
       if (receiptCount > 0) {
-        throw new HttpException(
-          `Cannot delete parking site: ${receiptCount} parking receipt(s) are already generated for this site.`,
-          HttpStatus.BAD_REQUEST,
-        );
+        AppException.badRequest({
+          message: `Cannot delete parking site: ${receiptCount} parking receipt(s) are already generated for this site.`,
+        });
       }
     }
 
