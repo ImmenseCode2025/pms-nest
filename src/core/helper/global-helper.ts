@@ -147,6 +147,8 @@ export class GlobalHelper {
 
   // Global relation filter helpers
   static selectIdName = (query: any) => query.select('id', 'name');
-  static selectFields = (...fields: string[]) => (query: any) =>
-    query.select(...fields);
+  static selectFields =
+    (...fields: (string | string[])[]) =>
+    (query: any) =>
+      query.select(fields.flat());
 }
