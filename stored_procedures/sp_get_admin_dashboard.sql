@@ -7,12 +7,18 @@ CREATE PROCEDURE sp_get_admin_dashboard(
     IN p_site_id INT,
     IN p_payment_method INT,
     IN p_vehicle_type INT,
+    IN p_device_type VARCHAR(50),
     IN p_start_date VARCHAR(50),
     IN p_end_date VARCHAR(50)
 )
 BEGIN
+    DECLARE v_device VARCHAR(50) DEFAULT NULL;
     DECLARE v_start_date VARCHAR(50) DEFAULT NULL;
     DECLARE v_end_date VARCHAR(50) DEFAULT NULL;
+
+    IF p_device_type IS NOT NULL AND TRIM(p_device_type) != '' THEN
+        SET v_device = LOWER(TRIM(p_device_type));
+    END IF;
  
     IF p_start_date IS NOT NULL AND TRIM(p_start_date) != '' THEN
         SET v_start_date = TRIM(p_start_date);
@@ -52,7 +58,8 @@ BEGIN
         INNER JOIN parking_site ps ON pt.site = ps.id
         LEFT JOIN vehicle_type vt ON vt.id = pt.vehicleType
         LEFT JOIN parking_price pp ON pp.vehicleType = pt.vehicleType AND pp.siteId = pt.site
-        WHERE (p_company_id IS NULL OR ps.company = p_company_id)
+        WHERE (v_device IS NULL OR v_device = 'system')
+          AND (p_company_id IS NULL OR ps.company = p_company_id)
           AND (p_site_id IS NULL OR pt.site = p_site_id)
           AND (p_payment_method IS NULL OR pt.paymentMethod = p_payment_method)
           AND (p_vehicle_type IS NULL OR pt.vehicleType = p_vehicle_type)
@@ -75,7 +82,8 @@ BEGIN
         INNER JOIN parking_site ps ON hw.asignee = ps.id
         LEFT JOIN vehicle_type vt ON vt.id = pr.vehicleType
         LEFT JOIN parking_price pp ON pp.vehicleType = pr.vehicleType AND pp.siteId = ps.id
-        WHERE (p_company_id IS NULL OR ps.company = p_company_id)
+        WHERE (v_device IS NULL OR v_device = 'handheld')
+          AND (p_company_id IS NULL OR ps.company = p_company_id)
           AND (p_site_id IS NULL OR ps.id = p_site_id)
           AND (p_payment_method IS NULL OR pr.paymentMethod = p_payment_method)
           AND (p_vehicle_type IS NULL OR pr.vehicleType = p_vehicle_type)
@@ -97,7 +105,8 @@ BEGIN
             COUNT(1) AS total_count
         FROM parking_token pt
         INNER JOIN parking_site ps ON pt.site = ps.id
-        WHERE pt.checkInDateTime IS NOT NULL
+        WHERE (v_device IS NULL OR v_device = 'system')
+          AND pt.checkInDateTime IS NOT NULL
           AND (p_company_id IS NULL OR ps.company = p_company_id)
           AND (p_site_id IS NULL OR pt.site = p_site_id)
           AND (p_payment_method IS NULL OR pt.paymentMethod = p_payment_method)
@@ -112,7 +121,8 @@ BEGIN
         FROM parking_receipt pr
         INNER JOIN hardware hw ON pr.deviceId = hw.ipOrApi
         INNER JOIN parking_site ps ON hw.asignee = ps.id
-        WHERE pr.creationDate IS NOT NULL
+        WHERE (v_device IS NULL OR v_device = 'handheld')
+          AND pr.creationDate IS NOT NULL
           AND (p_company_id IS NULL OR ps.company = p_company_id)
           AND (p_site_id IS NULL OR ps.id = p_site_id)
           AND (p_payment_method IS NULL OR pr.paymentMethod = p_payment_method)
@@ -150,7 +160,8 @@ BEGIN
             LEFT JOIN vehicle_type vt ON vt.id = pt.vehicleType
             LEFT JOIN parking_price pp ON pp.vehicleType = pt.vehicleType AND pp.siteId = pt.site
             LEFT JOIN payment_method pm ON pm.id = pt.paymentMethod
-            WHERE (p_company_id IS NULL OR ps.company = p_company_id)
+            WHERE (v_device IS NULL OR v_device = 'system')
+              AND (p_company_id IS NULL OR ps.company = p_company_id)
               AND (p_site_id IS NULL OR pt.site = p_site_id)
               AND (p_payment_method IS NULL OR pt.paymentMethod = p_payment_method)
               AND (p_vehicle_type IS NULL OR pt.vehicleType = p_vehicle_type)
@@ -188,7 +199,8 @@ BEGIN
             LEFT JOIN vehicle_type vt ON vt.id = pr.vehicleType
             LEFT JOIN parking_price pp ON pp.vehicleType = pr.vehicleType AND pp.siteId = ps.id
             LEFT JOIN payment_method pm ON pm.id = pr.paymentMethod
-            WHERE (p_company_id IS NULL OR ps.company = p_company_id)
+            WHERE (v_device IS NULL OR v_device = 'handheld')
+              AND (p_company_id IS NULL OR ps.company = p_company_id)
               AND (p_site_id IS NULL OR ps.id = p_site_id)
               AND (p_payment_method IS NULL OR pr.paymentMethod = p_payment_method)
               AND (p_vehicle_type IS NULL OR pr.vehicleType = p_vehicle_type)

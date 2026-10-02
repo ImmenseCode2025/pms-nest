@@ -14,6 +14,9 @@ export class DashboardFilterDto {
   vehicleType?: number;
 
   @IsOptional()
+  deviceType?: string;
+
+  @IsOptional()
   @IsDateString()
   startDate?: string;
 

@@ -10,12 +10,13 @@ export class DashboardService {
     const siteId = dto.siteId ? Number(dto.siteId) : null;
     const paymentMethod = dto.paymentMethod ? Number(dto.paymentMethod) : null;
     const vehicleType = dto.vehicleType ? Number(dto.vehicleType) : null;
+    const deviceType = dto.deviceType?.trim() || null;
     const startDate = dto.startDate?.trim() || null;
     const endDate = dto.endDate?.trim() || null;
 
     const dbResult: any = await ParkingToken.knex().raw(
-      `CALL sp_get_admin_dashboard(?, ?, ?, ?, ?, ?)`,
-      [COMPANY_ID, siteId, paymentMethod, vehicleType, startDate, endDate],
+      `CALL sp_get_admin_dashboard(?, ?, ?, ?, ?, ?, ?)`,
+      [COMPANY_ID, siteId, paymentMethod, vehicleType, deviceType, startDate, endDate],
     );
 
     const resultSets = dbResult?.[0] || [];
