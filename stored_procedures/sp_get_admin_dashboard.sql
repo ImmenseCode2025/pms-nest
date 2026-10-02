@@ -43,10 +43,10 @@ BEGIN
             SUM(CASE WHEN COALESCE(pt.paymentMethod, 0) = 14 THEN 1 ELSE 0 END) AS total_foc,
             SUM(CASE 
                 WHEN COALESCE(pt.paymentMethod, 0) = 14 THEN 0
-                WHEN pt.checkOutDateTime IS NOT NULL 
-                     AND TIMESTAMPDIFF(MINUTE, pt.checkInDateTime, pt.checkOutDateTime) > 15 
-                THEN COALESCE(pp.amount, 0) 
-                ELSE 0 
+                WHEN pt.checkOutDateTime IS NULL THEN COALESCE(pp.amount, 0)
+                WHEN TIMESTAMPDIFF(MINUTE, pt.checkInDateTime, pt.checkOutDateTime) > 15
+                THEN COALESCE(pp.amount, 0)
+                ELSE 0
             END) AS total_revenue
         FROM parking_token pt
         INNER JOIN parking_site ps ON pt.site = ps.id

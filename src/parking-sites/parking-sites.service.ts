@@ -1,7 +1,5 @@
 import {
-  HttpException,
-  HttpStatus,
-  Injectable,
+  Injectable
 } from '@nestjs/common';
 import { AppException } from 'src/core/exception/app-exception';
 import { AppQrCode } from 'src/core/orm/entities/app-qr-code.entity';
@@ -49,6 +47,18 @@ export class ParkingSitesService {
     query.orderBy('id', 'desc');
     const result = await ParkingSite.pagination(query, data);
     return result;
+  }
+
+  async dropdown() {
+    const query = ParkingSite.query();
+    const company = 7;
+    query.where('company', company);
+
+    query.select('id', 'name', 'siteCode', 'sgi', 'status');
+    query.orderBy('name', 'asc');
+
+    const sites = await ParkingSite.findAllCustom(query);
+    return sites
   }
 
   async delete(id: number) {

@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   ParseIntPipe,
   Post,
@@ -10,6 +11,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { Public } from 'src/core/guard/public.decorator';
 import { ResponseHelper } from 'src/core/helper/response.helper';
 import { SearchParkingSitesDto } from './dto/search-parking-sites.dto';
 import { ParkingSitesService } from './parking-sites.service';
@@ -17,6 +19,36 @@ import { ParkingSitesService } from './parking-sites.service';
 @Controller('api/parking-sites')
 export class ParkingSitesController {
   constructor(private readonly parkingSitesService: ParkingSitesService) {}
+
+  @Public()
+  @Get('/dropdown')
+  async dropdown(@Req() req: Request, @Res() res: Response) {
+    try {
+      const data = await this.parkingSitesService.dropdown();
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Parking sites dropdown fetched successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
+  @Public()
+  @Post('/dropdown')
+  async dropdownPost(@Req() req: Request, @Res() res: Response) {
+    try {
+      const data = await this.parkingSitesService.dropdown();
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Parking sites dropdown fetched successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
 
   @Post('/paginated')
   async paginated(
@@ -58,4 +90,20 @@ export class ParkingSitesController {
       return ResponseHelper.error({ res, req, error });
     }
   }
+
+  @Public()
+  @Get('/dropdown')
+  async dropdown(@Req() req: Request, @Res() res: Response) {
+    try {
+      const data = await this.parkingSitesService.dropdown();
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Parking sites dropdown fetched successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
 }
