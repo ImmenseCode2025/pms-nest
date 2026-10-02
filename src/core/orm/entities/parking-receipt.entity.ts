@@ -11,6 +11,7 @@ export class ParkingReceipt extends Mapping {
   deviceId?: string;
   uploadDate?: Date | string;
   vehicleTypeId?: number;
+    siteId?: number;
   createdAt?: Date | string;
   updatedAt?: Date | string;
   paymentMethod?: number;

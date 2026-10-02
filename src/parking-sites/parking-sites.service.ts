@@ -53,8 +53,6 @@ export class ParkingSitesService {
     const query = ParkingSite.query();
     const company = 7;
     query.where('company', company);
-
-    query.select('id', 'name', 'siteCode', 'sgi', 'status');
     query.orderBy('name', 'asc');
 
     const sites = await ParkingSite.findAllCustom(query);
