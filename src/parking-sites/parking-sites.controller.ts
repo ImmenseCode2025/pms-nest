@@ -90,20 +90,4 @@ export class ParkingSitesController {
       return ResponseHelper.error({ res, req, error });
     }
   }
-
-  @Public()
-  @Get('/dropdown')
-  async dropdown(@Req() req: Request, @Res() res: Response) {
-    try {
-      const data = await this.parkingSitesService.dropdown();
-      return ResponseHelper.success({
-        res,
-        data,
-        message: 'Parking sites dropdown fetched successfully',
-      });
-    } catch (error) {
-      return ResponseHelper.error({ res, req, error });
-    }
-  }
-
 }
