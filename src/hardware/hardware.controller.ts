@@ -108,4 +108,22 @@ export class HardwareController {
     }
   }
 
+  @Patch('/untag/:id')
+  async untag(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+    @Res() res: Response,
+    @AuthId() authId: number,
+  ) {
+    try {
+      const data = await this.hardwareService.untagHandheld(id, authId);
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Handheld hardware untagged successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
 }

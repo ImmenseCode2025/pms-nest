@@ -108,6 +108,30 @@ export class HardwareService {
     return updatedHardware;
   }
 
+  async untagHandheld(id: number, authId?: number) {
+    const existing: any = await Hardware.query().findById(id);
+    if (!existing) {
+      throw new HttpException('Hardware not found', HttpStatus.NOT_FOUND);
+    }
+
+    const updatedHardware = await Hardware.query().patchAndFetchById(id, {
+      asignee: null,
+      assignedTo: null,
+      assignedUser: null,
+    });
+
+    await HardwareAssignLogs.query().insertAndFetch({
+      hardware: id,
+      assignee: existing.asignee || 0,
+      user: authId || null,
+      assignTo: 'unassigned',
+      description: 'Handheld hardware untagged from site',
+      assignedUser: null,
+    });
+
+    return updatedHardware;
+  }
+
   private hasAssignmentChange(dto: UpdateHardwareDto): boolean {
     return (
       LodashHelper.get(dto, 'asignee') !== undefined ||
