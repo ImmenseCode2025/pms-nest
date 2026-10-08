@@ -2,16 +2,22 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  ParseIntPipe,
+  Patch,
   Post,
   Query,
   Req,
   Res,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { AuthId } from 'src/core/decorators/auth-id.decorator';
 import { Public } from 'src/core/guard/public.decorator';
 import { ResponseHelper } from 'src/core/helper/response.helper';
+import { CreateHardwareDto } from './dto/create-hardware.dto';
 import { HardwareFilterDto } from './dto/hardware-filter.dto';
 import { HardwarePaginatedDto } from './dto/hardware-paginated.dto';
+import { UpdateHardwareDto } from './dto/update-hardware.dto';
 import { HardwareService } from './hardware.service';
 
 @Controller('api/hardware')
@@ -59,4 +65,47 @@ export class HardwareController {
       return ResponseHelper.error({ res, req, error });
     }
   }
+
+  @Post('/create')
+  async create(
+    @Body() dto: CreateHardwareDto,
+    @Req() req: Request,
+    @Res() res: Response,
+    @AuthId() authId:number
+  ) {
+    try {
+      const data = await this.hardwareService.create({
+        dto,
+        userId: authId,
+      });
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Hardware created successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
+  @Patch('/update/:id')
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateHardwareDto,
+    @Req() req: Request,
+    @Res() res: Response,
+    @AuthId() authId: number,
+  ) {
+    try {
+      const data = await this.hardwareService.update(id, dto, authId);
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Hardware updated successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
 }
