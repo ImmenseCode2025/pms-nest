@@ -1,13 +1,12 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class TagHardwareDto {
   @IsNotEmpty()
   siteId: number;
 
-  @IsOptional()
+  @IsNotEmpty()
   assignedUser?: number;
 
-  @IsOptional()
-  @IsString()
+  @IsNotEmpty()
   description?: string;
 }
