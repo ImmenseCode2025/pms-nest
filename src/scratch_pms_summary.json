@@ -1,0 +1,449 @@
+{
+  "cda-parking-chat-backend": {
+    "path": "E:\\projects\\pms\\cda-parking-chat-backend",
+    "hasPackageJson": true,
+    "hasReadme": false,
+    "hasEnv": false,
+    "packageInfo": {
+      "name": "cda-parking-backend",
+      "description": "",
+      "scripts": [
+        "test",
+        "start",
+        "dev"
+      ],
+      "dependencies": [
+        "bcryptjs",
+        "body-parser",
+        "cors",
+        "dotenv",
+        "exceljs",
+        "express",
+        "express-rate-limit",
+        "express-validator",
+        "fernet",
+        "helmet"
+      ]
+    },
+    "readmeSnippet": "",
+    "files": [
+      ".git",
+      ".github",
+      ".gitignore",
+      ".sequelizerc",
+      "app.js",
+      "config",
+      "controllers",
+      "cronJobs",
+      "docs",
+      "middlewares",
+      "migrations",
+      "models",
+      "package-lock.json",
+      "package.json",
+      "routes"
+    ]
+  },
+  "cda-parking-web-app": {
+    "path": "E:\\projects\\pms\\cda-parking-web-app",
+    "hasPackageJson": true,
+    "hasReadme": true,
+    "hasEnv": true,
+    "packageInfo": {
+      "name": "parking-web-app",
+      "scripts": [
+        "start",
+        "predeploy",
+        "deploy",
+        "build",
+        "eject"
+      ],
+      "dependencies": [
+        "@emotion/react",
+        "axios",
+        "bootstrap",
+        "chart.js",
+        "chartjs-plugin-zoom",
+        "chroma-js",
+        "file-saver",
+        "formik",
+        "google-maps-react",
+        "html2canvas"
+      ]
+    },
+    "readmeSnippet": "# KMC Parking Management System — Admin Portal\r\n\r\nThis repository contains the React administration portal for the Karachi Metropolitan Corporation Parking Management System.\r\n\r\nFor architecture, setup, routes, Redux data flow, the complete frontend API catalog, external integrations, security notes",
+    "files": [
+      ".env",
+      ".git",
+      ".gitignore",
+      "DOCUMENTATION.md",
+      "DOCUMENTATION.pdf",
+      "package-lock.json",
+      "package.json",
+      "public",
+      "README.md",
+      "src"
+    ]
+  },
+  "CDA-Parking-Web-User": {
+    "path": "E:\\projects\\pms\\CDA-Parking-Web-User",
+    "hasPackageJson": true,
+    "hasReadme": true,
+    "hasEnv": true,
+    "packageInfo": {
+      "name": "parking-web-app-user",
+      "scripts": [
+        "start",
+        "predeploy",
+        "deploy",
+        "build",
+        "test",
+        "eject"
+      ],
+      "dependencies": [
+        "axios",
+        "bootstrap",
+        "chart.js",
+        "chroma-js",
+        "google-maps-react",
+        "jspdf",
+        "jspdf-autotable",
+        "moment",
+        "qrcode",
+        "react"
+      ]
+    },
+    "readmeSnippet": "# Getting Started with Create React App\r\n\r\n## Architecture documentation\r\n\r\nSee [PMS User Web Application: Code, System Architecture, Business Logic, and API Integration](docs/PMS_USER_WEB_ARCHITECTURE.md) for the repository-specific technical documentation.\r\n\r\nThis project was bootstrapped with [Cr",
+    "files": [
+      ".env",
+      ".git",
+      ".gitignore",
+      "docs",
+      "package-lock.json",
+      "package.json",
+      "public",
+      "README.md",
+      "src"
+    ]
+  },
+  "pms-admin-web-backend": {
+    "path": "E:\\projects\\pms\\pms-admin-web-backend",
+    "hasPackageJson": false,
+    "hasReadme": true,
+    "hasEnv": false,
+    "packageInfo": null,
+    "readmeSnippet": "# pms-admin-web-backend",
+    "files": [
+      ".git",
+      "docs",
+      "kmcParkingAdminWeb.py",
+      "pms-admin-web.sh",
+      "README.md",
+      "requirements.txt",
+      "sendEmail.py",
+      "venv",
+      "__pycache__"
+    ]
+  },
+  "pms-compliance": {
+    "path": "E:\\projects\\pms\\pms-compliance",
+    "hasPackageJson": false,
+    "hasReadme": true,
+    "hasEnv": false,
+    "packageInfo": null,
+    "readmeSnippet": "# Deploy\r\n\r\nOn an Ubuntu/Debian server, place `deploy.sh` and both HTML files in the same directory, then run:\r\n\r\n```sh\r\nsudo bash deploy.sh\r\n```\r\n\r\nThe script copies the pages and includes their routes in the existing `smartparking-frontend` Nginx site. It backs up that site file, disables the dupl",
+    "files": [
+      ".git",
+      "deploy.sh",
+      "privacyPolicy.html",
+      "README.md",
+      "termAndConditions.html"
+    ]
+  },
+  "pms-corporate-portal": {
+    "path": "E:\\projects\\pms\\pms-corporate-portal",
+    "hasPackageJson": true,
+    "hasReadme": true,
+    "hasEnv": false,
+    "packageInfo": {
+      "name": "pms-corporate-portal",
+      "scripts": [
+        "dev",
+        "build",
+        "lint",
+        "preview"
+      ],
+      "dependencies": [
+        "@react-google-maps/api",
+        "@reduxjs/toolkit",
+        "@tailwindcss/vite",
+        "@testing-library/jest-dom",
+        "@testing-library/react",
+        "@testing-library/user-event",
+        "axios",
+        "html2canvas",
+        "jspdf",
+        "qrcode"
+      ]
+    },
+    "readmeSnippet": "# PMS Corporate Portal\r\n\r\nFrontend application for company authentication and dashboard access, built with React + Vite.\r\n\r\nFor the implementation-grounded system design, business workflows, data model, and complete API catalog, see [Architecture and Integration Documentation](docs/ARCHITECTURE.md).",
+    "files": [
+      ".env.example",
+      ".git",
+      ".github",
+      ".gitignore",
+      "docs",
+      "eslint.config.js",
+      "index.html",
+      "package-lock.json",
+      "package.json",
+      "public",
+      "README.md",
+      "src",
+      "vite.config.js"
+    ]
+  },
+  "pms-etag-apis": {
+    "path": "E:\\projects\\pms\\pms-etag-apis",
+    "hasPackageJson": false,
+    "hasReadme": true,
+    "hasEnv": false,
+    "packageInfo": null,
+    "readmeSnippet": "# pms-etag-apis",
+    "files": [
+      ".git",
+      "cda-parking-1d0ab-firebase-adminsdk-uwjhh-1077301e07.json",
+      "kmcParkingEtag.py",
+      "pms-etag.sh",
+      "README.md",
+      "requirements.txt"
+    ]
+  },
+  "pms-handheld-backend": {
+    "path": "E:\\projects\\pms\\pms-handheld-backend",
+    "hasPackageJson": false,
+    "hasReadme": true,
+    "hasEnv": false,
+    "packageInfo": null,
+    "readmeSnippet": "# PMS Handheld Backend\r\n\r\nFlask/MySQL synchronization API for PMS handheld and TicketEase parking devices.\r\n\r\n## Documentation\r\n\r\n- [System architecture and technical documentation](docs/SYSTEM_ARCHITECTURE.md)\r\n- [Online-payment proof Postman collection](postman/postman-online-payment-proof.collect",
+    "files": [
+      ".git",
+      ".gitignore",
+      "docs",
+      "kmcParkingHandheldApplication.py",
+      "pms-handheld.sh",
+      "README.md",
+      "requirements.txt",
+      "venv",
+      "__pycache__"
+    ]
+  },
+  "PMS-LandingPage": {
+    "path": "E:\\projects\\pms\\PMS-LandingPage",
+    "hasPackageJson": false,
+    "hasReadme": false,
+    "hasEnv": false,
+    "packageInfo": null,
+    "readmeSnippet": "",
+    "files": [
+      ".git",
+      "accountDeletion",
+      "app.js",
+      "car-top.png",
+      "index.html",
+      "PMS_Landing_Page_Requirements.pdf",
+      "style.css"
+    ]
+  },
+  "pms-mobile-backend": {
+    "path": "E:\\projects\\pms\\pms-mobile-backend",
+    "hasPackageJson": false,
+    "hasReadme": true,
+    "hasEnv": false,
+    "packageInfo": null,
+    "readmeSnippet": "# pms-mobile-backend\r\n\r\nSee [BACKEND_ARCHITECTURE.md](BACKEND_ARCHITECTURE.md) for the detailed code architecture, system architecture, business logic, data model, API catalog, third-party integrations, deployment model, and implementation risk assessment.\r\n",
+    "files": [
+      ".git",
+      ".github",
+      ".gitignore",
+      "BACKEND_ARCHITECTURE.md",
+      "BACKEND_ARCHITECTURE.pdf",
+      "cda-parking-1d0ab-firebase-adminsdk-uwjhh-1077301e07.json",
+      "config.ini",
+      "kmcParkingCustomerApp.py",
+      "PaymentGateway.ini",
+      "pms-mobile.sh",
+      "README.md",
+      "requirements.txt",
+      "sendEmail.py",
+      "__pycache__"
+    ]
+  },
+  "pms-nest": {
+    "path": "E:\\projects\\pms\\pms-nest",
+    "hasPackageJson": true,
+    "hasReadme": true,
+    "hasEnv": true,
+    "packageInfo": {
+      "name": "grc",
+      "description": "",
+      "scripts": [
+        "build",
+        "format",
+        "start",
+        "start:dev",
+        "start:debug",
+        "dev",
+        "start:prod",
+        "lint",
+        "test",
+        "test:watch",
+        "test:cov",
+        "test:debug",
+        "test:e2e",
+        "db:migrate",
+        "db:rollback",
+        "db:seed"
+      ],
+      "dependencies": [
+        "@aws-sdk/client-s3",
+        "@itgorillaz/configify",
+        "@keyv/redis",
+        "@nestjs/bull",
+        "@nestjs/bullmq",
+        "@nestjs/cache-manager",
+        "@nestjs/common",
+        "@nestjs/config",
+        "@nestjs/core",
+        "@nestjs/event-emitter"
+      ]
+    },
+    "readmeSnippet": "# PMS Nest API\n\n## Requirements\n\n- Node.js 22.11.0\n- npm 10.9.2\n- MySQL 8+\n\n## Database setup\n\n1. Copy `.env.example` to `.env` and set the MySQL connection values.\n2. Create the database using the same name as `DATABASE_NAME` with the\n   `utf8mb4` character set.\n3. Install dependencies and apply th",
+    "files": [
+      ".env",
+      ".env.example",
+      ".eslintrc.js",
+      ".git",
+      ".gitignore",
+      ".prettierrc",
+      ".vscode",
+      "DATABASE_RELATIONS_REFERENCE.md",
+      "dist",
+      "html-templates",
+      "knexfile.js",
+      "nest-cli.json",
+      "node_modules",
+      "package-lock.json",
+      "package.json"
+    ],
+    "port": "3307"
+  },
+  "pms-scratch-card-backend": {
+    "path": "E:\\projects\\pms\\pms-scratch-card-backend",
+    "hasPackageJson": false,
+    "hasReadme": true,
+    "hasEnv": false,
+    "packageInfo": null,
+    "readmeSnippet": "# pms-scratch-card-backend",
+    "files": [
+      ".git",
+      "parkingScratchCard.py",
+      "pms-scratch-card.sh",
+      "README.md",
+      "requirements.txt",
+      "sendEmail.py"
+    ]
+  },
+  "pms-scripts": {
+    "path": "E:\\projects\\pms\\pms-scripts",
+    "hasPackageJson": true,
+    "hasReadme": true,
+    "hasEnv": true,
+    "packageInfo": {
+      "name": "pms-scripts",
+      "description": "",
+      "scripts": [
+        "build",
+        "format",
+        "start",
+        "start:dev",
+        "start:debug",
+        "dev",
+        "start:prod",
+        "lint",
+        "test",
+        "test:watch",
+        "test:cov",
+        "test:debug",
+        "test:e2e",
+        "remove-service",
+        "generate:entities",
+        "migrate:latest",
+        "migrate:rollback"
+      ],
+      "dependencies": [
+        "@aws-sdk/client-s3",
+        "@itgorillaz/configify",
+        "@keyv/redis",
+        "@nestjs/bull",
+        "@nestjs/bullmq",
+        "@nestjs/cache-manager",
+        "@nestjs/common",
+        "@nestjs/config",
+        "@nestjs/core",
+        "@nestjs/event-emitter"
+      ]
+    },
+    "readmeSnippet": "node version = 22.11.0\r\nnpm version = 10.9.2\r\nDatabase = Mysql\r\n",
+    "files": [
+      ".env",
+      ".env.example",
+      ".eslintrc.js",
+      ".git",
+      ".gitignore",
+      ".prettierrc",
+      "deploy.bat",
+      "dist",
+      "html-templates",
+      "knexfile.js",
+      "migrations",
+      "nest-cli.json",
+      "node_modules",
+      "package-lock.json",
+      "package.json"
+    ],
+    "port": "1433"
+  },
+  "pms-site-scripts": {
+    "path": "E:\\projects\\pms\\pms-site-scripts",
+    "hasPackageJson": false,
+    "hasReadme": true,
+    "hasEnv": false,
+    "packageInfo": null,
+    "readmeSnippet": "# pms-site-scripts",
+    "files": [
+      ".git",
+      "pms-site-script.sh",
+      "README.md",
+      "requirements.txt",
+      "syncScriptServer.py"
+    ]
+  },
+  "pms-user-web-backend": {
+    "path": "E:\\projects\\pms\\pms-user-web-backend",
+    "hasPackageJson": false,
+    "hasReadme": true,
+    "hasEnv": false,
+    "packageInfo": null,
+    "readmeSnippet": "# pms-user-web-backend\r\n\r\n## Password reset configuration\r\n\r\nThe password reset API uses these environment variables:\r\n\r\n- `PMS_SMTP_USERNAME` (required)\r\n- `PMS_SMTP_PASSWORD` (required)\r\n- `PMS_SMTP_HOST` (default: `smtp.office365.com`)\r\n- `PMS_SMTP_PORT` (default: `587`)\r\n- `PMS_SMTP_FROM` (defau",
+    "files": [
+      ".git",
+      "kmcParkingUserWeb.py",
+      "pms-user-web.sh",
+      "README.md",
+      "requirements.txt",
+      "sendEmail.py",
+      "venv"
+    ]
+  }
+}

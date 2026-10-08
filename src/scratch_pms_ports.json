@@ -1,0 +1,168 @@
+[
+  {
+    "name": "cda-parking-chat-backend",
+    "ports": [
+      ":3000",
+      ":3001",
+      ":5173"
+    ],
+    "scripts": [],
+    "mainFiles": [
+      "app.js"
+    ]
+  },
+  {
+    "name": "cda-parking-web-app",
+    "ports": [
+      ":7102",
+      ":7781",
+      ":7781"
+    ],
+    "scripts": [],
+    "mainFiles": [
+      ".env"
+    ]
+  },
+  {
+    "name": "CDA-Parking-Web-User",
+    "ports": [
+      ":7103",
+      ":5000"
+    ],
+    "scripts": [],
+    "mainFiles": [
+      ".env"
+    ]
+  },
+  {
+    "name": "pms-admin-web-backend",
+    "ports": [
+      "app.run(port=7700"
+    ],
+    "scripts": [],
+    "mainFiles": [
+      "kmcParkingAdminWeb.py",
+      "pms-admin-web.sh",
+      "sendEmail.py"
+    ]
+  },
+  {
+    "name": "pms-compliance",
+    "ports": [],
+    "scripts": [],
+    "mainFiles": [
+      "deploy.sh"
+    ]
+  },
+  {
+    "name": "pms-corporate-portal",
+    "ports": [],
+    "scripts": [],
+    "mainFiles": []
+  },
+  {
+    "name": "pms-etag-apis",
+    "ports": [
+      "app.run(port=7124"
+    ],
+    "scripts": [],
+    "mainFiles": [
+      "kmcParkingEtag.py",
+      "pms-etag.sh"
+    ]
+  },
+  {
+    "name": "pms-handheld-backend",
+    "ports": [
+      "app.run(port=7711"
+    ],
+    "scripts": [],
+    "mainFiles": [
+      "kmcParkingHandheldApplication.py",
+      "pms-handheld.sh"
+    ]
+  },
+  {
+    "name": "PMS-LandingPage",
+    "ports": [
+      ":7119"
+    ],
+    "scripts": [],
+    "mainFiles": [
+      "app.js"
+    ]
+  },
+  {
+    "name": "pms-mobile-backend",
+    "ports": [
+      "app.run(port=7705",
+      ":7788"
+    ],
+    "scripts": [],
+    "mainFiles": [
+      "config.ini",
+      "kmcParkingCustomerApp.py",
+      "PaymentGateway.ini",
+      "pms-mobile.sh",
+      "sendEmail.py"
+    ]
+  },
+  {
+    "name": "pms-nest",
+    "ports": [
+      ":8104",
+      ":8104"
+    ],
+    "scripts": [],
+    "mainFiles": [
+      ".env",
+      "pms-nest.sh"
+    ]
+  },
+  {
+    "name": "pms-scratch-card-backend",
+    "ports": [
+      "app.run(port=7700"
+    ],
+    "scripts": [],
+    "mainFiles": [
+      "parkingScratchCard.py",
+      "pms-scratch-card.sh",
+      "sendEmail.py"
+    ]
+  },
+  {
+    "name": "pms-scripts",
+    "ports": [
+      ":8105"
+    ],
+    "scripts": [],
+    "mainFiles": [
+      ".env",
+      "pms-scripts.sh"
+    ]
+  },
+  {
+    "name": "pms-site-scripts",
+    "ports": [
+      "app.run(port=7125"
+    ],
+    "scripts": [],
+    "mainFiles": [
+      "pms-site-script.sh",
+      "syncScriptServer.py"
+    ]
+  },
+  {
+    "name": "pms-user-web-backend",
+    "ports": [
+      "app.run(port=7700"
+    ],
+    "scripts": [],
+    "mainFiles": [
+      "kmcParkingUserWeb.py",
+      "pms-user-web.sh",
+      "sendEmail.py"
+    ]
+  }
+]
