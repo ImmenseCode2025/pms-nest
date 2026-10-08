@@ -17,6 +17,7 @@ import { ResponseHelper } from 'src/core/helper/response.helper';
 import { CreateHardwareDto } from './dto/create-hardware.dto';
 import { HardwareFilterDto } from './dto/hardware-filter.dto';
 import { HardwarePaginatedDto } from './dto/hardware-paginated.dto';
+import { TagHardwareDto } from './dto/tag-hardware.dto';
 import { UpdateHardwareDto } from './dto/update-hardware.dto';
 import { HardwareService } from './hardware.service';
 
@@ -121,6 +122,26 @@ export class HardwareController {
         res,
         data,
         message: 'Handheld hardware untagged successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
+  @Patch('/tag/:id')
+  async tag(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: TagHardwareDto,
+    @Req() req: Request,
+    @Res() res: Response,
+    @AuthId() authId: number,
+  ) {
+    try {
+      const data = await this.hardwareService.tagHandheld(id, dto, authId);
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Handheld hardware tagged successfully',
       });
     } catch (error) {
       return ResponseHelper.error({ res, req, error });

@@ -5,6 +5,7 @@ import { Hardware } from 'src/core/orm/entities/hardware.entity';
 import { CreateHardwareDto } from './dto/create-hardware.dto';
 import { HardwareFilterDto } from './dto/hardware-filter.dto';
 import { HardwarePaginatedDto } from './dto/hardware-paginated.dto';
+import { TagHardwareDto } from './dto/tag-hardware.dto';
 import { UpdateHardwareDto } from './dto/update-hardware.dto';
 
 @Injectable()
@@ -116,8 +117,6 @@ export class HardwareService {
 
     const updatedHardware = await Hardware.query().patchAndFetchById(id, {
       asignee: null,
-      assignedTo: null,
-      assignedUser: null,
     });
 
     await HardwareAssignLogs.query().insertAndFetch({
@@ -127,6 +126,29 @@ export class HardwareService {
       assignTo: 'unassigned',
       description: 'Handheld hardware untagged from site',
       assignedUser: null,
+    });
+
+    return updatedHardware;
+  }
+
+  async tagHandheld(id: number, dto: TagHardwareDto, authId?: number) {
+    const existing: any = await Hardware.query().findById(id);
+    if (!existing) {
+      throw new HttpException('Hardware not found', HttpStatus.NOT_FOUND);
+    }
+
+    const payload: any = {
+      asignee: dto.siteId,
+      assignedTo: 'parking site',
+    };
+    const updatedHardware = await Hardware.query().patchAndFetchById(id, payload);
+    await HardwareAssignLogs.query().insertAndFetch({
+      hardware: id,
+      assignee: dto.siteId,
+      user: authId || null,
+      assignTo: 'parking site',
+      description: 'Handheld hardware tagged to site',
+      assignedUser: dto.assignedUser || null,
     });
 
     return updatedHardware;
