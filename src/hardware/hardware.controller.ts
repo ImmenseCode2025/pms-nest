@@ -37,7 +37,6 @@ export class HardwareController {
     }
   }
 
-  @Public()
   @Post('/handheld-paginated')
   async paginated(
     @Body() dto: HardwarePaginatedDto,
