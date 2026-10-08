@@ -30,7 +30,7 @@ export class HardwareService {
       });
     }
 
-    query.withGraphFetched('[Hardware_site,user]');
+    query.withGraphFetched('[Hardware_site,hardware_user]');
     query.orderBy('id', 'desc');
 
     return await Hardware.pagination(query, data);

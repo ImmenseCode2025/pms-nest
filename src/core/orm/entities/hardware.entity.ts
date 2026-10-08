@@ -40,9 +40,12 @@ export class Hardware extends Mapping {
           to: 'parking_shift_closing.deviceId',
         },
       },
-      user: {
+      hardware_user: {
         relation: Mapping.BelongsToOneRelation,
         modelClass: Users,
+        modify(query) {
+          query.select('id', 'username', 'email');
+        },
         join: {
           from: 'hardware.user',
           to: 'user.id',
