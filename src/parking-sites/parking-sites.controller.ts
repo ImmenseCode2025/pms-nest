@@ -73,6 +73,20 @@ export class ParkingSitesController {
     }
   }
 
+  @Get('/site-dropdown')
+  async siteDropdown(@Req() req: Request, @Res() res: Response) {
+    try {
+      const data = await this.parkingSitesService.siteDropdown();
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Parking sites dropdown fetched successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
   @Delete('/delete/:id')
   async delete(
     @Param('id', ParseIntPipe) id: number,

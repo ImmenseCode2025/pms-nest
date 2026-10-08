@@ -49,6 +49,17 @@ export class ParkingSitesService {
     return result;
   }
 
+    async siteDropdown() {
+    const query = ParkingSite.query();
+    const company = 7;
+    query.select('id', 'name')
+    query.where('company', company);
+    query.orderBy('name', 'asc');
+
+    const sites = await ParkingSite.findAllCustom(query);
+    return sites
+  }
+
   async dropdown() {
     const query = ParkingSite.query();
     const company = 7;
