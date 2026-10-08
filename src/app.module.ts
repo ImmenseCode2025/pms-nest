@@ -28,6 +28,7 @@ import { ParkingSitesModule } from './parking-sites/parking-sites.module';
 import { CorporatesModule } from './corporates/corporates.module';
 import { PaymentGatewayModule } from './payment-gateway/payment-gateway.module';
 import { UsersModule } from './users/users.module';
+import { HardwareModule } from './hardware/hardware.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { UsersModule } from './users/users.module';
     CorporatesModule,
     DashboardModule,
     PaymentGatewayModule,
+    HardwareModule,
     AppQueueModule,
     AppCacheModule,
     CustomLoggerModule,

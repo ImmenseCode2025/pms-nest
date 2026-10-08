@@ -128,7 +128,7 @@ export class Hardware extends Mapping {
           to: 'corporate_qr_code.hardware',
         },
       },
-      parkingSite: {
+      Hardware_site: {
         relation: Mapping.BelongsToOneRelation,
         modelClass: ParkingSite,
         modify(query) {
