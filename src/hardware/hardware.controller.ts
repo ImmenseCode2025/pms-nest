@@ -1,14 +1,17 @@
 import {
+  Body,
   Controller,
   Get,
+  Post,
   Query,
   Req,
-  Res
+  Res,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Public } from 'src/core/guard/public.decorator';
 import { ResponseHelper } from 'src/core/helper/response.helper';
 import { HardwareFilterDto } from './dto/hardware-filter.dto';
+import { HardwarePaginatedDto } from './dto/hardware-paginated.dto';
 import { HardwareService } from './hardware.service';
 
 @Controller('api/hardware')
@@ -34,5 +37,27 @@ export class HardwareController {
     }
   }
 
-  
+  @Public()
+  @Post('/handheld-paginated')
+  async paginated(
+    @Body() dto: HardwarePaginatedDto,
+    @Query() query: any,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const data = await this.hardwareService.paginated({
+        dto,
+        query,
+        req,
+      });
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Handheld hardware retrieved successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
 }
