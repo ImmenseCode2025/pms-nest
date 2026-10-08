@@ -18,6 +18,7 @@ import { CreateHardwareDto } from './dto/create-hardware.dto';
 import { HardwareFilterDto } from './dto/hardware-filter.dto';
 import { HardwarePaginatedDto } from './dto/hardware-paginated.dto';
 import { TagHardwareDto } from './dto/tag-hardware.dto';
+import { UntagHardwareDto } from './dto/untag-hardware.dto';
 import { UpdateHardwareDto } from './dto/update-hardware.dto';
 import { HardwareService } from './hardware.service';
 
@@ -112,12 +113,13 @@ export class HardwareController {
   @Patch('/untag/:id')
   async untag(
     @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UntagHardwareDto,
     @Req() req: Request,
     @Res() res: Response,
     @AuthId() authId: number,
   ) {
     try {
-      const data = await this.hardwareService.untagHandheld(id, authId);
+      const data = await this.hardwareService.untagHandheld(id, dto, authId);
       return ResponseHelper.success({
         res,
         data,

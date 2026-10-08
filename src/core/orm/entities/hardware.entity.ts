@@ -18,11 +18,14 @@ export class Hardware extends Mapping {
   }
 
   partName?: string;
+  sku?: string;
   description?: string;
   configuration?: string;
+  ipOrApi?: string;
   type?: "camera" | "barrier" | "license plate recognizer" | "personal computer" | "handheld" | "pos";
   status?: "active" | "inactive" | "outOfService" | "maintenance";
   userId?: number;
+  user?: number;
   assignedTo?: "parking site" | "parking gate" | "parking lot" | "hardware" | "parking block" | "parking floor";
   asignee?: number;
   assignedUser?: number;

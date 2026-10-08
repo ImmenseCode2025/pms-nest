@@ -6,6 +6,7 @@ import { CreateHardwareDto } from './dto/create-hardware.dto';
 import { HardwareFilterDto } from './dto/hardware-filter.dto';
 import { HardwarePaginatedDto } from './dto/hardware-paginated.dto';
 import { TagHardwareDto } from './dto/tag-hardware.dto';
+import { UntagHardwareDto } from './dto/untag-hardware.dto';
 import { UpdateHardwareDto } from './dto/update-hardware.dto';
 
 @Injectable()
@@ -30,8 +31,9 @@ export class HardwareService {
     if (dto.search) {
       query.where((builder) => {
         builder
-          .where('partName', 'like', `%${dto.search}%`)
+          .where('sku', 'like', `%${dto.search}%`)
           .orWhere('uniqueId', 'like', `%${dto.search}%`)
+          .orWhere('ipOrApi', 'like', `%${dto.search}%`)
           .orWhere('description', 'like', `%${dto.search}%`);
       });
     }
@@ -109,7 +111,7 @@ export class HardwareService {
     return updatedHardware;
   }
 
-  async untagHandheld(id: number, authId?: number) {
+  async untagHandheld(id: number, dto: UntagHardwareDto, authId?: number) {
     const existing: any = await Hardware.query().findById(id);
     if (!existing) {
       throw new HttpException('Hardware not found', HttpStatus.NOT_FOUND);
@@ -119,12 +121,16 @@ export class HardwareService {
       asignee: null,
     });
 
+    const description =
+      dto?.description ||
+      'Handheld hardware untagged from site';
+
     await HardwareAssignLogs.query().insertAndFetch({
       hardware: id,
-      assignee: existing.asignee || 0,
+      assignee: dto?.siteId || existing.asignee || 0,
       user: authId || null,
       assignTo: 'unassigned',
-      description: 'Handheld hardware untagged from site',
+      description,
       assignedUser: null,
     });
 
@@ -141,13 +147,22 @@ export class HardwareService {
       asignee: dto.siteId,
       assignedTo: 'parking site',
     };
+    if (dto.assignedUser !== undefined) {
+      payload.assignedUser = dto.assignedUser;
+    }
+
     const updatedHardware = await Hardware.query().patchAndFetchById(id, payload);
+
+    const description =
+      dto?.description ||
+      'Handheld hardware tagged to site';
+
     await HardwareAssignLogs.query().insertAndFetch({
       hardware: id,
       assignee: dto.siteId,
       user: authId || null,
       assignTo: 'parking site',
-      description: 'Handheld hardware tagged to site',
+      description,
       assignedUser: dto.assignedUser || null,
     });
 

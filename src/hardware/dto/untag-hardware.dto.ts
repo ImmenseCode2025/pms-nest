@@ -1,11 +1,8 @@
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class TagHardwareDto {
+export class UntagHardwareDto {
   @IsNotEmpty()
   siteId: number;
-
-  @IsOptional()
-  assignedUser?: number;
 
   @IsOptional()
   @IsString()
