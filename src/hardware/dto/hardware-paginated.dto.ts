@@ -6,7 +6,4 @@ export class HardwarePaginatedDto {
 
   @IsOptional()
   search?: string;
-
-  @IsOptional()
-  status?: string;
 }
