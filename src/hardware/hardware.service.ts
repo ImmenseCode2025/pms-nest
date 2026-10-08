@@ -7,6 +7,7 @@ import { HardwarePaginatedDto } from './dto/hardware-paginated.dto';
 export class HardwareService {
   async getHandheldList(dto?: HardwareFilterDto) {
     const query = Hardware.query();
+    query.select('id', 'ipOrApi', 'type', 'status', 'asignee');
     query.where('type', 'handheld');
     query.where('asignee', dto?.siteId);
     query.withGraphFetched('Hardware_site');
