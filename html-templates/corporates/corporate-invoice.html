@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Invoice {{invoiceNumber}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+* {
+  box-sizing: border-box;
+}
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+a {
+  color: #04305f;
+  text-decoration: none;
+}
+</style>
+</head>
+<body>
+<div style="width: 794px; min-height: 1123px; height: 1123px; box-sizing: border-box; background: #ffffff; font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1a2230; font-size: 13px; line-height: 1.45; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden">
+
+  <!-- Top Accent Bar -->
+  <div style="height: 8px; display: flex; width: 100%;">
+    <div style="flex: 3; background: #04305F;"></div>
+    <div style="flex: 1; background: #A4CE4E;"></div>
+  </div>
+
+  <!-- Main Container -->
+  <div style="padding: 40px 56px 0 56px; display: flex; flex-direction: column; gap: 26px; flex: 1;">
+
+    <!-- Header Section -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 24px;">
+      <!-- Company Branding -->
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        {{#if logoBase64}}
+        <img src="{{logoBase64}}" alt="AJCL logo" style="height: 64px; width: auto; display: block; object-fit: contain;">
+        {{else}}
+        <div style="font-size: 32px; font-weight: 900; color: #04305F; letter-spacing: 0.5px;">AJCL</div>
+        {{/if}}
+        <div style="font-size: 12px; color: #4a5566; line-height: 1.55;">
+          <div style="font-weight: 700; color: #1a2230;">AJCL Private Limited</div>
+          <div>113-A, Main Shahrah-e-Faisal</div>
+          <div>Block A, SMCHS, Karachi, 74400, Pakistan</div>
+          <div>NTN: 0814981-7 &middot; STRN: 17-00-9805-001-82</div>
+          <div>billing@ajcl.net &middot; (021) 111 252 575</div>
+        </div>
+      </div>
+
+
+      <!-- Invoice Title & Status -->
+      <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px; text-align: right;">
+        <div style="font-size: 34px; font-weight: 700; letter-spacing: 6px; color: #04305F; line-height: 1;">INVOICE</div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; color: #1a2230;">{{invoiceNumber}}</div>
+        
+        {{#if isPaid}}
+        <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; background: #dcfce7; color: #15803d; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">
+          <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="4" fill="#15803d"></circle></svg>
+          Paid
+        </div>
+        {{else if isOverdue}}
+        <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; background: #fee2e2; color: #b91c1c; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">
+          <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="4" fill="#b91c1c"></circle></svg>
+          Overdue
+        </div>
+        {{else}}
+        <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; background: #fff3dc; color: #8a5300; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">
+          <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4" r="4" fill="#d68a00"></circle></svg>
+          {{statusLabel}}
+        </div>
+        {{/if}}
+      </div>
+    </div>
+
+    <!-- Details Grid (Bill to & Invoice Details) -->
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px;">
+      <!-- Bill To Card -->
+      <div style="border: 1px solid #dfe4ec; border-radius: 10px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px;">
+        <div style="font-size: 10.5px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #4E7A12;">Bill to</div>
+        <div style="font-size: 16px; font-weight: 600; color: #04305F;">{{corporateName}}</div>
+        <div style="font-size: 12px; color: #4a5566; line-height: 1.6;">
+          <div>Attn: {{contactPerson}}</div>
+          <div>{{billingAddress}}</div>
+          <div>{{cityCountry}}</div>
+          <div>{{contactInfo}}</div>
+          <div>NTN: {{taxId}}</div>
+        </div>
+      </div>
+
+
+      <!-- Invoice Details Card -->
+      <div style="border-radius: 10px; padding: 18px 20px; background: #f3f6fa; display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-size: 10.5px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #4E7A12;">Invoice details</div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 7px; column-gap: 12px; font-size: 12.5px;">
+          <div style="color: #4a5566;">Invoice date</div><div style="text-align: right; font-weight: 500;">{{invoiceDate}}</div>
+          <div style="color: #4a5566;">Due date</div><div style="text-align: right; font-weight: 600; color: #04305F;">{{dueDate}}</div>
+          <div style="color: #4a5566;">Invoice month</div><div style="text-align: right; font-weight: 500;">{{invoiceMonth}}</div>
+          <div style="color: #4a5566;">Billing period</div><div style="text-align: right; font-weight: 500;">{{billingPeriod}}</div>
+          <div style="color: #4a5566; text-transform: capitalize;">Billable {{unitTypeLower}}</div><div style="text-align: right; font-weight: 500;">{{quantity}}</div>
+          <div style="color: #4a5566;">Billing plan</div><div style="text-align: right; font-weight: 500;">{{billingPlan}}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Itemized Breakdown Table -->
+    <div style="display: flex; flex-direction: column;">
+      <div style="display: grid; grid-template-columns: 3.2fr 1.4fr 1.2fr 1.2fr; gap: 12px; padding: 10px 16px; background: #04305F; color: #ffffff; font-size: 10.5px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; border-radius: 8px 8px 0 0;">
+        <div>Description</div>
+        <div style="text-align: center;">{{quantityHeader}}</div>
+        <div style="text-align: right;">{{priceHeader}}</div>
+        <div style="text-align: right;">Amount</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 3.2fr 1.4fr 1.2fr 1.2fr; gap: 12px; padding: 16px; border-bottom: 1px solid #dfe4ec; border-left: 1px solid #dfe4ec; border-right: 1px solid #dfe4ec; align-items: start;">
+        <div style="display: flex; flex-direction: column; gap: 3px;">
+          <div style="font-weight: 600; color: #1a2230;">Monthly service charges</div>
+          <div style="font-size: 11.5px; color: #5a6575;">Billing period {{billingPeriod}} &middot; {{quantity}} billable {{unitTypeLower}}</div>
+        </div>
+        <div style="text-align: center; font-variant-numeric: tabular-nums;">{{quantity}}</div>
+        <div style="text-align: right; font-variant-numeric: tabular-nums;">{{unitPriceFormatted}}</div>
+        <div style="text-align: right; font-weight: 600; font-variant-numeric: tabular-nums;">{{subtotalFormatted}}</div>
+      </div>
+    </div>
+
+
+    <!-- Notes & Financial Summary -->
+    <div style="display: flex; gap: 28px; align-items: flex-start;">
+      <!-- Notes Left -->
+      <div style="flex: 1; display: flex; flex-direction: column; gap: 18px;">
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="font-size: 10.5px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #4E7A12;">Notes</div>
+          <div style="font-size: 12.5px; color: #3a4556; line-height: 1.5;">{{notes}}</div>
+        </div>
+      </div>
+
+      <!-- Summary Right -->
+      <div style="width: 300px; display: flex; flex-direction: column; font-size: 12.5px; font-variant-numeric: tabular-nums;">
+        <div style="display: flex; justify-content: space-between; padding: 6px 0;"><span style="color: #4a5566;">Subtotal</span><span>{{subtotalFormatted}}</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 6px 0;"><span style="color: #4a5566;">Discount ({{discountPercentage}}%)</span><span>{{discountAmountFormatted}}</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 6px 0;"><span style="color: #4a5566;">Sales tax ({{salesTaxPercentage}}%)</span><span>{{salesTaxAmountFormatted}}</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 6px 0 10px 0; border-bottom: 1px solid #dfe4ec;"><span style="color: #4a5566;">Withholding tax ({{whTaxPercentage}}%)</span><span>{{whTaxAmountFormatted}}</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 10px 0 6px 0; font-weight: 600;"><span>Total amount</span><span>{{totalAmountFormatted}}</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 6px 0;"><span style="color: #4a5566;">Paid</span><span>{{paidAmountFormatted}}</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 6px 0 12px 0;"><span style="color: #4a5566;">Arrears</span><span>{{arrearsFormatted}}</span></div>
+        
+        <!-- Balance Due Highlight Box -->
+        <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 14px 16px; background: #04305F; color: #ffffff; border-radius: 8px;">
+          <span style="font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase;">Balance due</span>
+          <span style="font-size: 20px; font-weight: 700;">PKR {{balanceDueFormatted}}</span>
+        </div>
+        <div style="font-size: 11px; color: #5a6575; text-align: right; padding-top: 8px;">Due by {{dueDate}}</div>
+      </div>
+    </div>
+
+    <!-- Space Filler -->
+    <div style="flex: 1;"></div>
+
+    <!-- Bottom Footer Text -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; padding-bottom: 24px;">
+      <div style="font-size: 11.5px; color: #5a6575; line-height: 1.6;">
+        <div style="font-weight: 600; color: #04305F; font-size: 13px;">Thank you for your business.</div>
+        <div>Questions about this invoice? Contact billing@ajcl.net or call (021) 111 252 575</div>
+        <div>This is a computer-generated invoice and does not require a signature.</div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Bottom Accent Bar -->
+  <div style="height: 8px; display: flex; width: 100%;">
+    <div style="flex: 1; background: #A4CE4E;"></div>
+    <div style="flex: 3; background: #04305F;"></div>
+  </div>
+
+</div>
+</body>
+</html>

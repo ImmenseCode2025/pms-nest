@@ -73,6 +73,24 @@ export class CorporatesController {
     }
   }
 
+  @Get('/invoice-pdf/:id')
+  async invoicePdf(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const data = await this.corporatesService.generateInvoicePdf(id);
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Corporate invoice PDF generated successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
   @Delete('/delete/:id')
   async delete(
     @Param('id', ParseIntPipe) id: number,
