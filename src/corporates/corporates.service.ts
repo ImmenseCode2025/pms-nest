@@ -236,6 +236,8 @@ export class CorporatesService {
         maximumFractionDigits: 2,
       });
 
+    const hasDiscount = discountAmount > 0 || discountPercentage > 0;
+
     const templateData = {
       logoBase64,
       invoiceNumber,
@@ -263,6 +265,7 @@ export class CorporatesService {
       notes,
       unitPriceFormatted: formatCurrency(unitPrice),
       subtotalFormatted: formatCurrency(subtotal),
+      hasDiscount,
       discountPercentage,
       discountAmountFormatted: formatCurrency(discountAmount),
       salesTaxPercentage,
@@ -274,6 +277,7 @@ export class CorporatesService {
       arrearsFormatted: formatCurrency(arrears),
       balanceDueFormatted: formatCurrency(balanceDue),
     };
+
 
 
 

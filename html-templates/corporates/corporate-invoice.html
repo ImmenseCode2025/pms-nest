@@ -145,8 +145,11 @@ a {
       <!-- Summary Right -->
       <div style="width: 300px; display: flex; flex-direction: column; font-size: 12.5px; font-variant-numeric: tabular-nums;">
         <div style="display: flex; justify-content: space-between; padding: 6px 0;"><span style="color: #4a5566;">Subtotal</span><span>{{subtotalFormatted}}</span></div>
-        <div style="display: flex; justify-content: space-between; padding: 6px 0;"><span style="color: #4a5566;">Discount ({{discountPercentage}}%)</span><span>{{discountAmountFormatted}}</span></div>
+        {{#if hasDiscount}}
+        <div style="display: flex; justify-content: space-between; padding: 6px 0;"><span style="color: #4a5566;">Discount ({{discountPercentage}}%)</span><span>-{{discountAmountFormatted}}</span></div>
+        {{/if}}
         <div style="display: flex; justify-content: space-between; padding: 6px 0;"><span style="color: #4a5566;">Sales tax ({{salesTaxPercentage}}%)</span><span>{{salesTaxAmountFormatted}}</span></div>
+
         <div style="display: flex; justify-content: space-between; padding: 6px 0 10px 0; border-bottom: 1px solid #dfe4ec;"><span style="color: #4a5566;">Withholding tax ({{whTaxPercentage}}%)</span><span>{{whTaxAmountFormatted}}</span></div>
         <div style="display: flex; justify-content: space-between; padding: 10px 0 6px 0; font-weight: 600;"><span>Total amount</span><span>{{totalAmountFormatted}}</span></div>
         <div style="display: flex; justify-content: space-between; padding: 6px 0;"><span style="color: #4a5566;">Paid</span><span>{{paidAmountFormatted}}</span></div>
