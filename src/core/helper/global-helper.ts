@@ -145,6 +145,10 @@ export class GlobalHelper {
     return moment().format(format);
   }
 
+    static getDate(date: string = 'YYYY-MM-DD'): string {
+    return moment(date).format('YYYY-MM-DD');
+  }
+
   // Global relation filter helpers
   static selectIdName = (query: any) => query.select('id', 'name');
   static selectFields =

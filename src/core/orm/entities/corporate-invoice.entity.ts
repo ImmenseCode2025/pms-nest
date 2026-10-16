@@ -9,6 +9,10 @@ export class CorporateInvoice extends Mapping {
     return 'corporate_invoices';
   }
 
+  static get jsonAttributes() {
+    return ['vehicleSnapshot', 'billingBreakdown'];
+  }
+
   id?: number;
   invoiceNumber?: string;
   corporateId?: number;
@@ -17,12 +21,18 @@ export class CorporateInvoice extends Mapping {
   billingPeriodEnd?: Date | string;
   invoiceDate?: Date | string;
   dueDate?: Date | string;
+  invoiceMonth?: string;
+  unitType?: string;
+  unitPrice?: number;
+  quantity?: number;
   billableVehicleCount?: number;
-  pricePerVehicle?: number;
   subtotal?: number;
-  discount?: number;
-  taxRate?: number;
-  taxAmount?: number;
+  discountPercentage?: number;
+  discountAmount?: number;
+  salesTaxPercentage?: number;
+  salesTaxAmount?: number;
+  whTaxPercentage?: number;
+  whTaxAmount?: number;
   totalAmount?: number;
   paidAmount?: number;
   arrears?: number;

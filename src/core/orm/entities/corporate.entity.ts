@@ -1,10 +1,10 @@
 import { Mapping } from '../sql.model';
+import { Address } from './address.entity';
+import { CorporateBillingPlan } from './corporate-billing-plan.entity';
+import { CorporateCards } from './corporate-cards.entity';
+import { CorporateInvoice } from './corporate-invoice.entity';
 import { CorporateResetPassword } from './corporate-reset-password.entity';
 import { PortalNotification } from './portal-notification.entity';
-import { Address } from './address.entity';
-import { CorporateCards } from './corporate-cards.entity';
-import { CorporateBillingPlan } from './corporate-billing-plan.entity';
-import { CorporateInvoice } from './corporate-invoice.entity';
 
 export class Corporate extends Mapping {
     static get tableName() {
@@ -15,6 +15,9 @@ export class Corporate extends Mapping {
   registrationNumber?: string;
   email?: string;
   addressId?: number;
+  quantity?: number;
+  unitType?: string;
+  unitPrice?: number;
   location?: string;
   contactPersonName?: string;
   contactNumber?: string;
