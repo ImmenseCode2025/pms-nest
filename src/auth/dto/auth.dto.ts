@@ -17,3 +17,21 @@ export class LoginDto {
   @IsString()
   macAddress?: string;
 }
+
+export class SendEmailDto {
+  @IsNotEmpty()
+  @IsEmail()
+  to: string;
+
+  @IsNotEmpty()
+  @IsString()
+  subject: string;
+
+  @IsOptional()
+  @IsString()
+  html?: string;
+
+  @IsOptional()
+  otp?: string | number;
+}
+

@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import { Public } from 'src/core/guard/public.decorator';
 import { ResponseHelper } from 'src/core/helper/response.helper';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/auth.dto';
+import { LoginDto, SendEmailDto } from './dto/auth.dto';
 
 @Controller('api/auth')
 export class AuthController {
@@ -40,4 +40,24 @@ export class AuthController {
       return ResponseHelper.error({ res, req, error });
     }
   }
+
+  @Public()
+  @Post('send-email')
+  async sendEmail(
+    @Body() dto: SendEmailDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const data = await this.authService.sendEmail(dto);
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Email sent successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
 }
+

@@ -1,5 +1,6 @@
 import { MailerModule } from '@nestjs-modules/mailer';
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { jwtConstants } from 'src/core/guard/guard-constants';
@@ -10,15 +11,31 @@ import { AuthService } from './auth.service';
 @Module({
   imports: [
     UsersModule,
-    MailerModule.forRoot({
-      transport: {
-        port: 587,
-        host: 'smtp.hostinger.com',
-        secure: false,
-        auth: {
-          user: 'admin@koderspedia.net',
-          pass: 'zSlQ$DTUSzk@1',
-        },
+    MailerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        const port = parseInt(config.get('MAIL_PORT') || '587', 10);
+        const username = config.get('MAIL_USERNAME') || 'noreply@immensecode.ai';
+        const password = config.get('MAIL_PASSWORD') || 'sydzrthbxgcgkkdt';
+        const host = config.get('MAIL_HOST') || 'smtp.office365.com';
+
+        return {
+          transport: {
+            host,
+            port,
+            secure: port === 465,
+            auth: {
+              user: username,
+              pass: password,
+            },
+            tls: {
+              rejectUnauthorized: false,
+            },
+          },
+          defaults: {
+            from: `"PMS" <${username}>`,
+          },
+        };
       },
     }),
     PassportModule,
@@ -27,6 +44,7 @@ import { AuthService } from './auth.service';
       secret: jwtConstants.secret,
     }),
   ],
+
 
   controllers: [AuthController],
   providers: [AuthService],

@@ -1,13 +1,19 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import * as fs from 'fs';
+import * as handlebars from 'handlebars';
+import * as path from 'path';
 import { UserAccessToken } from 'src/core/orm/entities/user-access-token.entity';
 import { Users } from 'src/core/orm/entities/users.entity';
-import { LoginDto } from './dto/auth.dto';
+import { LoginDto, SendEmailDto } from './dto/auth.dto';
 
 const fernet = require('fernet');
 const FERNET_KEY = 'i3vVJAiA2-e6JIBoTBwvmQNmTXvVhbr60p5jOYVRVws=';
 
 @Injectable()
 export class AuthService {
+  constructor(private readonly mailService: MailerService) {}
+
   /**
    * Generates a 16-character alphanumeric random token,
    * saves it into user_access_token table,
@@ -140,4 +146,42 @@ export class AuthService {
       errors: [],
     };
   }
+
+  /**
+   * Public sendEmail method using MailerService
+   */
+  async sendEmail(dto: SendEmailDto) {
+    let htmlContent = dto.html;
+
+    if (dto.otp) {
+      const templatePath = path.join(
+        process.cwd(),
+        'html-templates',
+        'verification-code.html',
+      );
+      if (fs.existsSync(templatePath)) {
+        const htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
+        const compiledTemplate = handlebars.compile(htmlTemplate);
+        htmlContent = compiledTemplate({
+          otp: dto.otp,
+        });
+      }
+    }
+
+    const fromUser = process.env.MAIL_USERNAME || 'noreply@immensecode.ai';
+    const info = await this.mailService.sendMail({
+      from: `"PMS" <${fromUser}>`,
+      to: dto.to,
+      subject: dto.subject,
+      html: htmlContent,
+    });
+
+    return {
+      messageId: info.messageId,
+      accepted: info.accepted,
+      to: dto.to,
+      subject: dto.subject,
+    };
+  }
 }
+
