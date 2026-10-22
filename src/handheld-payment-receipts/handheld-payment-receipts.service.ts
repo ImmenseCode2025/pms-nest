@@ -14,8 +14,10 @@ export class HandheldPaymentReceiptsService {
 
   async ticketEase(dto: TicketEaseDto) {
 
-   let findOne =  await ParkingReceipt.query().where({ticketNumber: dto.ticketNumber}).first()
-
+ const findOne = await ParkingReceipt.query()
+      .whereRaw('LOWER(TRIM(ticketNumber)) = LOWER(?)', [dto.ticketNumber])
+      .first();
+      
    if(!findOne){
     AppException.badRequest({message:'Ticket Number not found'})
    }
