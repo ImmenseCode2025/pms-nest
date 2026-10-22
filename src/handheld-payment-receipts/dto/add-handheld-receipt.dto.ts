@@ -41,3 +41,25 @@ export class AddHandheldReceiptDto {
   @IsString()
   siteId: string;
 }
+
+
+//   UPDATE parking_receipt SET
+//   sourceTicketEase       = 1,
+//   checkoutDateTime       = <request>,
+//   paymentMethod          = <request>,
+//   paymentReference       = <request ya NULL>,
+//   onlinePaymentReference = <image URL ya NULL>,
+//   siteId                 = COALESCE(<request>, siteId)
+// WHERE ticketNumber = ?
+
+export class TicketEaseDto {
+  @IsNotEmpty()
+  @IsString()
+  ticketNumber: string;
+
+  @IsNotEmpty()
+  @IsString()
+  checkoutDateTime: string;
+  
+  
+}

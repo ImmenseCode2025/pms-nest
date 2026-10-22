@@ -1,16 +1,31 @@
 import { Injectable } from '@nestjs/common';
+import { AppException } from 'src/core/exception/app-exception';
 import {
   HandheldPaymentMethodIdMap,
   VehicleTypeIdMap,
 } from 'src/core/helper/enum/global.enum';
 import { ParkingReceipt } from 'src/core/orm/entities/parking-receipt.entity';
 import { FilesUploadService } from 'src/files-upload/files-upload.service';
-import { AddHandheldReceiptDto } from './dto/add-handheld-receipt.dto';
+import { AddHandheldReceiptDto, TicketEaseDto } from './dto/add-handheld-receipt.dto';
 
 @Injectable()
 export class HandheldPaymentReceiptsService {
   constructor(private readonly filesUploadService: FilesUploadService) {}
 
+  async ticketEase(dto: TicketEaseDto) {
+
+   let findOne =  await ParkingReceipt.query().where({ticketNumber: dto.ticketNumber}).first()
+
+   if(!findOne){
+    AppException.badRequest({message:'Ticket Number not found'})
+   }
+   
+    await ParkingReceipt.query().updateAndFetchById(findOne.id,{
+    sourceTicketEase:1, 
+    checkoutDateTime:dto.checkoutDateTime, 
+    })
+   return true
+  }
   async add(dto: AddHandheldReceiptDto) {
     await ParkingReceipt.query().insertAndFetch({
       vehicleNumber: dto.vehicleNumber,
