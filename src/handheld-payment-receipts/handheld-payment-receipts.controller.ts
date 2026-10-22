@@ -7,7 +7,7 @@ import {
   UseInterceptors
 } from '@nestjs/common';
 import { NoFilesInterceptor } from '@nestjs/platform-express';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { Public } from 'src/core/guard/public.decorator';
 import { ResponseHelper } from 'src/core/helper/response.helper';
 import { AddHandheldReceiptDto } from './dto/add-handheld-receipt.dto';
@@ -27,17 +27,15 @@ export class HandheldPaymentReceiptsController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-
-     try {
-          const data = await this.handheldPaymentReceiptsService.add(dto);
-          return ResponseHelper.success({
-            res,
-            data,
-            message: 'Payment gateways retrieved successfully',
-          });
-        } catch (error) {
-          return ResponseHelper.error({ res, req, error });
-        }
-    
+    try {
+      const data = await this.handheldPaymentReceiptsService.add(dto);
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Handheld payment receipt created successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
   }
 }
