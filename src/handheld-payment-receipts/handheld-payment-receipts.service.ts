@@ -66,9 +66,7 @@ const fileExtension = (name: string): string => {
 export class HandheldPaymentReceiptsService {
   constructor(private readonly filesUploadService: FilesUploadService) {}
 
-  async add(
-    dto: AddHandheldReceiptDto,) {
-
+  async add( dto: AddHandheldReceiptDto) {
     await ParkingReceipt.query().insertAndFetch({
       vehicleNumber: dto.vehicleNumber,
       deviceId: dto.deviceId,
@@ -83,9 +81,6 @@ export class HandheldPaymentReceiptsService {
       siteId: dto.siteId ?? null,
     })
 
-    return {
-      status: HttpStatus.OK,
-      body: { message: 'Ticket generated successfully' },
-    };
+    return 'Ticket generated successfully'
   }
 }
