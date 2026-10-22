@@ -198,3 +198,37 @@ export const PaymentMethodLabelMap = {
   [PaymentMethodEnum.Cash]: 'Cash',
   [PaymentMethodEnum.CorporateCard]: 'Corporate Card',
 } as const;
+
+export enum HandheldPaymentMethodEnum {
+  SCRATCH_CARD = 'scratch card',
+  FOC = 'foc',
+  POS = 'pos',
+  CASH = 'cash',
+  ONLINE = 'online',
+  SKIP = 'skip',
+}
+
+export const HandheldPaymentMethodIdMap: Record<HandheldPaymentMethodEnum, number | null> = {
+  [HandheldPaymentMethodEnum.SCRATCH_CARD]: 6,
+  [HandheldPaymentMethodEnum.FOC]: 14,
+  [HandheldPaymentMethodEnum.POS]: 15,
+  [HandheldPaymentMethodEnum.CASH]: 16,
+  [HandheldPaymentMethodEnum.ONLINE]: 18,
+  [HandheldPaymentMethodEnum.SKIP]: null,
+};
+
+export enum VehicleTypeEnum {
+  CAR = 'car',
+  BUS = 'bus',
+  BIKE = 'bike',
+  VAN = 'van',
+}
+
+export const VehicleTypeIdMap: Record<VehicleTypeEnum, number> = {
+  [VehicleTypeEnum.CAR]: 1,
+  [VehicleTypeEnum.BUS]: 3,
+  [VehicleTypeEnum.BIKE]: 4,
+  [VehicleTypeEnum.VAN]: 5,
+};
+
+export { VehicleTypeEnum as HandheldVehicleTypeEnum, VehicleTypeIdMap as HandheldVehicleTypeIdMap };

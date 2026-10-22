@@ -31,7 +31,7 @@ export class HandheldPaymentReceiptsController {
       const data = await this.handheldPaymentReceiptsService.add(dto);
       return ResponseHelper.success({
         res,
-        data,
+        data, 
         message: 'Handheld payment receipt created successfully',
       });
     } catch (error) {

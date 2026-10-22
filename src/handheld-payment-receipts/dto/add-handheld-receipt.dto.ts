@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { HandheldPaymentMethodEnum, VehicleTypeEnum } from 'src/core/helper/enum/global.enum';
 
 export class AddHandheldReceiptDto {
   @IsNotEmpty()
@@ -14,12 +15,16 @@ export class AddHandheldReceiptDto {
   deviceId: string;
 
   @IsNotEmpty()
-  @IsString()
-  vehicleType: string;
+  @IsEnum(VehicleTypeEnum, {
+    message: `vehicleType must be one of: ${Object.values(VehicleTypeEnum).join(', ')}`,
+  })
+  vehicleType: VehicleTypeEnum;
 
   @IsNotEmpty()
-  @IsString()
-  paymentMethod: string;
+  @IsEnum(HandheldPaymentMethodEnum, {
+    message: `paymentMethod must be one of: ${Object.values(HandheldPaymentMethodEnum).join(', ')}`,
+  })
+  paymentMethod: HandheldPaymentMethodEnum;
 
   @IsNotEmpty()
   @IsString()
