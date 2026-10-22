@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { HandheldPaymentMethodEnum, VehicleTypeEnum } from 'src/core/helper/enum/global.enum';
 
 export class AddHandheldReceiptDto {
@@ -34,8 +34,7 @@ export class AddHandheldReceiptDto {
   @IsString()
   paymentReference: string;
 
-  @IsNotEmpty()
-  @IsString()
+  @IsOptional()
   onlinePaymentReference: string;
 
   @IsNotEmpty()
