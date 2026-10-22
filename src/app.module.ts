@@ -29,6 +29,7 @@ import { CorporatesModule } from './corporates/corporates.module';
 import { PaymentGatewayModule } from './payment-gateway/payment-gateway.module';
 import { UsersModule } from './users/users.module';
 import { HardwareModule } from './hardware/hardware.module';
+import { HandheldPaymentReceiptsModule } from './handheld-payment-receipts/handheld-payment-receipts.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { HardwareModule } from './hardware/hardware.module';
     DashboardModule,
     PaymentGatewayModule,
     HardwareModule,
+    HandheldPaymentReceiptsModule,
     AppQueueModule,
     AppCacheModule,
     CustomLoggerModule,
