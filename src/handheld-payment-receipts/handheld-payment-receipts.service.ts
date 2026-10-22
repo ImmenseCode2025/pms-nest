@@ -27,7 +27,7 @@ export class HandheldPaymentReceiptsService {
    return true
   }
   async add(dto: AddHandheldReceiptDto) {
-    await ParkingReceipt.query().insertAndFetch({
+ let findOne  = await ParkingReceipt.query().insertAndFetch({
       vehicleNumber: dto.vehicleNumber,
       deviceId: dto.deviceId,
       vehicleType: VehicleTypeIdMap[dto.vehicleType] ?? dto.vehicleType,
@@ -44,6 +44,6 @@ export class HandheldPaymentReceiptsService {
       siteId: dto.siteId ?? null,
     } as any);
 
-    return 'Ticket generated successfully';
+    return findOne;
   }
 }
