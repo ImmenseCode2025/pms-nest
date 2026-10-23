@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, ValidateIf } from 'class-validator';
 import { HandheldPaymentMethodEnum, VehicleTypeEnum } from 'src/core/helper/enum/global.enum';
 
 export class AddHandheldReceiptDto {
@@ -20,37 +20,34 @@ export class AddHandheldReceiptDto {
   })
   vehicleType: VehicleTypeEnum;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsEnum(HandheldPaymentMethodEnum, {
     message: `paymentMethod must be one of: ${Object.values(HandheldPaymentMethodEnum).join(', ')}`,
   })
-  paymentMethod: HandheldPaymentMethodEnum;
+  paymentMethod?: HandheldPaymentMethodEnum;
 
   @IsNotEmpty()
   @IsString()
   creationDate: string;
 
+  @ValidateIf((o) => o.paymentMethod && o.paymentMethod !== HandheldPaymentMethodEnum.SKIP)
   @IsNotEmpty()
   @IsString()
-  paymentReference: string;
+  checkoutDateTime?: string;
+
+  @ValidateIf((o) => o.paymentMethod && o.paymentMethod !== HandheldPaymentMethodEnum.SKIP)
+  @IsNotEmpty()
+  @IsString()
+  paymentReference?: string;
 
   @IsOptional()
-  onlinePaymentReference: string;
+  @IsString()
+  onlinePaymentReference?: string;
 
   @IsNotEmpty()
   @IsString()
   siteId: string;
 }
-
-
-//   UPDATE parking_receipt SET
-//   sourceTicketEase       = 1,
-//   checkoutDateTime       = <request>,
-//   paymentMethod          = <request>,
-//   paymentReference       = <request ya NULL>,
-//   onlinePaymentReference = <image URL ya NULL>,
-//   siteId                 = COALESCE(<request>, siteId)
-// WHERE ticketNumber = ?
 
 export class TicketEaseDto {
   @IsNotEmpty()

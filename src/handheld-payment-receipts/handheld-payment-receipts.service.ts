@@ -33,15 +33,12 @@ export class HandheldPaymentReceiptsService {
     let findOne = await ParkingReceipt.query().insertAndFetch({
       vehicleNumber: dto.vehicleNumber,
       deviceId: dto.deviceId,
-      vehicleType: VehicleTypeIdMap[dto.vehicleType] ?? dto.vehicleType,
-      paymentMethod:
-        HandheldPaymentMethodIdMap[dto.paymentMethod] !== undefined
-          ? HandheldPaymentMethodIdMap[dto.paymentMethod]
-          : dto.paymentMethod,
+      vehicleType: VehicleTypeIdMap[dto.vehicleType],
+      paymentMethod: dto.paymentMethod ? (HandheldPaymentMethodIdMap[dto.paymentMethod] ?? null) : null,
       creationDate: dto.creationDate,
       ticketNumber: dto.ticketNumber,
       sourceHandheld: 1,
-      checkoutDateTime: null,
+      checkoutDateTime: dto.checkoutDateTime ?? null,
       paymentReference: dto.paymentReference ?? null,
       onlinePaymentReference: dto.onlinePaymentReference ?? null,
       siteId: dto.siteId ?? null,
