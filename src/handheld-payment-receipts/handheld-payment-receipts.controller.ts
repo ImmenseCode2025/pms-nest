@@ -80,28 +80,7 @@ export class HandheldPaymentReceiptsController {
     }
   }
 
-  @Public()
-  @UseInterceptors(
-    InterceptorHelper.globalFileInterceptorForCsv({ fieldName: 'file' }),
-  )
-  @Post('/:source/batch')
-  async batch(
-    @UploadedFile() file: any,
-    @Req() req: Request,
-    @Res() res: Response,
-  ) {
-    try {
-      const data = await this.handheldPaymentReceiptsService.batch(file);
-      return ResponseHelper.success({
-        res,
-        data,
-        message: data.message,
-      });
-    } catch (error) {
-      return ResponseHelper.error({ res, req, error });
-    }
-  }
-
+ 
   @Public()
   @UseInterceptors(
     InterceptorHelper.globalFileInterceptorForCsv({ fieldName: 'file' }),

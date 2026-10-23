@@ -608,6 +608,7 @@ export class HandheldPaymentReceiptsService {
       sourceHandheld: 1,
       paymentReference: dto.paymentReference ?? null,
       onlinePaymentReference: onlinePaymentReferenceUrl,
+      siteId: dto.siteId, 
     });
     return true;
   }
