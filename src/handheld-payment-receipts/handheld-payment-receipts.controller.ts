@@ -17,6 +17,7 @@ import {
   AddHandheldReceiptDto,
   TicketEaseDto,
 } from './dto/add-handheld-receipt.dto';
+import { ShiftSummaryDto } from './dto/shift-summary.dto';
 import { HandheldPaymentReceiptsService } from './handheld-payment-receipts.service';
 
 @Controller('api/handheld-payment-receipts')
@@ -120,6 +121,21 @@ export class HandheldPaymentReceiptsController {
         data,
         message: data.message,
       });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
+  @Public()
+  @Post('/shift-summary')
+  async shiftSummary(
+    @Body() dto: ShiftSummaryDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const data = await this.handheldPaymentReceiptsService.getShiftSummary(dto);
+      return res.status(200).json(data);
     } catch (error) {
       return ResponseHelper.error({ res, req, error });
     }

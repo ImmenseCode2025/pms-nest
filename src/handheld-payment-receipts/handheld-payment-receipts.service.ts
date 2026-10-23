@@ -8,6 +8,8 @@ import {
   HandheldPaymentMethodIdMap,
   VehicleTypeIdMap,
 } from 'src/core/helper/enum/global.enum';
+import { LodashHelper } from 'src/core/helper/lodash-helper';
+import { ParkingPrice } from 'src/core/orm/entities/parking-price.entity';
 import { ParkingReceipt } from 'src/core/orm/entities/parking-receipt.entity';
 import { FilesUploadService } from 'src/files-upload/files-upload.service';
 import { Readable } from 'stream';
@@ -15,6 +17,7 @@ import {
   AddHandheldReceiptDto,
   TicketEaseDto,
 } from './dto/add-handheld-receipt.dto';
+import { ShiftSummaryDto } from './dto/shift-summary.dto';
 
 @Injectable()
 export class HandheldPaymentReceiptsService {
@@ -646,6 +649,159 @@ export class HandheldPaymentReceiptsService {
     } as any);
 
     return findOne;
+  }
+
+  async getShiftSummary(dto: ShiftSummaryDto) {
+
+    const rawDate = String(dto.date || '').trim();
+    if (!rawDate || !moment(rawDate, 'YYYY-MM-DD', true).isValid()) {
+      AppException.badRequest({ message: 'Invalid date format! Use YYYY-MM-DD.' });
+    }
+
+    const rawShift = String(dto.shiftTime || '').trim().toLowerCase();
+    if (rawShift !== 'morning' && rawShift !== 'evening') {
+      AppException.badRequest({
+        message: "Invalid shiftTime! Allowed values are 'morning' or 'evening'.",
+      });
+    }
+
+    let shiftStartDateTime: string;
+    let shiftEndDateTime: string;
+
+    if (rawShift === 'morning') {
+      shiftStartDateTime = `${rawDate} 10:00:00`;
+      shiftEndDateTime = `${rawDate} 18:00:00`;
+    } else {
+      const nextDay = moment(rawDate, 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD');
+      shiftStartDateTime = `${rawDate} 18:00:00`;
+      shiftEndDateTime = `${nextDay} 02:00:00`;
+    }
+
+    const siteIdNum:any  =  dto.siteId 
+
+    // 3. Query tickets from parking_receipt table
+    const tickets = await ParkingReceipt.query()
+      .where('deviceId', dto.handheldId)
+      .modify((qb) => {
+        if (siteIdNum !== null && !isNaN(siteIdNum)) {
+          qb.where('siteId', siteIdNum);
+        }
+      })
+      .where('creationDate', '>=', shiftStartDateTime)
+      .where('creationDate', '<=', shiftEndDateTime);
+
+    if (!tickets || tickets.length === 0) {
+      AppException.badRequest({ message: 'No Summary Data Found!' });
+    }
+
+    // Categorize tickets using LodashHelper
+    const ticketsByCategory = LodashHelper.groupBy(tickets, (t: any) => {
+      const pMethod =
+        t.paymentMethod !== null && t.paymentMethod !== undefined
+          ? Number(t.paymentMethod)
+          : null;
+      if (pMethod === 14) return 'foc';
+      if (pMethod === null || pMethod === 0) return 'unpaid';
+      return 'paid';
+    });
+
+    const focGroup = LodashHelper.groupBy(ticketsByCategory['foc'] || [], (t: any) =>
+      Number(t.vehicleType ?? t.vehicleTypeId)
+    );
+    const paidGroup = LodashHelper.groupBy(ticketsByCategory['paid'] || [], (t: any) =>
+      Number(t.vehicleType ?? t.vehicleTypeId)
+    );
+
+    const focTickets = (ticketsByCategory['foc'] || []).length;
+    const unpaidTickets = (ticketsByCategory['unpaid'] || []).length;
+
+    const focCarTickets = (focGroup[1] || []).length;
+    const focBusTickets = (focGroup[3] || []).length;
+    const focBikeTickets = (focGroup[4] || []).length;
+    const focVanTickets = (focGroup[5] || []).length;
+
+    const paidCarTickets = (paidGroup[1] || []).length;
+    const paidBusTickets = (paidGroup[3] || []).length;
+    const paidBikeTickets = (paidGroup[4] || []).length;
+    const paidVanTickets = (paidGroup[5] || []).length;
+
+    const totalTickets = tickets.length;
+
+    // 4. Calculate Revenue from parking_price table using LodashHelper.keyBy
+    let carRate = 0;
+    let busRate = 0;
+    let bikeRate = 0;
+    let vanRate = 0;
+
+    if (siteIdNum !== null && !isNaN(siteIdNum)) {
+      const prices = await ParkingPrice.query().where('siteId', siteIdNum);
+      const priceMap = LodashHelper.keyBy(prices, (p: any) =>
+        Number(p.vehicleType ?? p.vehicleTypeId)
+      );
+
+      carRate = Number(priceMap[1]?.amount) || 0;
+      busRate = Number(priceMap[3]?.amount) || 0;
+      bikeRate = Number(priceMap[4]?.amount) || 0;
+      vanRate = Number(priceMap[5]?.amount) || 0;
+    }
+
+    const totalRevenue =
+      paidCarTickets * carRate +
+      paidVanTickets * vanRate +
+      paidBusTickets * busRate +
+      paidBikeTickets * bikeRate;
+
+    const amountToSubmit = totalRevenue;
+    const generationDateTime = moment().format('YYYY-MM-DD HH:mm:ss');
+    const handheldIdNum =
+      dto.handheldId !== undefined && dto.handheldId !== null
+        ? Number(dto.handheldId) || 0
+        : 0;
+
+    // 5. Save summary to parking_receipt_summary table
+    // await ParkingReceiptSummary.query().insert({
+    //   totalTickets,
+    //   paidCarTickets,
+    //   paidVanTickets,
+    //   paidBusTickets,
+    //   paidBikeTickets,
+    //   focTickets,
+    //   focCarTickets,
+    //   focVanTickets,
+    //   focBusTickets,
+    //   focBikeTickets,
+    //   totalRevenue,
+    //   amountToSubmit,
+    //   shiftStartDateTime,
+    //   shiftEndDateTime,
+    //   generationDateTime,
+    //   siteId: siteIdNum || 0,
+    //   handheldId: handheldIdNum,
+    // });
+
+    // 6. Return thermal printer friendly JSON response
+    return {
+      message: 'Summary Retrieved Successfully!',
+      receipt_title: 'Shift-End Summary Receipt',
+      shift: rawShift,
+      shift_date: rawDate,
+      generation_datetime: generationDateTime,
+      summary: {
+        foc_tickets: focTickets,
+        foc_car_tickets: focCarTickets,
+        foc_van_tickets: focVanTickets,
+        foc_bus_tickets: focBusTickets,
+        foc_bike_tickets: focBikeTickets,
+        paid_car_tickets: paidCarTickets,
+        paid_van_tickets: paidVanTickets,
+        paid_bus_tickets: paidBusTickets,
+        paid_bike_tickets: paidBikeTickets,
+        unpaid_tickets: unpaidTickets,
+        total_tickets: totalTickets,
+        total_revenue: `${totalRevenue} PKR`,
+      },
+      response: 'success',
+    };
   }
 }
 

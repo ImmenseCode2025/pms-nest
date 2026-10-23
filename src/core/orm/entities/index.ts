@@ -43,6 +43,7 @@ export * from './parking-price.entity';
 export * from './parking-receipt-backlog.entity';
 export * from './parking-receipt-offline-log.entity';
 export * from './parking-receipt.entity';
+export * from './parking-receipt-summary.entity';
 export * from './parking-shift-closing-history.entity';
 export * from './parking-shift-closing.entity';
 export * from './parking-site.entity';
