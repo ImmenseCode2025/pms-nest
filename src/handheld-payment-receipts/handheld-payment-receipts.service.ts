@@ -15,12 +15,26 @@ import {
 export class HandheldPaymentReceiptsService {
   constructor(private readonly filesUploadService: FilesUploadService) {}
 
-  async ticketCheckout(dto: TicketEaseDto) {
+  async ticketCheckout(files: any, dto: TicketEaseDto) {
     const findOne = await ParkingReceipt.query()
       .whereRaw('LOWER(TRIM(ticketNumber)) = LOWER(?)', [dto.ticketNumber])
       .first();
     if (!findOne) {
       AppException.badRequest({ message: 'Ticket Number not found' });
+    }
+      let onlinePaymentReferenceUrl = null;
+      const proofFiles =
+      files?.onlinePaymentReference ||
+      (Array.isArray(files) ? files : null);
+
+    if (proofFiles && (Array.isArray(proofFiles) ? proofFiles.length > 0 : true)) {
+      const uploadResults = await this.filesUploadService.uploadFile(
+        Array.isArray(proofFiles) ? proofFiles : [proofFiles],
+        { destination: 'online-payment-proofs' } as any,
+      );
+      if (uploadResults && uploadResults.length > 0) {
+        onlinePaymentReferenceUrl = uploadResults[0];
+      }
     }
 
     await ParkingReceipt.query().updateAndFetchById(findOne.id, {

@@ -7,7 +7,6 @@ import {
   UploadedFiles,
   UseInterceptors
 } from '@nestjs/common';
-import { NoFilesInterceptor } from '@nestjs/platform-express';
 import { Request, Response } from 'express';
 import { Public } from 'src/core/guard/public.decorator';
 import { FileExtensionsEnum } from 'src/core/helper/enum/global.enum';
@@ -51,15 +50,21 @@ export class HandheldPaymentReceiptsController {
   }
 
   @Public()
-  @UseInterceptors(NoFilesInterceptor())
-  @Post('/ticket-checkout')
+ @UseInterceptors(
+    InterceptorHelper.s3GlobalFileInterceptorMultiple({
+      fieldNames: [{ name: 'onlinePaymentReference' }],
+      validations: { onlinePaymentReference: FileExtensionsEnum.All },
+    }),
+  )  @Post('/ticket-checkout')
   async ticketCheckout(
     @Body() dto: TicketEaseDto,
     @Req() req: Request,
     @Res() res: Response,
+         @UploadedFiles() files,
+
   ) {
     try {
-      const data = await this.handheldPaymentReceiptsService.ticketCheckout(dto);
+      const data = await this.handheldPaymentReceiptsService.ticketCheckout( files,dto);
       return ResponseHelper.success({
         res,
         data, 
