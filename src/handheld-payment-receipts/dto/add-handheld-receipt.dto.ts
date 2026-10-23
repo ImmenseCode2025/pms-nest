@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString, ValidateIf } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { HandheldPaymentMethodEnum, VehicleTypeEnum } from 'src/core/helper/enum/global.enum';
 
 export class AddHandheldReceiptDto {
@@ -30,9 +30,8 @@ export class AddHandheldReceiptDto {
   @IsString()
   creationDate: string;
 
-  @ValidateIf((o) => o.paymentMethod && o.paymentMethod !== HandheldPaymentMethodEnum.SKIP)
-  @IsNotEmpty()
-  @IsString()
+
+  @IsOptional()
   paymentReference?: string;
 
   @IsOptional()
@@ -68,5 +67,9 @@ export class TicketEaseDto {
 
   @IsOptional()
   paymentReference?: string;
+
+  
+  @IsOptional()
+  onlinePaymentReference?: string;
 }
 

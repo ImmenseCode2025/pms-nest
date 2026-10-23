@@ -34,7 +34,7 @@ export class HandheldPaymentReceiptsService {
       ticketNumber: dto.ticketNumber,
       sourceHandheld: 1,
       paymentReference: dto.paymentReference ?? null,
-      onlinePaymentReference: dto.paymentReference ?? null,
+      onlinePaymentReference: dto.onlinePaymentReference ?? null,
     });
     return true;
   }
