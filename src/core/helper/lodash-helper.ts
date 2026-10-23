@@ -9,6 +9,7 @@ import {
   get,
   flatten,
   isPlainObject,
+  chunk,
 } from 'lodash';
 
 export class LodashHelper {
@@ -66,6 +67,10 @@ export class LodashHelper {
 
   static isPlainObject(value: any): boolean {
     return isPlainObject(value);
+  }
+
+  static chunk<T>(array: T[], size: number): T[][] {
+    return chunk(array || [], size);
   }
 
   static map<T, R>(array: T[], iteratee: (item: T, index: number) => R): R[] {

@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import {
   FileFieldsInterceptor,
   FileInterceptor,
@@ -72,4 +73,24 @@ export class InterceptorHelper {
       fileFilter: imageAndVideoFileFilter,
     });
   }
+
+  static globalFileInterceptorForCsv({ fieldName = 'file' }: { fieldName?: string } = {}) {
+    return FileInterceptor(fieldName, {
+      limits: {
+        fileSize: 100 * 1024 * 1024, // 100MB
+      },
+      fileFilter: (req, file, cb) => {
+        if (!file || !file.originalname.match(/\.(csv)$/i)) {
+          return cb(
+            new BadRequestException(
+              'Invalid or missing CSV file. Only .csv is supported.',
+            ),
+            false,
+          );
+        }
+        cb(null, true);
+      },
+    });
+  }
 }
+

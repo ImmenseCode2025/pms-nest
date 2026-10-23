@@ -90,8 +90,8 @@ export class Mapping extends Model {
   }
 
   // Simplified static wrappers to maintain backward compatibility
-  static query() {
-    return super.query() as CustomQueryBuilder<any>;
+  static query(trxOrKnex?: any) {
+    return super.query(trxOrKnex) as CustomQueryBuilder<any>;
   }
 
   static async pagination(query: any, req: any = {}) {
