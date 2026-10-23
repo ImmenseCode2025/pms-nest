@@ -68,8 +68,5 @@ export class TicketEaseDto {
 
   @IsOptional()
   paymentReference?: string;
-
-  @IsNotEmpty()
-  siteId: string;
 }
 
