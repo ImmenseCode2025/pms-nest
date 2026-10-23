@@ -659,11 +659,7 @@ export class HandheldPaymentReceiptsService {
     }
 
     const siteIdNum:any  =  dto.siteId 
-    const handheldIdNum =
-      dto.handheldId !== undefined && dto.handheldId !== null
-        ? Number(dto.handheldId) || 0
-        : 0;
-
+    const handheldIdNum =dto.handheldId
     // Stop if summary for this shift is already generated
     const alreadyGenerated = await ParkingReceiptSummary.query()
       .where('handheldId', handheldIdNum)
