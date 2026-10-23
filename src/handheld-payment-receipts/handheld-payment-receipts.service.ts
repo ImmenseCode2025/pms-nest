@@ -6,30 +6,31 @@ import {
 } from 'src/core/helper/enum/global.enum';
 import { ParkingReceipt } from 'src/core/orm/entities/parking-receipt.entity';
 import { FilesUploadService } from 'src/files-upload/files-upload.service';
-import { AddHandheldReceiptDto, TicketEaseDto } from './dto/add-handheld-receipt.dto';
+import {
+  AddHandheldReceiptDto,
+  TicketEaseDto,
+} from './dto/add-handheld-receipt.dto';
 
 @Injectable()
 export class HandheldPaymentReceiptsService {
   constructor(private readonly filesUploadService: FilesUploadService) {}
 
-  async ticketEase(dto: TicketEaseDto) {
-
- const findOne = await ParkingReceipt.query()
+  async ticketCheckout(dto: TicketEaseDto) {
+    const findOne = await ParkingReceipt.query()
       .whereRaw('LOWER(TRIM(ticketNumber)) = LOWER(?)', [dto.ticketNumber])
       .first();
-      
-   if(!findOne){
-    AppException.badRequest({message:'Ticket Number not found'})
-   }
-   
-    await ParkingReceipt.query().updateAndFetchById(findOne.id,{
-    sourceTicketEase:1, 
-    checkoutDateTime:dto.checkoutDateTime, 
-    })
-   return true
+    if (!findOne) {
+      AppException.badRequest({ message: 'Ticket Number not found' });
+    }
+
+    await ParkingReceipt.query().updateAndFetchById(findOne.id, {
+      sourceTicketEase: 1,
+      checkoutDateTime: dto.checkoutDateTime,
+    });
+    return true;
   }
   async add(dto: AddHandheldReceiptDto) {
- let findOne  = await ParkingReceipt.query().insertAndFetch({
+    let findOne = await ParkingReceipt.query().insertAndFetch({
       vehicleNumber: dto.vehicleNumber,
       deviceId: dto.deviceId,
       vehicleType: VehicleTypeIdMap[dto.vehicleType] ?? dto.vehicleType,

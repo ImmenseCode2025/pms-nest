@@ -49,11 +49,11 @@ export class HandheldPaymentReceiptsController {
     @Res() res: Response,
   ) {
     try {
-      const data = await this.handheldPaymentReceiptsService.ticketEase(dto);
+      const data = await this.handheldPaymentReceiptsService.ticketCheckout(dto);
       return ResponseHelper.success({
         res,
         data, 
-        message: 'Handheld payment receipt created successfully',
+        message: 'Ticket checkout successfully',
       });
     } catch (error) {
       return ResponseHelper.error({ res, req, error });
