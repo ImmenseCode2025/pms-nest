@@ -10,6 +10,7 @@ import {
 } from 'src/core/helper/enum/global.enum';
 import { LodashHelper } from 'src/core/helper/lodash-helper';
 import { ParkingPrice } from 'src/core/orm/entities/parking-price.entity';
+import { ParkingReceiptSummary } from 'src/core/orm/entities/parking-receipt-summary.entity';
 import { ParkingReceipt } from 'src/core/orm/entities/parking-receipt.entity';
 import { FilesUploadService } from 'src/files-upload/files-upload.service';
 import { Readable } from 'stream';
@@ -658,6 +659,22 @@ export class HandheldPaymentReceiptsService {
     }
 
     const siteIdNum:any  =  dto.siteId 
+    const handheldIdNum =
+      dto.handheldId !== undefined && dto.handheldId !== null
+        ? Number(dto.handheldId) || 0
+        : 0;
+
+    // Stop if summary for this shift is already generated
+    const alreadyGenerated = await ParkingReceiptSummary.query()
+      .where('handheldId', handheldIdNum)
+      .where('siteId', Number(siteIdNum) || 0)
+      .where('shiftStartDateTime', shiftStartDateTime)
+      .first();
+    if (alreadyGenerated) {
+      AppException.badRequest({
+        message: 'Shift summary already generated for this shift!',
+      });
+    }
 
     // 3. Query tickets from parking_receipt table
     const tickets = await ParkingReceipt.query()
@@ -733,31 +750,27 @@ export class HandheldPaymentReceiptsService {
 
     const amountToSubmit = totalRevenue;
     const generationDateTime = moment().format('YYYY-MM-DD HH:mm:ss');
-    const handheldIdNum =
-      dto.handheldId !== undefined && dto.handheldId !== null
-        ? Number(dto.handheldId) || 0
-        : 0;
 
     // 5. Save summary to parking_receipt_summary table
-    // await ParkingReceiptSummary.query().insert({
-    //   totalTickets,
-    //   paidCarTickets,
-    //   paidVanTickets,
-    //   paidBusTickets,
-    //   paidBikeTickets,
-    //   focTickets,
-    //   focCarTickets,
-    //   focVanTickets,
-    //   focBusTickets,
-    //   focBikeTickets,
-    //   totalRevenue,
-    //   amountToSubmit,
-    //   shiftStartDateTime,
-    //   shiftEndDateTime,
-    //   generationDateTime,
-    //   siteId: siteIdNum || 0,
-    //   handheldId: handheldIdNum,
-    // });
+    await ParkingReceiptSummary.query().insert({
+      totalTickets,
+      paidCarTickets,
+      paidVanTickets,
+      paidBusTickets,
+      paidBikeTickets,
+      focTickets,
+      focCarTickets,
+      focVanTickets,
+      focBusTickets,
+      focBikeTickets,
+      totalRevenue,
+      amountToSubmit,
+      shiftStartDateTime,
+      shiftEndDateTime,
+      generationDateTime,
+      siteId: siteIdNum || 0,
+      handheldId: handheldIdNum,
+    });
 
     // 6. Return thermal printer friendly JSON response
     return {
