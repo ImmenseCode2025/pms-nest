@@ -216,6 +216,7 @@ export class HandheldPaymentReceiptsService {
       'vehicleType',
       'paymentMethod',
       'creationDate',
+      'siteId',
     ];
     const missingColumns = requiredColumns.filter((c) => !col[c]);
     if (missingColumns.length > 0) {
@@ -242,7 +243,7 @@ export class HandheldPaymentReceiptsService {
       const onlinePaymentReference = this.cleanString(
         get(row, 'onlinePaymentReference'),
       );
-      const siteId = Number(this.cleanString(get(row, 'siteId'))) || 0;
+      const rawSiteId = this.cleanString(get(row, 'siteId'));
 
       // Skip empty rows
       if (!ticketNumber && !vehicleNumber && !deviceId) continue;
@@ -256,6 +257,12 @@ export class HandheldPaymentReceiptsService {
         fail('Invalid data: ticketNumber, vehicleNumber and deviceId are required');
         continue;
       }
+
+      if (!rawSiteId || isNaN(Number(rawSiteId))) {
+        fail(`Invalid or missing siteId: ${rawSiteId}`);
+        continue;
+      }
+      const siteId = Number(rawSiteId);
 
       const vehicleType = this.resolveVehicleType(rawVehicleType);
       if (vehicleType === null) {
