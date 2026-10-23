@@ -26,6 +26,16 @@ export class HandheldPaymentReceiptsService {
     await ParkingReceipt.query().updateAndFetchById(findOne.id, {
       sourceTicketEase: 1,
       checkoutDateTime: dto.checkoutDateTime,
+       vehicleNumber: dto.vehicleNumber,
+      deviceId: dto.deviceId,
+      vehicleType: VehicleTypeIdMap[dto.vehicleType],
+      paymentMethod: dto.paymentMethod ? (HandheldPaymentMethodIdMap[dto.paymentMethod] ?? null) : null,
+      creationDate: dto.creationDate,
+      ticketNumber: dto.ticketNumber,
+      sourceHandheld: 1,
+      paymentReference: dto.paymentReference ?? null,
+      onlinePaymentReference: dto.paymentReference ?? null,
+      siteId: dto.siteId ?? null,
     });
     return true;
   }
@@ -38,7 +48,7 @@ export class HandheldPaymentReceiptsService {
       creationDate: dto.creationDate,
       ticketNumber: dto.ticketNumber,
       sourceHandheld: 1,
-      checkoutDateTime: dto.checkoutDateTime ?? null,
+      checkoutDateTime: null,
       paymentReference: dto.paymentReference ?? null,
       onlinePaymentReference: dto.onlinePaymentReference ?? null,
       siteId: dto.siteId ?? null,

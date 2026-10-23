@@ -33,15 +33,9 @@ export class AddHandheldReceiptDto {
   @ValidateIf((o) => o.paymentMethod && o.paymentMethod !== HandheldPaymentMethodEnum.SKIP)
   @IsNotEmpty()
   @IsString()
-  checkoutDateTime?: string;
-
-  @ValidateIf((o) => o.paymentMethod && o.paymentMethod !== HandheldPaymentMethodEnum.SKIP)
-  @IsNotEmpty()
-  @IsString()
   paymentReference?: string;
 
   @IsOptional()
-  @IsString()
   onlinePaymentReference?: string;
 
   @IsNotEmpty()
@@ -51,12 +45,31 @@ export class AddHandheldReceiptDto {
 
 export class TicketEaseDto {
   @IsNotEmpty()
-  @IsString()
+  vehicleNumber: string;
+
+  @IsNotEmpty()
   ticketNumber: string;
 
   @IsNotEmpty()
-  @IsString()
+  creationDate: string;
+
+  @IsNotEmpty()
   checkoutDateTime: string;
-  
-  
+
+  @IsNotEmpty()
+  deviceId: string;
+
+  @IsNotEmpty()
+  vehicleType: string;
+
+
+  @IsNotEmpty()
+  paymentMethod: string;
+
+  @IsOptional()
+  paymentReference?: string;
+
+  @IsNotEmpty()
+  siteId: string;
 }
+
