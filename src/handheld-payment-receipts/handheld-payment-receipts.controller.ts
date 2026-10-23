@@ -1,13 +1,12 @@
 import {
   Body,
   Controller,
-  Param,
   Post,
   Req,
   Res,
   UploadedFile,
   UploadedFiles,
-  UseInterceptors,
+  UseInterceptors
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Public } from 'src/core/guard/public.decorator';
@@ -18,7 +17,6 @@ import {
   AddHandheldReceiptDto,
   TicketEaseDto,
 } from './dto/add-handheld-receipt.dto';
-import { BatchUploadDto } from './dto/batch-upload.dto';
 import { HandheldPaymentReceiptsService } from './handheld-payment-receipts.service';
 
 @Controller('api/handheld-payment-receipts')
@@ -116,6 +114,28 @@ export class HandheldPaymentReceiptsController {
   ) {
     try {
       const data = await this.handheldPaymentReceiptsService.batch(file);
+      return ResponseHelper.success({
+        res,
+        data,
+        message: data.message,
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
+  @Public()
+  @UseInterceptors(
+    InterceptorHelper.globalFileInterceptorForCsv({ fieldName: 'file' }),
+  )
+  @Post('/check-out-batch')
+  async checkOutBatch(
+    @UploadedFile() file: any,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const data = await this.handheldPaymentReceiptsService.checkOutBatch(file);
       return ResponseHelper.success({
         res,
         data,

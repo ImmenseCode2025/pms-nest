@@ -347,9 +347,228 @@ export class HandheldPaymentReceiptsService {
     };
   }
 
-  async UploadedFile(
-    file: any,
-  ) {
+  async checkOutBatch(file: any) {
+    if (!file || !file.buffer) {
+      AppException.badRequest({ message: 'Invalid or missing CSV file' });
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    try {
+      await workbook.csv.read(Readable.from(file.buffer));
+    } catch {
+      AppException.badRequest({
+        message: 'Invalid CSV file. Unable to parse file.',
+      });
+    }
+
+    const worksheet = workbook.worksheets[0];
+    if (!worksheet || worksheet.rowCount <= 1) {
+      AppException.badRequest({ message: 'CSV file is empty' });
+    }
+
+    const col: Record<string, number> = {};
+    worksheet.getRow(1).eachCell((cell, colNumber) => {
+      col[this.cleanString(cell.value)] = colNumber;
+    });
+
+    const requiredColumns = [
+      'ticketNumber',
+      'vehicleNumber',
+      'deviceId',
+      'vehicleType',
+      'paymentMethod',
+      'creationDate',
+      'checkoutDateTime',
+      'siteId',
+    ];
+    const missingColumns = requiredColumns.filter((c) => !col[c]);
+    if (missingColumns.length > 0) {
+      AppException.badRequest({
+        message: `Missing columns: [${missingColumns.join(', ')}]`,
+      });
+    }
+
+    const get = (row: ExcelJS.Row, name: string) =>
+      col[name] ? this.getCellValue(row.getCell(col[name])) : '';
+
+    const errors: Array<{ row: number; ticketNumber?: string; error: string }> =
+      [];
+    const rows: any[] = [];
+
+    for (let r = 2; r <= worksheet.rowCount; r++) {
+      const row = worksheet.getRow(r);
+      const ticketNumber = this.cleanString(get(row, 'ticketNumber'));
+      const vehicleNumber = this.cleanString(get(row, 'vehicleNumber'));
+      const deviceId = this.cleanString(get(row, 'deviceId'));
+      const rawVehicleType = this.cleanString(get(row, 'vehicleType'));
+      const rawPaymentMethod = this.cleanString(get(row, 'paymentMethod'));
+      const rawCreationDate = get(row, 'creationDate');
+      const rawCheckoutDateTime = get(row, 'checkoutDateTime');
+      const paymentReference = this.cleanString(get(row, 'paymentReference'));
+      const onlinePaymentReference = this.cleanString(
+        get(row, 'onlinePaymentReference'),
+      );
+      const rawSiteId = this.cleanString(get(row, 'siteId'));
+
+      if (!ticketNumber && !vehicleNumber && !deviceId) continue;
+
+      const fail = (error: string) => {
+        this.appendLog(`[ticketEase] ${ticketNumber} ${error}`);
+        errors.push({ row: r, ticketNumber, error });
+      };
+
+      if (!ticketNumber || !vehicleNumber || !deviceId) {
+        fail('ticketNumber, vehicleNumber and deviceId are required');
+        continue;
+      }
+
+      if (!rawSiteId || isNaN(Number(rawSiteId))) {
+        fail(`Invalid or missing siteId: ${rawSiteId}`);
+        continue;
+      }
+      const siteId = Number(rawSiteId);
+
+      const vehicleType = this.resolveVehicleType(rawVehicleType);
+      if (vehicleType === null) {
+        fail(`Invalid Vehicle Type: ${rawVehicleType}`);
+        continue;
+      }
+
+      const payment = this.resolvePaymentMethod(rawPaymentMethod);
+      if (!payment.isValid) {
+        fail(`Invalid Payment Method: ${rawPaymentMethod}`);
+        continue;
+      }
+
+      const creationDate = this.parseDateTime(rawCreationDate);
+      if (!creationDate) {
+        fail(`Invalid Creation Date: ${rawCreationDate}`);
+        continue;
+      }
+
+      const checkoutDateTime = this.parseDateTime(rawCheckoutDateTime);
+      if (!checkoutDateTime) {
+        fail(`Invalid Checkout Date Time: ${rawCheckoutDateTime}`);
+        continue;
+      }
+
+      if (payment.id === 18 && !onlinePaymentReference) {
+        fail('onlinePaymentReference is required for online payment');
+        continue;
+      }
+
+      rows.push({
+        rowNumber: r,
+        ticketNumber,
+        vehicleNumber,
+        deviceId,
+        vehicleType,
+        paymentMethod: payment.id,
+        creationDate,
+        checkoutDateTime,
+        paymentReference: paymentReference || null,
+        onlinePaymentReference: onlinePaymentReference || null,
+        siteId,
+      });
+    }
+
+    // Lookup existing tickets in DB
+    const existingMap = new Map<string, any>();
+    const ticketNumbers = rows.map((r) => r.ticketNumber);
+    for (let i = 0; i < ticketNumbers.length; i += 1000) {
+      const found = await ParkingReceipt.query()
+        .whereIn('ticketNumber', ticketNumbers.slice(i, i + 1000))
+        .select(
+          'id',
+          'ticketNumber',
+          'vehicleNumber',
+          'deviceId',
+          'vehicleType',
+          'siteId',
+        );
+      found.forEach((f) => existingMap.set(this.cleanString(f.ticketNumber), f));
+    }
+
+    const toInsert: any[] = [];
+    const toUpdate: Array<{ id: number; patch: any }> = [];
+    const seen = new Set<string>();
+
+    for (const row of rows) {
+      if (seen.has(row.ticketNumber)) continue;
+      seen.add(row.ticketNumber);
+
+      const existing = existingMap.get(row.ticketNumber);
+      if (existing) {
+        const mismatch =
+          this.cleanString(existing.vehicleNumber).toLowerCase() !==
+            row.vehicleNumber.toLowerCase() ||
+          this.cleanString(existing.deviceId).toLowerCase() !==
+            row.deviceId.toLowerCase() ||
+          Number(existing.vehicleType) !== Number(row.vehicleType);
+
+        if (mismatch) {
+          this.appendLog(`[ticketEase] Mismatch for ticket ${row.ticketNumber}`);
+          errors.push({
+            row: row.rowNumber,
+            ticketNumber: row.ticketNumber,
+            error: 'Vehicle or device data mismatch with DB',
+          });
+          continue;
+        }
+
+        toUpdate.push({
+          id: existing.id,
+          patch: {
+            sourceTicketEase: 1,
+            checkoutDateTime: row.checkoutDateTime,
+            paymentMethod: row.paymentMethod,
+            paymentReference: row.paymentReference,
+            onlinePaymentReference: row.onlinePaymentReference,
+            siteId: row.siteId || existing.siteId,
+            updatedAt: new Date(),
+          },
+        });
+      } else {
+        toInsert.push({
+          ticketNumber: row.ticketNumber,
+          vehicleNumber: row.vehicleNumber,
+          deviceId: row.deviceId,
+          vehicleType: row.vehicleType,
+          paymentMethod: row.paymentMethod,
+          creationDate: row.creationDate,
+          checkoutDateTime: row.checkoutDateTime,
+          sourceTicketEase: 1,
+          paymentReference: row.paymentReference,
+          onlinePaymentReference: row.onlinePaymentReference,
+          siteId: row.siteId,
+          uploadDate: new Date(),
+          updatedAt: new Date(),
+        });
+      }
+    }
+
+    if (toInsert.length > 0 || toUpdate.length > 0) {
+      const knex = ParkingReceipt.knex();
+      await knex.transaction(async (trx) => {
+        if (toInsert.length > 0) {
+          await trx.batchInsert(ParkingReceipt.tableName, toInsert, 500);
+        }
+        for (const u of toUpdate) {
+          await trx(ParkingReceipt.tableName).where('id', u.id).update(u.patch);
+        }
+      });
+    }
+
+    return {
+      inserted: toInsert.length,
+      updated: toUpdate.length,
+      errored: errors.length,
+      message: `${toInsert.length} Record(s) inserted, ${toUpdate.length} Record(s) updated and ${errors.length} Record(s) errored`,
+      errors: errors.slice(0, 100),
+    };
+  }
+
+  async UploadedFile(file: any) {
     return this.batch(file);
   }
 
