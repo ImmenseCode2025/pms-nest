@@ -4,12 +4,15 @@ import {
   Post,
   Req,
   Res,
+  UploadedFiles,
   UseInterceptors
 } from '@nestjs/common';
 import { NoFilesInterceptor } from '@nestjs/platform-express';
 import { Request, Response } from 'express';
 import { Public } from 'src/core/guard/public.decorator';
+import { FileExtensionsEnum } from 'src/core/helper/enum/global.enum';
 import { ResponseHelper } from 'src/core/helper/response.helper';
+import { InterceptorHelper } from 'src/core/interceptors/files-interceptor';
 import { AddHandheldReceiptDto, TicketEaseDto } from './dto/add-handheld-receipt.dto';
 import { HandheldPaymentReceiptsService } from './handheld-payment-receipts.service';
 
@@ -21,15 +24,22 @@ export class HandheldPaymentReceiptsController {
 
   
   @Public()
-  @UseInterceptors(NoFilesInterceptor())
+ @UseInterceptors(
+    InterceptorHelper.s3GlobalFileInterceptorMultiple({
+      fieldNames: [{ name: 'onlinePaymentReference' }],
+      validations: { onlinePaymentReference: FileExtensionsEnum.All },
+    }),
+  )
   @Post('/handheld-add')
   async addHandheld(
     @Body() dto: AddHandheldReceiptDto,
     @Req() req: Request,
     @Res() res: Response,
+     @UploadedFiles() files,
+    
   ) {
     try {
-      const data = await this.handheldPaymentReceiptsService.add(dto);
+      const data = await this.handheldPaymentReceiptsService.add(files,dto);
       return ResponseHelper.success({
         res,
         data, 

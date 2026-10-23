@@ -38,7 +38,22 @@ export class HandheldPaymentReceiptsService {
     });
     return true;
   }
-  async add(dto: AddHandheldReceiptDto) {
+  async add(files: any, dto: AddHandheldReceiptDto) {
+    let onlinePaymentReferenceUrl = null;
+
+    const proofFiles =
+      files?.onlinePaymentReference ||
+      (Array.isArray(files) ? files : null);
+
+    if (proofFiles && (Array.isArray(proofFiles) ? proofFiles.length > 0 : true)) {
+      const uploadResults = await this.filesUploadService.uploadFile(
+        Array.isArray(proofFiles) ? proofFiles : [proofFiles],
+        { destination: 'online-payment-proofs' } as any,
+      );
+      if (uploadResults && uploadResults.length > 0) {
+        onlinePaymentReferenceUrl = uploadResults[0];
+      }
+    }
     let findOne = await ParkingReceipt.query().insertAndFetch({
       vehicleNumber: dto.vehicleNumber,
       deviceId: dto.deviceId,
@@ -49,7 +64,7 @@ export class HandheldPaymentReceiptsService {
       sourceHandheld: 1,
       checkoutDateTime: null,
       paymentReference: dto.paymentReference ?? null,
-      onlinePaymentReference: dto.onlinePaymentReference ?? null,
+      onlinePaymentReference: onlinePaymentReferenceUrl,
       siteId: dto.siteId ?? null,
     } as any);
 
