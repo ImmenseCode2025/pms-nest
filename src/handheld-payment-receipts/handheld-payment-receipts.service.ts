@@ -298,39 +298,19 @@ export class HandheldPaymentReceiptsService {
       });
     }
 
-    // Skip tickets that already exist in DB
-    const existing = new Set<string>();
-    const ticketNumbers = rows.map((r) => r.ticketNumber);
-    for (let i = 0; i < ticketNumbers.length; i += 1000) {
-      const found = await ParkingReceipt.query()
-        .whereIn('ticketNumber', ticketNumbers.slice(i, i + 1000))
-        .select('ticketNumber');
-      found.forEach((f) => existing.add(this.cleanString(f.ticketNumber)));
-    }
-
-    const toInsert: any[] = [];
-    let skipped = 0;
-    for (const row of rows) {
-      if (existing.has(row.ticketNumber)) {
-        skipped++;
-        continue;
-      }
-      existing.add(row.ticketNumber); // duplicate rows in same file
-      toInsert.push({
-        ticketNumber: row.ticketNumber,
-        vehicleNumber: row.vehicleNumber,
-        deviceId: row.deviceId,
-        vehicleType: row.vehicleType,
-        paymentMethod: row.paymentMethod,
-        creationDate: row.creationDate,
-        onlinePaymentReference: row.onlinePaymentReference,
-        siteId: row.siteId,
-        sourceHandheld: 1,
-        uploadDate: new Date(),
-        updatedAt: new Date(),
-      });
-    }
-    console.log(toInsert ,'toInsert')
+    const toInsert = rows.map((row) => ({
+      ticketNumber: row.ticketNumber,
+      vehicleNumber: row.vehicleNumber,
+      deviceId: row.deviceId,
+      vehicleType: row.vehicleType,
+      paymentMethod: row.paymentMethod,
+      creationDate: row.creationDate,
+      onlinePaymentReference: row.onlinePaymentReference,
+      siteId: row.siteId,
+      sourceHandheld: 1,
+      uploadDate: new Date(),
+      updatedAt: new Date(),
+    }));
 
     if (toInsert.length > 0) {
       // knex batchInsert: chunks of 500, all inside one transaction
@@ -343,9 +323,9 @@ export class HandheldPaymentReceiptsService {
 
     return {
       inserted: toInsert.length,
-      skipped,
+      skipped: 0,
       errored: errors.length,
-      message: `${toInsert.length} Record(s) inserted, ${skipped} Record(s) already exist and ${errors.length} Record(s) errored`,
+      message: `${toInsert.length} Record(s) inserted and ${errors.length} Record(s) errored`,
       errors: errors.slice(0, 100),
     };
   }
