@@ -174,11 +174,7 @@ BEGIN
         (
             SELECT 
                 pr.id AS id,
-                (CASE 
-                    WHEN pr.sourceHandheld = 1 AND pr.sourceTicketEase = 1 THEN 'Handheld + TicketEase'
-                    WHEN pr.sourceTicketEase = 1 THEN 'TicketEase'
-                    ELSE 'Handheld'
-                END) AS source,
+                'Handheld' AS source,
                 COALESCE(pr.ticketNumber, CONCAT('REC-', pr.id)) AS slip_number,
                 pr.vehicleNumber AS vehicle_number,
                 ps.id AS site_id,
