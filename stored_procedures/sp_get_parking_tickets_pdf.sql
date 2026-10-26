@@ -21,11 +21,19 @@ BEGIN
     END IF;
 
     IF p_start_date IS NOT NULL AND TRIM(p_start_date) != '' THEN
-        SET v_start = TRIM(p_start_date);
+        IF LENGTH(TRIM(p_start_date)) = 10 THEN
+            SET v_start = CONCAT(TRIM(p_start_date), ' 00:00:00');
+        ELSE
+            SET v_start = TRIM(p_start_date);
+        END IF;
     END IF;
 
     IF p_end_date IS NOT NULL AND TRIM(p_end_date) != '' THEN
-        SET v_end = TRIM(p_end_date);
+        IF LENGTH(TRIM(p_end_date)) = 10 THEN
+            SET v_end = CONCAT(TRIM(p_end_date), ' 23:59:59');
+        ELSE
+            SET v_end = TRIM(p_end_date);
+        END IF;
     END IF;
 
     IF p_device_type IS NOT NULL AND TRIM(p_device_type) != '' THEN
@@ -33,7 +41,7 @@ BEGIN
     END IF;
 
     -- =========================================================================
-    -- Complete Filtered Rows for PDF Report (Max 20,000 for PDF generation)
+    -- Complete Filtered Rows for Export Reports (All matching records)
     -- =========================================================================
     SELECT * FROM (
         (
@@ -63,15 +71,13 @@ BEGIN
             WHERE (v_device IS NULL OR v_device = 'system')
               AND (p_site_id IS NULL OR pt.site = p_site_id)
               AND (p_vehicle_type IS NULL OR pt.vehicleType = p_vehicle_type)
-              AND (v_start IS NULL OR DATE(pt.checkInDateTime) >= DATE(v_start))
-              AND (v_end   IS NULL OR DATE(pt.checkInDateTime) <= DATE(v_end))
+              AND (v_start IS NULL OR pt.checkInDateTime >= v_start)
+              AND (v_end   IS NULL OR pt.checkInDateTime <= v_end)
               AND (v_search IS NULL
                    OR pt.tokenNumber LIKE v_search
                    OR pt.carNo       LIKE v_search
                    OR ps.name        LIKE v_search
                    OR vt.name        LIKE v_search)
-            ORDER BY pt.checkInDateTime DESC
-            LIMIT 20000
         )
         UNION ALL
         (
@@ -106,19 +112,16 @@ BEGIN
             WHERE (v_device IS NULL OR v_device = 'handheld')
               AND (p_site_id IS NULL OR ps.id = p_site_id)
               AND (p_vehicle_type IS NULL OR pr.vehicleType = p_vehicle_type)
-              AND (v_start IS NULL OR DATE(pr.creationDate) >= DATE(v_start))
-              AND (v_end   IS NULL OR DATE(pr.creationDate) <= DATE(v_end))
+              AND (v_start IS NULL OR pr.creationDate >= v_start)
+              AND (v_end   IS NULL OR pr.creationDate <= v_end)
               AND (v_search IS NULL
                    OR pr.ticketNumber  LIKE v_search
                    OR pr.vehicleNumber LIKE v_search
                    OR ps.name          LIKE v_search
                    OR vt.name          LIKE v_search)
-            ORDER BY pr.creationDate DESC
-            LIMIT 20000
         )
     ) AS combined
-    ORDER BY check_in_date_time DESC
-    LIMIT 20000;
+    ORDER BY check_in_date_time DESC;
 
 END $$
 
