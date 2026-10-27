@@ -573,7 +573,7 @@ export class HandheldPaymentReceiptsService {
     return this.batch(file);
   }
 
-  async ticketCheckout(files: any, dto: TicketEaseDto) {
+  async ticketCheckout(files: any, dto: TicketEaseDto, operatorId?: number) {
     const findOne = await ParkingReceipt.query()
       .whereRaw('LOWER(TRIM(ticketNumber)) = LOWER(?)', [dto.ticketNumber])
       .first();
@@ -612,13 +612,13 @@ export class HandheldPaymentReceiptsService {
       paymentReference: dto.paymentReference ?? null,
       onlinePaymentReference: onlinePaymentReferenceUrl,
       siteId: dto.siteId,
+      checkOutOperatorId: operatorId,
     });
     return true;
   }
 
-  async add(files: any, dto: AddHandheldReceiptDto) {
+  async add(files: any, dto: AddHandheldReceiptDto, operatorId?: number) {
     let onlinePaymentReferenceUrl = null;
-
     const proofFiles =
       files?.onlinePaymentReference || (Array.isArray(files) ? files : null);
 
@@ -648,12 +648,13 @@ export class HandheldPaymentReceiptsService {
       paymentReference: dto.paymentReference ?? null,
       onlinePaymentReference: onlinePaymentReferenceUrl,
       siteId: dto.siteId ?? null,
+      checkInOperatorId: operatorId ?? 0,
     } as any);
 
     return findOne;
   }
 
-  async getShiftSummary(dto: ShiftSummaryDto) {
+  async getShiftSummary(dto: ShiftSummaryDto, operatorId?: number) {
     let hardWareData: any = await Hardware.query()
       .where('ipOrApi', dto.handheldId)
       .first();

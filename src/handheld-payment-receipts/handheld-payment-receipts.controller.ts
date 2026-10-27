@@ -6,9 +6,12 @@ import {
   Res,
   UploadedFile,
   UploadedFiles,
-  UseInterceptors
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { OperatorAuthId } from 'src/core/decorators/jwt-auth.decorator';
+import { OperatorJwtAuthGuard } from 'src/core/guard/operator-jwt-auth.guard';
 import { Public } from 'src/core/guard/public.decorator';
 import { FileExtensionsEnum } from 'src/core/helper/enum/global.enum';
 import { ResponseHelper } from 'src/core/helper/response.helper';
@@ -27,6 +30,7 @@ export class HandheldPaymentReceiptsController {
   ) {}
 
   @Public()
+  @UseGuards(OperatorJwtAuthGuard)
   @UseInterceptors(
     InterceptorHelper.s3GlobalFileInterceptorMultiple({
       fieldNames: [{ name: 'onlinePaymentReference' }],
@@ -39,9 +43,14 @@ export class HandheldPaymentReceiptsController {
     @Req() req: Request,
     @Res() res: Response,
     @UploadedFiles() files,
+    @OperatorAuthId() operatorId: number,
   ) {
     try {
-      const data = await this.handheldPaymentReceiptsService.add(files, dto);
+      const data = await this.handheldPaymentReceiptsService.add(
+        files,
+        dto,
+        operatorId,
+      );
       return ResponseHelper.success({
         res,
         data,
@@ -53,6 +62,7 @@ export class HandheldPaymentReceiptsController {
   }
 
   @Public()
+  @UseGuards(OperatorJwtAuthGuard)
   @UseInterceptors(
     InterceptorHelper.s3GlobalFileInterceptorMultiple({
       fieldNames: [{ name: 'onlinePaymentReference' }],
@@ -65,11 +75,13 @@ export class HandheldPaymentReceiptsController {
     @Req() req: Request,
     @Res() res: Response,
     @UploadedFiles() files,
+    @OperatorAuthId() operatorId: number,
   ) {
     try {
       const data = await this.handheldPaymentReceiptsService.ticketCheckout(
         files,
         dto,
+        operatorId,
       );
       return ResponseHelper.success({
         res,
@@ -81,7 +93,6 @@ export class HandheldPaymentReceiptsController {
     }
   }
 
- 
   @Public()
   @UseInterceptors(
     InterceptorHelper.globalFileInterceptorForCsv({ fieldName: 'file' }),
@@ -115,7 +126,8 @@ export class HandheldPaymentReceiptsController {
     @Res() res: Response,
   ) {
     try {
-      const data = await this.handheldPaymentReceiptsService.checkOutBatch(file);
+      const data =
+        await this.handheldPaymentReceiptsService.checkOutBatch(file);
       return ResponseHelper.success({
         res,
         data,
@@ -127,21 +139,22 @@ export class HandheldPaymentReceiptsController {
   }
 
   @Public()
+  @UseGuards(OperatorJwtAuthGuard)
   @Post('/shift-summary')
   async shiftSummary(
     @Body() dto: ShiftSummaryDto,
     @Req() req: Request,
     @Res() res: Response,
+    @OperatorAuthId() operatorId: number,
   ) {
     try {
-      const data = await this.handheldPaymentReceiptsService.getShiftSummary(dto);
+      const data = await this.handheldPaymentReceiptsService.getShiftSummary(
+        dto,
+        operatorId,
+      );
       return res.status(200).json(data);
     } catch (error) {
       return ResponseHelper.error({ res, req, error });
     }
   }
 }
-
-
-
-
