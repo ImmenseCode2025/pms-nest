@@ -107,7 +107,7 @@ export class ParkingSitesController {
   }
 
   @Public()
-  @Post(['get-info', 'get_info'])
+  @Post('get-info')
   async getInfo(
     @Body() dto: GetHandheldInfoDto,
     @Req() req: Request,

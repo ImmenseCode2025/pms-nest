@@ -30,6 +30,7 @@ import { PaymentGatewayModule } from './payment-gateway/payment-gateway.module';
 import { UsersModule } from './users/users.module';
 import { HardwareModule } from './hardware/hardware.module';
 import { HandheldPaymentReceiptsModule } from './handheld-payment-receipts/handheld-payment-receipts.module';
+import { OperatorsModule } from './operators/operators.module';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { HandheldPaymentReceiptsModule } from './handheld-payment-receipts/handh
     AppConfigModule,
     TasksModule,
     FilesUploadModule,
+    OperatorsModule,
   ],
 
   controllers: [AppController],

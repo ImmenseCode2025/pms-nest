@@ -70,3 +70,4 @@ export * from './user-access-token.entity';
 export * from './users.entity';
 export * from './vehicle-type.entity';
 export * from './wallet.entity';
+export * from './operator.entity';
