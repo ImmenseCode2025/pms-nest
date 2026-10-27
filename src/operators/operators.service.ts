@@ -72,6 +72,9 @@ export class OperatorsService {
     }
 
     query.withGraphFetched('[site, supervisor]');
+    query.modifyGraph('site', (builder) => {
+      builder.select('id', 'name');
+    });
     query.orderBy('id', 'desc');
 
     return await Operator.pagination(query, data);
@@ -81,7 +84,10 @@ export class OperatorsService {
   async findOne(id: number) {
     const item = await Operator.query()
       .findById(id)
-      .withGraphFetched('[site, supervisor]');
+      .withGraphFetched('[site, supervisor]')
+      .modifyGraph('site', (builder) => {
+        builder.select('id', 'name');
+      });
 
     if (!item) {
       AppException.notFound({ message: 'Operator not found' });

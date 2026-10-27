@@ -3,7 +3,7 @@ import { Hardware } from './hardware.entity';
 import { VehicleType } from './vehicle-type.entity';
 
 export class ParkingReceipt extends Mapping {
-    static get tableName() {
+  static get tableName() {
     return 'parking_receipt';
   }
 
@@ -11,14 +11,15 @@ export class ParkingReceipt extends Mapping {
   deviceId?: string;
   uploadDate?: Date | string;
   vehicleTypeId?: number;
-    siteId?: number;
+  operatorId?: number;
+  siteId?: number;
   createdAt?: Date | string;
   updatedAt?: Date | string;
   paymentMethod?: number;
   onlinePaymentReference?: string;
   ticketNumber?: string;
 
-    static get relationMappings() {
+  static get relationMappings() {
     return {
       receiptVehicleTypes: {
         relation: Mapping.BelongsToOneRelation,
