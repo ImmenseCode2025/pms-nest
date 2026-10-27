@@ -1,4 +1,6 @@
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { UniqueOnDatabase } from 'src/core/decorators/unique.validation';
+import { Operator } from 'src/core/orm/entities';
 
 export class CreateOperatorDto {
   @IsNotEmpty()
@@ -21,6 +23,7 @@ export class CreateOperatorDto {
   supervisor_id: number;
 
   @IsNotEmpty()
+  @UniqueOnDatabase(Operator)
   password: string;
 
   @IsOptional()
