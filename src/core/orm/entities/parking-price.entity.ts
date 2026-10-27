@@ -29,6 +29,14 @@ export class ParkingPrice extends Mapping {
           to: 'vehicle_type.id',
         },
       },
+      vehicleTypes: {
+        relation: Mapping.BelongsToOneRelation,
+        modelClass: VehicleType,
+        join: {
+          from: 'parking_price.vehicleType',
+          to: 'vehicle_type.id',
+        },
+      },
       priceUsers: {
         relation: Mapping.BelongsToOneRelation,
         modelClass: Users,

@@ -1,6 +1,9 @@
 import {
-  Injectable
+  HttpException,
+  HttpStatus,
+  Injectable,
 } from '@nestjs/common';
+import { GetHandheldInfoDto } from './dto/get-handheld-info.dto';
 import { AppException } from 'src/core/exception/app-exception';
 import { AppQrCode } from 'src/core/orm/entities/app-qr-code.entity';
 import { CashQrCode } from 'src/core/orm/entities/cash-qr-code.entity';
@@ -199,5 +202,32 @@ export class ParkingSitesService {
     });
 
     return { id, deleted: true };
+  }
+
+  async getHandheldInfo(dto: GetHandheldInfoDto) {
+    const site = await ParkingSite.query()
+      .select('id', 'name')
+      .where('id', dto.siteId)
+      .first();
+
+    if (!site) {
+      throw new HttpException('Site not found', HttpStatus.NOT_FOUND);
+    }
+
+    const siteParkingPrices = await ParkingPrice.query()
+      .select(
+        ParkingSite.raw(
+          'COALESCE(vehicle_type.name, CAST(parking_price.vehicleType AS CHAR)) as vehicleType',
+        ),
+        'parking_price.amount as amount',
+      )
+      .leftJoin('vehicle_type', 'parking_price.vehicleType', 'vehicle_type.id')
+      .where('parking_price.siteId', dto.siteId);
+
+    return {
+      id: site.id,
+      name: site.name,
+      siteParkingPrices,
+    };
   }
 }

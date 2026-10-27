@@ -13,6 +13,7 @@ import {
 import { Request, Response } from 'express';
 import { Public } from 'src/core/guard/public.decorator';
 import { ResponseHelper } from 'src/core/helper/response.helper';
+import { GetHandheldInfoDto } from './dto/get-handheld-info.dto';
 import { SearchParkingSitesDto } from './dto/search-parking-sites.dto';
 import { ParkingSitesService } from './parking-sites.service';
 
@@ -99,6 +100,25 @@ export class ParkingSitesController {
         res,
         data,
         message: 'Parking site and related configuration deleted successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
+  @Public()
+  @Post(['get-info', 'get_info'])
+  async getInfo(
+    @Body() dto: GetHandheldInfoDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const data = await this.parkingSitesService.getHandheldInfo(dto);
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Parking site info fetched successfully',
       });
     } catch (error) {
       return ResponseHelper.error({ res, req, error });

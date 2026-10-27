@@ -8,7 +8,7 @@ import {
   Post,
   Query,
   Req,
-  Res,
+  Res
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthId } from 'src/core/decorators/auth-id.decorator';
