@@ -9,6 +9,7 @@ import {
   VehicleTypeIdMap,
 } from 'src/core/helper/enum/global.enum';
 import { LodashHelper } from 'src/core/helper/lodash-helper';
+import { Hardware } from 'src/core/orm/entities';
 import { ParkingPrice } from 'src/core/orm/entities/parking-price.entity';
 import { ParkingReceiptSummary } from 'src/core/orm/entities/parking-receipt-summary.entity';
 import { ParkingReceipt } from 'src/core/orm/entities/parking-receipt.entity';
@@ -98,8 +99,15 @@ export class HandheldPaymentReceiptsService {
     return null;
   }
 
-  private resolvePaymentMethod(method: any): { isValid: boolean; id: number | null } {
-    if (method === null || method === undefined || String(method).trim() === '') {
+  private resolvePaymentMethod(method: any): {
+    isValid: boolean;
+    id: number | null;
+  } {
+    if (
+      method === null ||
+      method === undefined ||
+      String(method).trim() === ''
+    ) {
       return { isValid: false, id: null };
     }
     const s = String(method).trim().toLowerCase();
@@ -129,7 +137,10 @@ export class HandheldPaymentReceiptsService {
     return { isValid: false, id: null };
   }
 
-  private validateOnlinePaymentReference(paymentMethodNameOrId: any, onlineRef: any): boolean {
+  private validateOnlinePaymentReference(
+    paymentMethodNameOrId: any,
+    onlineRef: any,
+  ): boolean {
     const isOnline =
       String(paymentMethodNameOrId).trim().toLowerCase() === 'online' ||
       paymentMethodNameOrId === 18;
@@ -258,7 +269,9 @@ export class HandheldPaymentReceiptsService {
       };
 
       if (!ticketNumber || !vehicleNumber || !deviceId) {
-        fail('Invalid data: ticketNumber, vehicleNumber and deviceId are required');
+        fail(
+          'Invalid data: ticketNumber, vehicleNumber and deviceId are required',
+        );
         continue;
       }
 
@@ -470,7 +483,9 @@ export class HandheldPaymentReceiptsService {
           'vehicleType',
           'siteId',
         );
-      found.forEach((f) => existingMap.set(this.cleanString(f.ticketNumber), f));
+      found.forEach((f) =>
+        existingMap.set(this.cleanString(f.ticketNumber), f),
+      );
     }
 
     const toInsert: any[] = [];
@@ -491,7 +506,9 @@ export class HandheldPaymentReceiptsService {
           Number(existing.vehicleType) !== Number(row.vehicleType);
 
         if (mismatch) {
-          this.appendLog(`[ticketEase] Mismatch for ticket ${row.ticketNumber}`);
+          this.appendLog(
+            `[ticketEase] Mismatch for ticket ${row.ticketNumber}`,
+          );
           errors.push({
             row: row.rowNumber,
             ticketNumber: row.ticketNumber,
@@ -565,10 +582,12 @@ export class HandheldPaymentReceiptsService {
     }
     let onlinePaymentReferenceUrl = null;
     const proofFiles =
-      files?.onlinePaymentReference ||
-      (Array.isArray(files) ? files : null);
+      files?.onlinePaymentReference || (Array.isArray(files) ? files : null);
 
-    if (proofFiles && (Array.isArray(proofFiles) ? proofFiles.length > 0 : true)) {
+    if (
+      proofFiles &&
+      (Array.isArray(proofFiles) ? proofFiles.length > 0 : true)
+    ) {
       const uploadResults = await this.filesUploadService.uploadFile(
         Array.isArray(proofFiles) ? proofFiles : [proofFiles],
         { destination: 'online-payment-proofs' } as any,
@@ -592,7 +611,7 @@ export class HandheldPaymentReceiptsService {
       sourceHandheld: 1,
       paymentReference: dto.paymentReference ?? null,
       onlinePaymentReference: onlinePaymentReferenceUrl,
-      siteId: dto.siteId, 
+      siteId: dto.siteId,
     });
     return true;
   }
@@ -601,10 +620,12 @@ export class HandheldPaymentReceiptsService {
     let onlinePaymentReferenceUrl = null;
 
     const proofFiles =
-      files?.onlinePaymentReference ||
-      (Array.isArray(files) ? files : null);
+      files?.onlinePaymentReference || (Array.isArray(files) ? files : null);
 
-    if (proofFiles && (Array.isArray(proofFiles) ? proofFiles.length > 0 : true)) {
+    if (
+      proofFiles &&
+      (Array.isArray(proofFiles) ? proofFiles.length > 0 : true)
+    ) {
       const uploadResults = await this.filesUploadService.uploadFile(
         Array.isArray(proofFiles) ? proofFiles : [proofFiles],
         { destination: 'online-payment-proofs' } as any,
@@ -633,16 +654,27 @@ export class HandheldPaymentReceiptsService {
   }
 
   async getShiftSummary(dto: ShiftSummaryDto) {
+    let hardWareData: any = await Hardware.query()
+      .where('ipOrApi', dto.handheldId)
+      .first();
+    if (!hardWareData) {
+      AppException.badRequest({ message: 'Handheld not found' });
+    }
 
     const rawDate = String(dto.date || '').trim();
     if (!rawDate || !moment(rawDate, 'YYYY-MM-DD', true).isValid()) {
-      AppException.badRequest({ message: 'Invalid date format! Use YYYY-MM-DD.' });
+      AppException.badRequest({
+        message: 'Invalid date format! Use YYYY-MM-DD.',
+      });
     }
 
-    const rawShift = String(dto.shiftTime || '').trim().toLowerCase();
+    const rawShift = String(dto.shiftTime || '')
+      .trim()
+      .toLowerCase();
     if (rawShift !== 'morning' && rawShift !== 'evening') {
       AppException.badRequest({
-        message: "Invalid shiftTime! Allowed values are 'morning' or 'evening'.",
+        message:
+          "Invalid shiftTime! Allowed values are 'morning' or 'evening'.",
       });
     }
 
@@ -653,7 +685,9 @@ export class HandheldPaymentReceiptsService {
       shiftStartDateTime = `${rawDate} 10:00:00`;
       shiftEndDateTime = `${rawDate} 18:00:00`;
     } else {
-      const nextDay = moment(rawDate, 'YYYY-MM-DD').add(1, 'day').format('YYYY-MM-DD');
+      const nextDay = moment(rawDate, 'YYYY-MM-DD')
+        .add(1, 'day')
+        .format('YYYY-MM-DD');
       shiftStartDateTime = `${rawDate} 18:00:00`;
       shiftEndDateTime = `${nextDay} 02:00:00`;
     }
@@ -683,13 +717,16 @@ export class HandheldPaymentReceiptsService {
       const totalTickets = Number(alreadyGenerated.totalTickets) || 0;
       const paidTickets =
         paidCarTickets + paidVanTickets + paidBusTickets + paidBikeTickets;
-      const unpaidTickets = (alreadyGenerated as any).unpaidTickets !== undefined
-        ? Number((alreadyGenerated as any).unpaidTickets) || 0
-        : Math.max(0, totalTickets - (paidTickets + focTickets));
+      const unpaidTickets =
+        (alreadyGenerated as any).unpaidTickets !== undefined
+          ? Number((alreadyGenerated as any).unpaidTickets) || 0
+          : Math.max(0, totalTickets - (paidTickets + focTickets));
 
       const totalRevenue = Number(alreadyGenerated.totalRevenue) || 0;
       const generationDateTime = alreadyGenerated.generationDateTime
-        ? moment(alreadyGenerated.generationDateTime).format('YYYY-MM-DD HH:mm:ss')
+        ? moment(alreadyGenerated.generationDateTime).format(
+            'YYYY-MM-DD HH:mm:ss',
+          )
         : moment().format('YYYY-MM-DD HH:mm:ss');
 
       return {
@@ -742,11 +779,13 @@ export class HandheldPaymentReceiptsService {
       return 'paid';
     });
 
-    const focGroup = LodashHelper.groupBy(ticketsByCategory['foc'] || [], (t: any) =>
-      Number(t.vehicleType ?? t.vehicleTypeId)
+    const focGroup = LodashHelper.groupBy(
+      ticketsByCategory['foc'] || [],
+      (t: any) => Number(t.vehicleType ?? t.vehicleTypeId),
     );
-    const paidGroup = LodashHelper.groupBy(ticketsByCategory['paid'] || [], (t: any) =>
-      Number(t.vehicleType ?? t.vehicleTypeId)
+    const paidGroup = LodashHelper.groupBy(
+      ticketsByCategory['paid'] || [],
+      (t: any) => Number(t.vehicleType ?? t.vehicleTypeId),
     );
 
     const focTickets = (ticketsByCategory['foc'] || []).length;
@@ -773,7 +812,7 @@ export class HandheldPaymentReceiptsService {
     if (siteIdNum !== null && !isNaN(siteIdNum)) {
       const prices = await ParkingPrice.query().where('siteId', siteIdNum);
       const priceMap = LodashHelper.keyBy(prices, (p: any) =>
-        Number(p.vehicleType ?? p.vehicleTypeId)
+        Number(p.vehicleType ?? p.vehicleTypeId),
       );
 
       carRate = Number(priceMap[1]?.amount) || 0;
@@ -809,7 +848,7 @@ export class HandheldPaymentReceiptsService {
       shiftEndDateTime,
       generationDateTime,
       siteId: siteIdNum || 0,
-      handheldId: handheldIdNum,
+      handheldId: hardWareData?.id,
     });
 
     // 6. Return thermal printer friendly JSON response
@@ -837,4 +876,3 @@ export class HandheldPaymentReceiptsService {
     };
   }
 }
-
