@@ -259,6 +259,9 @@ export class HandheldPaymentReceiptsService {
         get(row, 'onlinePaymentReference'),
       );
       const rawSiteId = this.cleanString(get(row, 'siteId'));
+      const rawCheckInOperatorId = this.cleanString(
+        get(row, 'checkInOperatorId'),
+      );
 
       // Skip empty rows
       if (!ticketNumber && !vehicleNumber && !deviceId) continue;
@@ -280,6 +283,11 @@ export class HandheldPaymentReceiptsService {
         continue;
       }
       const siteId = Number(rawSiteId);
+
+      let checkInOperatorId = 0;
+      if (rawCheckInOperatorId && !isNaN(Number(rawCheckInOperatorId))) {
+        checkInOperatorId = Number(rawCheckInOperatorId);
+      }
 
       const vehicleType = this.resolveVehicleType(rawVehicleType);
       if (vehicleType === null) {
@@ -309,6 +317,7 @@ export class HandheldPaymentReceiptsService {
         creationDate,
         onlinePaymentReference: onlinePaymentReference || null,
         siteId,
+        checkInOperatorId,
       });
     }
 
@@ -321,6 +330,7 @@ export class HandheldPaymentReceiptsService {
       creationDate: row.creationDate,
       onlinePaymentReference: row.onlinePaymentReference,
       siteId: row.siteId,
+      checkInOperatorId: row.checkInOperatorId ?? 0,
       sourceHandheld: 1,
       uploadDate: new Date(),
       updatedAt: new Date(),
@@ -454,6 +464,15 @@ export class HandheldPaymentReceiptsService {
         continue;
       }
 
+      const rawCheckOutOperatorId = this.cleanString(
+        get(row, 'checkOutOperatorId'),
+      );
+
+      let checkOutOperatorId: number | undefined = undefined;
+      if (rawCheckOutOperatorId && !isNaN(Number(rawCheckOutOperatorId))) {
+        checkOutOperatorId = Number(rawCheckOutOperatorId);
+      }
+
       rows.push({
         rowNumber: r,
         ticketNumber,
@@ -466,6 +485,7 @@ export class HandheldPaymentReceiptsService {
         paymentReference: paymentReference || null,
         onlinePaymentReference: onlinePaymentReference || null,
         siteId,
+        checkOutOperatorId,
       });
     }
 
@@ -526,6 +546,9 @@ export class HandheldPaymentReceiptsService {
             paymentReference: row.paymentReference,
             onlinePaymentReference: row.onlinePaymentReference,
             siteId: row.siteId || existing.siteId,
+            ...(row.checkOutOperatorId !== undefined
+              ? { checkOutOperatorId: row.checkOutOperatorId }
+              : {}),
             updatedAt: new Date(),
           },
         });
@@ -542,6 +565,7 @@ export class HandheldPaymentReceiptsService {
           paymentReference: row.paymentReference,
           onlinePaymentReference: row.onlinePaymentReference,
           siteId: row.siteId,
+          checkOutOperatorId: row.checkOutOperatorId ?? 0,
           uploadDate: new Date(),
           updatedAt: new Date(),
         });
