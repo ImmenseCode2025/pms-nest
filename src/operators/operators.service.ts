@@ -9,22 +9,25 @@ import { UpdateOperatorDto } from './dto/update-operator.dto';
 export class OperatorsService {
   // 1. CREATE
   async getPasswords() {
-    const dbResult: any = await Operator.knex().raw(`
-      SELECT password FROM (
-        SELECT s.i::text as password
-        FROM generate_series(1000, 9999) AS s(i)
-        EXCEPT
-        SELECT password FROM operators WHERE deleted_at IS NULL
-      ) AS available_passwords
-      ORDER BY RANDOM()
-      LIMIT 1
-    `);
+    const usedOperators = await Operator.query()
+      .select('password')
+      .whereNotNull('password');
+    const usedSet = new Set(usedOperators.map((o) => String(o.password)));
 
-    if (!dbResult.rows.length) {
+    const candidates: string[] = [];
+    for (let i = 1000; i <= 9999; i++) {
+      const pin = String(i);
+      if (!usedSet.has(pin)) {
+        candidates.push(pin);
+      }
+    }
+
+    if (!candidates.length) {
       AppException.badRequest({ message: 'No available passwords found.' });
     }
-    const password = dbResult.rows[0].password;
-    return password;
+
+    const randomIndex = Math.floor(Math.random() * candidates.length);
+    return candidates[randomIndex];
   }
   async create(dto: CreateOperatorDto) {
     const item = await Operator.query().insertAndFetch({

@@ -35,3 +35,8 @@ export class SendEmailDto {
   otp?: string | number;
 }
 
+export class OperatorLoginDto {
+  @IsNotEmpty()
+  @IsString()
+  pin: string;
+}
