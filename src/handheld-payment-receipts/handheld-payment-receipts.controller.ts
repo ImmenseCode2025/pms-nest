@@ -6,12 +6,10 @@ import {
   Res,
   UploadedFile,
   UploadedFiles,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { OperatorAuthId } from 'src/core/decorators/jwt-auth.decorator';
-import { OperatorJwtAuthGuard } from 'src/core/guard/operator-jwt-auth.guard';
 import { Public } from 'src/core/guard/public.decorator';
 import { FileExtensionsEnum } from 'src/core/helper/enum/global.enum';
 import { ResponseHelper } from 'src/core/helper/response.helper';
@@ -30,7 +28,7 @@ export class HandheldPaymentReceiptsController {
   ) {}
 
   @Public()
-  @UseGuards(OperatorJwtAuthGuard)
+  // @UseGuards(OperatorJwtAuthGuard)
   @UseInterceptors(
     InterceptorHelper.s3GlobalFileInterceptorMultiple({
       fieldNames: [{ name: 'onlinePaymentReference' }],
@@ -62,7 +60,7 @@ export class HandheldPaymentReceiptsController {
   }
 
   @Public()
-  @UseGuards(OperatorJwtAuthGuard)
+  // @UseGuards(OperatorJwtAuthGuard)
   @UseInterceptors(
     InterceptorHelper.s3GlobalFileInterceptorMultiple({
       fieldNames: [{ name: 'onlinePaymentReference' }],
@@ -139,7 +137,7 @@ export class HandheldPaymentReceiptsController {
   }
 
   @Public()
-  @UseGuards(OperatorJwtAuthGuard)
+  // @UseGuards(OperatorJwtAuthGuard)
   @Post('/shift-summary')
   async shiftSummary(
     @Body() dto: ShiftSummaryDto,
