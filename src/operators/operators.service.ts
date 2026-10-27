@@ -8,6 +8,24 @@ import { UpdateOperatorDto } from './dto/update-operator.dto';
 @Injectable()
 export class OperatorsService {
   // 1. CREATE
+  async getPasswords() {
+    const dbResult: any = await Operator.knex().raw(`
+      SELECT password FROM (
+        SELECT s.i::text as password
+        FROM generate_series(1000, 9999) AS s(i)
+        EXCEPT
+        SELECT password FROM operators WHERE deleted_at IS NULL
+      ) AS available_passwords
+      ORDER BY RANDOM()
+      LIMIT 1
+    `);
+
+    if (!dbResult.rows.length) {
+      AppException.badRequest({ message: 'No available passwords found.' });
+    }
+    const password = dbResult.rows[0].password;
+    return password;
+  }
   async create(dto: CreateOperatorDto) {
     const item = await Operator.query().insertAndFetch({
       site_id: dto.site_id,
@@ -60,7 +78,7 @@ export class OperatorsService {
   async findOne(id: number) {
     const item = await Operator.query()
       .findById(id)
-    .withGraphFetched('[site, supervisor]');
+      .withGraphFetched('[site, supervisor]');
 
     if (!item) {
       AppException.notFound({ message: 'Operator not found' });

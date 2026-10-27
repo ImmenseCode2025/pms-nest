@@ -7,7 +7,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const createConfig = () => ({
-  client: 'mysql',
+  client: 'mysql2',
   connection: {
     host: process.env.DATABASE_HOST,
     port: Number(process.env.DATABASE_PORT || 3306),

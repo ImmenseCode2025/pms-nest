@@ -122,4 +122,19 @@ export class OperatorsController {
       return ResponseHelper.error({ res, req, error });
     }
   }
+
+  // 6. GET AVAILABLE PASSWORDS
+  @Get('get-passwords')
+  async getPasswords(@Req() req: Request, @Res() res: Response) {
+    try {
+      const data = await this.operatorsService.getPasswords();
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Available password retrieved successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
 }
