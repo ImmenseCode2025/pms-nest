@@ -658,18 +658,62 @@ export class HandheldPaymentReceiptsService {
       shiftEndDateTime = `${nextDay} 02:00:00`;
     }
 
-    const siteIdNum:any  =  dto.siteId 
-    const handheldIdNum =dto.handheldId
-    // Stop if summary for this shift is already generated
+    const siteIdNum: any = dto.siteId;
+    const handheldIdNum = dto.handheldId;
+
+    // If summary for this shift is already generated, return the existing summary
     const alreadyGenerated = await ParkingReceiptSummary.query()
       .where('handheldId', handheldIdNum)
       .where('siteId', Number(siteIdNum) || 0)
       .where('shiftStartDateTime', shiftStartDateTime)
       .first();
+
     if (alreadyGenerated) {
-      AppException.badRequest({
-        message: 'Shift summary already generated for this shift!',
-      });
+      const focTickets = Number(alreadyGenerated.focTickets) || 0;
+      const focCarTickets = Number(alreadyGenerated.focCarTickets) || 0;
+      const focVanTickets = Number(alreadyGenerated.focVanTickets) || 0;
+      const focBusTickets = Number(alreadyGenerated.focBusTickets) || 0;
+      const focBikeTickets = Number(alreadyGenerated.focBikeTickets) || 0;
+
+      const paidCarTickets = Number(alreadyGenerated.paidCarTickets) || 0;
+      const paidVanTickets = Number(alreadyGenerated.paidVanTickets) || 0;
+      const paidBusTickets = Number(alreadyGenerated.paidBusTickets) || 0;
+      const paidBikeTickets = Number(alreadyGenerated.paidBikeTickets) || 0;
+
+      const totalTickets = Number(alreadyGenerated.totalTickets) || 0;
+      const paidTickets =
+        paidCarTickets + paidVanTickets + paidBusTickets + paidBikeTickets;
+      const unpaidTickets = (alreadyGenerated as any).unpaidTickets !== undefined
+        ? Number((alreadyGenerated as any).unpaidTickets) || 0
+        : Math.max(0, totalTickets - (paidTickets + focTickets));
+
+      const totalRevenue = Number(alreadyGenerated.totalRevenue) || 0;
+      const generationDateTime = alreadyGenerated.generationDateTime
+        ? moment(alreadyGenerated.generationDateTime).format('YYYY-MM-DD HH:mm:ss')
+        : moment().format('YYYY-MM-DD HH:mm:ss');
+
+      return {
+        message: 'Summary Retrieved Successfully!',
+        receipt_title: 'Shift-End Summary Receipt',
+        shift: rawShift,
+        shift_date: rawDate,
+        generation_datetime: generationDateTime,
+        summary: {
+          foc_tickets: focTickets,
+          foc_car_tickets: focCarTickets,
+          foc_van_tickets: focVanTickets,
+          foc_bus_tickets: focBusTickets,
+          foc_bike_tickets: focBikeTickets,
+          paid_car_tickets: paidCarTickets,
+          paid_van_tickets: paidVanTickets,
+          paid_bus_tickets: paidBusTickets,
+          paid_bike_tickets: paidBikeTickets,
+          unpaid_tickets: unpaidTickets,
+          total_tickets: totalTickets,
+          total_revenue: `${totalRevenue} PKR`,
+        },
+        response: 'success',
+      };
     }
 
     // 3. Query tickets from parking_receipt table
