@@ -696,45 +696,27 @@ export class HandheldPaymentReceiptsService {
       AppException.badRequest({ message: 'No Summary Data Found!' });
     }
 
-    // Categorize tickets using LodashHelper
+    // Categorize tickets by payment method: FOC (14), Cash (16), POS (15/1), Online (18)
     const ticketsByCategory = LodashHelper.groupBy(tickets, (t: any) => {
-      const pMethod =
-        t.paymentMethod !== null && t.paymentMethod !== undefined
-          ? Number(t.paymentMethod)
-          : null;
+      const pMethod = Number(t.paymentMethod);
       if (pMethod === 14) return 'foc';
+      if (pMethod === 16) return 'cash';
       if (pMethod === 15 || pMethod === 1) return 'pos';
       if (pMethod === 18) return 'online';
-      if (pMethod === null || pMethod === 0) return 'unpaid';
-      return 'paid'; // Cash / other cash collection
+      return 'other';
     });
 
-    const focGroup = LodashHelper.groupBy(
-      ticketsByCategory['foc'] || [],
-      (t: any) => Number(t.vehicleType ?? t.vehicleTypeId),
-    );
-    const paidGroup = LodashHelper.groupBy(
-      ticketsByCategory['paid'] || [],
-      (t: any) => Number(t.vehicleType ?? t.vehicleTypeId),
-    );
-    const posGroup = LodashHelper.groupBy(
-      ticketsByCategory['pos'] || [],
-      (t: any) => Number(t.vehicleType ?? t.vehicleTypeId),
-    );
-    const onlineGroup = LodashHelper.groupBy(
-      ticketsByCategory['online'] || [],
-      (t: any) => Number(t.vehicleType ?? t.vehicleTypeId),
-    );
-    // Cash (ID 16) breakdown out of the paid tickets
-    const cashTicketsList = (ticketsByCategory['paid'] || []).filter(
-      (t: any) => Number(t.paymentMethod) === 16,
-    );
-    const cashGroup = LodashHelper.groupBy(cashTicketsList, (t: any) =>
-      Number(t.vehicleType ?? t.vehicleTypeId),
-    );
+    const byVehicle = (category: string) =>
+      LodashHelper.groupBy(ticketsByCategory[category] || [], (t: any) =>
+        Number(t.vehicleType ?? t.vehicleTypeId),
+      );
+    const focGroup = byVehicle('foc');
+    const cashGroup = byVehicle('cash');
+    const posGroup = byVehicle('pos');
+    const onlineGroup = byVehicle('online');
 
     const focTickets = (ticketsByCategory['foc'] || []).length;
-    const unpaidTickets = (ticketsByCategory['unpaid'] || []).length;
+    const cashTickets = (ticketsByCategory['cash'] || []).length;
     const posTickets = (ticketsByCategory['pos'] || []).length;
     const onlineTickets = (ticketsByCategory['online'] || []).length;
 
@@ -743,10 +725,10 @@ export class HandheldPaymentReceiptsService {
     const focBikeTickets = (focGroup[4] || []).length;
     const focVanTickets = (focGroup[5] || []).length;
 
-    const paidCarTickets = (paidGroup[1] || []).length;
-    const paidBusTickets = (paidGroup[3] || []).length;
-    const paidBikeTickets = (paidGroup[4] || []).length;
-    const paidVanTickets = (paidGroup[5] || []).length;
+    const cashCarTickets = (cashGroup[1] || []).length;
+    const cashBusTickets = (cashGroup[3] || []).length;
+    const cashBikeTickets = (cashGroup[4] || []).length;
+    const cashVanTickets = (cashGroup[5] || []).length;
 
     const posCarTickets = (posGroup[1] || []).length;
     const posBusTickets = (posGroup[3] || []).length;
@@ -758,16 +740,16 @@ export class HandheldPaymentReceiptsService {
     const onlineBikeTickets = (onlineGroup[4] || []).length;
     const onlineVanTickets = (onlineGroup[5] || []).length;
 
-    const cashTickets = cashTicketsList.length;
-    const cashCarTickets = (cashGroup[1] || []).length;
-    const cashBusTickets = (cashGroup[3] || []).length;
-    const cashBikeTickets = (cashGroup[4] || []).length;
-    const cashVanTickets = (cashGroup[5] || []).length;
+    // Paid = Cash + POS + Online (saved into paid* columns of the summary table)
+    const paidCarTickets = cashCarTickets + posCarTickets + onlineCarTickets;
+    const paidBusTickets = cashBusTickets + posBusTickets + onlineBusTickets;
+    const paidBikeTickets = cashBikeTickets + posBikeTickets + onlineBikeTickets;
+    const paidVanTickets = cashVanTickets + posVanTickets + onlineVanTickets;
 
-    const totalTickets = tickets.length;
+    const totalTickets = focTickets + cashTickets + posTickets + onlineTickets;
 
     // 4. Calculate Revenue from parking_price table using LodashHelper.keyBy
-    // Note: Only FOC tickets are excluded from totalRevenue (paid + POS + online are counted)
+    // Note: FOC tickets are excluded from totalRevenue (Cash + POS + Online are counted)
     let carRate = 0;
     let busRate = 0;
     let bikeRate = 0;
@@ -785,13 +767,11 @@ export class HandheldPaymentReceiptsService {
       vanRate = Number(priceMap[5]?.amount) || 0;
     }
 
-    const paidRevenue =
-      paidCarTickets * carRate +
-      paidVanTickets * vanRate +
-      paidBusTickets * busRate +
-      paidBikeTickets * bikeRate;
-    const amountToSubmit = paidRevenue;
-
+    const cashRevenue =
+      cashCarTickets * carRate +
+      cashVanTickets * vanRate +
+      cashBusTickets * busRate +
+      cashBikeTickets * bikeRate;
     const posRevenue =
       posCarTickets * carRate +
       posVanTickets * vanRate +
@@ -802,14 +782,8 @@ export class HandheldPaymentReceiptsService {
       onlineVanTickets * vanRate +
       onlineBusTickets * busRate +
       onlineBikeTickets * bikeRate;
-    const cashRevenue =
-      cashCarTickets * carRate +
-      cashVanTickets * vanRate +
-      cashBusTickets * busRate +
-      cashBikeTickets * bikeRate;
 
-    // FOC is the only category left out of revenue
-    const totalRevenue = paidRevenue + posRevenue + onlineRevenue;
+    const totalRevenue = cashRevenue + posRevenue + onlineRevenue;
 
     let operator = await Operator.query().findById(operatorId);
 
@@ -861,10 +835,6 @@ export class HandheldPaymentReceiptsService {
         foc_van_tickets: focVanTickets,
         foc_bus_tickets: focBusTickets,
         foc_bike_tickets: focBikeTickets,
-        paid_car_tickets: paidCarTickets,
-        paid_van_tickets: paidVanTickets,
-        paid_bus_tickets: paidBusTickets,
-        paid_bike_tickets: paidBikeTickets,
         cash_tickets: cashTickets,
         cash_car_tickets: cashCarTickets,
         cash_van_tickets: cashVanTickets,
@@ -883,7 +853,6 @@ export class HandheldPaymentReceiptsService {
         online_bus_tickets: onlineBusTickets,
         online_bike_tickets: onlineBikeTickets,
         online_revenue: `${onlineRevenue} PKR`,
-        unpaid_tickets: unpaidTickets,
         total_tickets: totalTickets,
         total_revenue: `${totalRevenue} PKR`,
       },
