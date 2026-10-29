@@ -735,11 +735,6 @@ export class HandheldPaymentReceiptsService {
     const paidBikeTickets = (paidGroup[4] || []).length;
     const paidVanTickets = (paidGroup[5] || []).length;
 
-    const posCarTickets = (posGroup[1] || []).length;
-    const posBusTickets = (posGroup[3] || []).length;
-    const posBikeTickets = (posGroup[4] || []).length;
-    const posVanTickets = (posGroup[5] || []).length;
-
     const totalTickets = tickets.length;
 
     // 4. Calculate Revenue from parking_price table using LodashHelper.keyBy
@@ -822,11 +817,6 @@ export class HandheldPaymentReceiptsService {
         paid_van_tickets: paidVanTickets,
         paid_bus_tickets: paidBusTickets,
         paid_bike_tickets: paidBikeTickets,
-        pos_tickets: posTickets,
-        pos_car_tickets: posCarTickets,
-        pos_van_tickets: posVanTickets,
-        pos_bus_tickets: posBusTickets,
-        pos_bike_tickets: posBikeTickets,
         unpaid_tickets: unpaidTickets,
         total_tickets: totalTickets,
         total_revenue: `${totalRevenue} PKR`,
