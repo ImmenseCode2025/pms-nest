@@ -10,7 +10,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { OperatorAuthId } from 'src/core/decorators/jwt-auth.decorator';
+import {
+  OperatorAuth,
+  OperatorAuthId,
+} from 'src/core/decorators/jwt-auth.decorator';
 import { OperatorJwtAuthGuard } from 'src/core/guard/operator-jwt-auth.guard';
 import { Public } from 'src/core/guard/public.decorator';
 import { FileExtensionsEnum } from 'src/core/helper/enum/global.enum';
@@ -138,7 +141,7 @@ export class HandheldPaymentReceiptsController {
     }
   }
 
-  @UseGuards(OperatorJwtAuthGuard)
+  @OperatorAuth()
   @Post('/shift-summary')
   async shiftSummary(
     @Body() dto: ShiftSummaryDto,

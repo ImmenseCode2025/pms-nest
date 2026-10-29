@@ -36,12 +36,11 @@ export class OperatorJwtAuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: jwtConstants.secret,
       });
+      console.log(payload, 'payload');
 
       // Attach decoded JWT to request
       request['user'] = payload;
       request['operator'] = payload;
-      request['operatorId'] = payload.id;
-      request['userId'] = payload.id;
       return true;
     } catch (error) {
       throw new HttpException(
