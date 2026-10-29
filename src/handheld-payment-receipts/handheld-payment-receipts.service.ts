@@ -698,35 +698,14 @@ export class HandheldPaymentReceiptsService {
 
     // Categorize tickets using LodashHelper
     const ticketsByCategory = LodashHelper.groupBy(tickets, (t: any) => {
-      const rawMethod = t.paymentMethod;
-      if (
-        rawMethod === null ||
-        rawMethod === undefined ||
-        rawMethod === '' ||
-        rawMethod === 0
-      ) {
-        return 'unpaid';
-      }
-      const strMethod = String(rawMethod).trim().toLowerCase();
-      const numMethod = Number(rawMethod);
-
-      // FOC (Free of Cost) - ID 14
-      if (numMethod === 14 || strMethod === 'foc' || strMethod === 'free car') {
-        return 'foc';
-      }
-
-      // POS - ID 15 or 1
-      if (numMethod === 15 || numMethod === 1 || strMethod === 'pos') {
-        return 'pos';
-      }
-
-      // Skip / Unpaid
-      if (strMethod === 'skip' || strMethod === 'unpaid') {
-        return 'unpaid';
-      }
-
-      // Paid via Cash / Other (ID 16 or 'cash')
-      return 'paid';
+      const pMethod =
+        t.paymentMethod !== null && t.paymentMethod !== undefined
+          ? Number(t.paymentMethod)
+          : null;
+      if (pMethod === 14) return 'foc';
+      if (pMethod === 15 || pMethod === 1) return 'pos';
+      if (pMethod === null || pMethod === 0) return 'unpaid';
+      return 'paid'; // Cash / other cash collection
     });
 
     const focGroup = LodashHelper.groupBy(
@@ -764,10 +743,7 @@ export class HandheldPaymentReceiptsService {
     const totalTickets = tickets.length;
 
     // 4. Calculate Revenue from parking_price table using LodashHelper.keyBy
-    // NOTE:
-    // - FOC (Free of Cost) tickets generate 0 PKR revenue (foc revenue is NOT counted).
-    // - POS amount is NOT counted in totalRevenue (collected electronically via card machine).
-    // - ONLY physical Cash paid tickets generate totalRevenue / operator cash amount to submit.
+    // Note: POS amount is not counted in totalRevenue as it is collected electronically via POS machine
     let carRate = 0;
     let busRate = 0;
     let bikeRate = 0;
@@ -842,7 +818,6 @@ export class HandheldPaymentReceiptsService {
         foc_van_tickets: focVanTickets,
         foc_bus_tickets: focBusTickets,
         foc_bike_tickets: focBikeTickets,
-        foc_revenue: `0 PKR`,
         paid_car_tickets: paidCarTickets,
         paid_van_tickets: paidVanTickets,
         paid_bus_tickets: paidBusTickets,
