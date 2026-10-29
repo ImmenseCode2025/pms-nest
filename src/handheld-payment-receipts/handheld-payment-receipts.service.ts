@@ -704,6 +704,7 @@ export class HandheldPaymentReceiptsService {
           : null;
       if (pMethod === 14) return 'foc';
       if (pMethod === 15 || pMethod === 1) return 'pos';
+      if (pMethod === 18) return 'online';
       if (pMethod === null || pMethod === 0) return 'unpaid';
       return 'paid'; // Cash / other cash collection
     });
@@ -720,10 +721,22 @@ export class HandheldPaymentReceiptsService {
       ticketsByCategory['pos'] || [],
       (t: any) => Number(t.vehicleType ?? t.vehicleTypeId),
     );
+    const onlineGroup = LodashHelper.groupBy(
+      ticketsByCategory['online'] || [],
+      (t: any) => Number(t.vehicleType ?? t.vehicleTypeId),
+    );
+    // Cash (ID 16) breakdown out of the paid tickets
+    const cashTicketsList = (ticketsByCategory['paid'] || []).filter(
+      (t: any) => Number(t.paymentMethod) === 16,
+    );
+    const cashGroup = LodashHelper.groupBy(cashTicketsList, (t: any) =>
+      Number(t.vehicleType ?? t.vehicleTypeId),
+    );
 
     const focTickets = (ticketsByCategory['foc'] || []).length;
     const unpaidTickets = (ticketsByCategory['unpaid'] || []).length;
     const posTickets = (ticketsByCategory['pos'] || []).length;
+    const onlineTickets = (ticketsByCategory['online'] || []).length;
 
     const focCarTickets = (focGroup[1] || []).length;
     const focBusTickets = (focGroup[3] || []).length;
@@ -734,6 +747,22 @@ export class HandheldPaymentReceiptsService {
     const paidBusTickets = (paidGroup[3] || []).length;
     const paidBikeTickets = (paidGroup[4] || []).length;
     const paidVanTickets = (paidGroup[5] || []).length;
+
+    const posCarTickets = (posGroup[1] || []).length;
+    const posBusTickets = (posGroup[3] || []).length;
+    const posBikeTickets = (posGroup[4] || []).length;
+    const posVanTickets = (posGroup[5] || []).length;
+
+    const onlineCarTickets = (onlineGroup[1] || []).length;
+    const onlineBusTickets = (onlineGroup[3] || []).length;
+    const onlineBikeTickets = (onlineGroup[4] || []).length;
+    const onlineVanTickets = (onlineGroup[5] || []).length;
+
+    const cashTickets = cashTicketsList.length;
+    const cashCarTickets = (cashGroup[1] || []).length;
+    const cashBusTickets = (cashGroup[3] || []).length;
+    const cashBikeTickets = (cashGroup[4] || []).length;
+    const cashVanTickets = (cashGroup[5] || []).length;
 
     const totalTickets = tickets.length;
 
@@ -762,6 +791,23 @@ export class HandheldPaymentReceiptsService {
       paidBusTickets * busRate +
       paidBikeTickets * bikeRate;
     const amountToSubmit = totalRevenue;
+
+    // POS / Online amounts are shown separately, not added to cash totalRevenue
+    const posRevenue =
+      posCarTickets * carRate +
+      posVanTickets * vanRate +
+      posBusTickets * busRate +
+      posBikeTickets * bikeRate;
+    const onlineRevenue =
+      onlineCarTickets * carRate +
+      onlineVanTickets * vanRate +
+      onlineBusTickets * busRate +
+      onlineBikeTickets * bikeRate;
+    const cashRevenue =
+      cashCarTickets * carRate +
+      cashVanTickets * vanRate +
+      cashBusTickets * busRate +
+      cashBikeTickets * bikeRate;
 
     let operator = await Operator.query().findById(operatorId);
 
@@ -817,6 +863,24 @@ export class HandheldPaymentReceiptsService {
         paid_van_tickets: paidVanTickets,
         paid_bus_tickets: paidBusTickets,
         paid_bike_tickets: paidBikeTickets,
+        cash_tickets: cashTickets,
+        cash_car_tickets: cashCarTickets,
+        cash_van_tickets: cashVanTickets,
+        cash_bus_tickets: cashBusTickets,
+        cash_bike_tickets: cashBikeTickets,
+        cash_revenue: `${cashRevenue} PKR`,
+        pos_tickets: posTickets,
+        pos_car_tickets: posCarTickets,
+        pos_van_tickets: posVanTickets,
+        pos_bus_tickets: posBusTickets,
+        pos_bike_tickets: posBikeTickets,
+        pos_revenue: `${posRevenue} PKR`,
+        online_tickets: onlineTickets,
+        online_car_tickets: onlineCarTickets,
+        online_van_tickets: onlineVanTickets,
+        online_bus_tickets: onlineBusTickets,
+        online_bike_tickets: onlineBikeTickets,
+        online_revenue: `${onlineRevenue} PKR`,
         unpaid_tickets: unpaidTickets,
         total_tickets: totalTickets,
         total_revenue: `${totalRevenue} PKR`,
