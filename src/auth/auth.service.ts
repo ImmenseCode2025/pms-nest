@@ -8,7 +8,13 @@ import { AppException } from 'src/core/exception/app-exception';
 import { Operator } from 'src/core/orm/entities';
 import { UserAccessToken } from 'src/core/orm/entities/user-access-token.entity';
 import { Users } from 'src/core/orm/entities/users.entity';
-import { LoginDto, OperatorLoginDto, SendEmailDto } from './dto/auth.dto';
+import { jwtConstants } from 'src/core/guard/guard-constants';
+import {
+  EmployeeLoginDto,
+  LoginDto,
+  OperatorLoginDto,
+  SendEmailDto,
+} from './dto/auth.dto';
 
 const fernet = require('fernet');
 const FERNET_KEY = 'i3vVJAiA2-e6JIBoTBwvmQNmTXvVhbr60p5jOYVRVws=';
@@ -91,11 +97,9 @@ export class AuthService {
   }
 
   /**
-   * Login API matching Flask parkingSystem login logic
+   * Validates user email/password (shared by Fernet login and employee JWT login)
    */
-  async login(loginDto: LoginDto, clientIp: string = '0.0.0.0') {
-    const { email, password, ipAddress, macAddress } = loginDto;
-
+  private async validateUserCredentials(email: string, password: string) {
     // Find user by email
     const user: any = await Users.query().where('email', email.trim()).first();
 
@@ -140,6 +144,16 @@ export class AuthService {
       );
     }
 
+    return user;
+  }
+
+  /**
+   * Login API matching Flask parkingSystem login logic
+   */
+  async login(loginDto: LoginDto, clientIp: string = '0.0.0.0') {
+    const { email, password, ipAddress, macAddress } = loginDto;
+    const user = await this.validateUserCredentials(email, password);
+
     // Generate Flask compatible Fernet token
     const token = await this.generateAuthCode(
       user.id,
@@ -166,6 +180,41 @@ export class AuthService {
       errors: [],
     };
   }
+  /**
+   * Employee login - same credential check as login, but returns a JWT
+   */
+  async employeeLogin(loginDto: EmployeeLoginDto) {
+    const { email, password } = loginDto;
+    const user = await this.validateUserCredentials(email, password);
+
+    const payload = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      access: user.access,
+    };
+    const token = await this.jwtService.signAsync(payload, {
+      expiresIn: jwtConstants.expiry as any,
+    });
+
+    return {
+      message: 'Successfully Logged In',
+      token,
+      userInfo: {
+        id: user.id,
+        name: user.username,
+        email: user.email,
+        profile: user.profile
+          ? `https://smartparkings.com.pk/admin/userProfileImages/${user.profile}`
+          : '',
+        access: user.access,
+        site: user.site,
+      },
+      response: 'success',
+      errors: [],
+    };
+  }
+
   async operatorLogin(loginDto: OperatorLoginDto) {
     const { pin } = loginDto;
     const operator: any = await Operator.query().where('password', pin).first();

@@ -4,6 +4,7 @@ import {
   ExecutionContext,
   UseGuards,
 } from '@nestjs/common';
+import { EmployeeJwtAuthGuard } from '../guard/employee-jwt-auth.guard';
 import { OperatorJwtAuthGuard } from '../guard/operator-jwt-auth.guard';
 import { Public } from '../guard/public.decorator';
 
@@ -17,6 +18,18 @@ import { Public } from '../guard/public.decorator';
  */
 export function OperatorAuth() {
   return applyDecorators(Public(), UseGuards(OperatorJwtAuthGuard));
+}
+
+/**
+ * Composite decorator that bypasses legacy JwtAuthGuard
+ * and enforces EmployeeJwtAuthGuard for employees.
+ * Usage:
+ *   @EmployeeAuth()
+ *   @Get('employee-profile')
+ *   getProfile(@EmployeeAuthId() employeeId: number) { ... }
+ */
+export function EmployeeAuth() {
+  return applyDecorators(Public(), UseGuards(EmployeeJwtAuthGuard));
 }
 
 /**
@@ -62,5 +75,29 @@ export const CurrentOperator = createParamDecorator(
     const request = ctx.switchToHttp().getRequest();
     const user = request.user;
     return data ? user?.[data] : user;
+  },
+);
+
+/**
+ * Extracts the employee ID from request.employee
+ */
+export const EmployeeAuthId = createParamDecorator(
+  (data: unknown, ctx: ExecutionContext): number | undefined => {
+    const request = ctx.switchToHttp().getRequest();
+    return request.employee?.id || 0;
+  },
+);
+
+/**
+ * Extracts the employee payload (or a specific key) from request.employee
+ * Usage:
+ *   @CurrentEmployee() employee: any
+ *   @CurrentEmployee('site') site: number
+ */
+export const CurrentEmployee = createParamDecorator(
+  (data: string | undefined, ctx: ExecutionContext) => {
+    const request = ctx.switchToHttp().getRequest();
+    const employee = request.employee;
+    return data ? employee?.[data] : employee;
   },
 );

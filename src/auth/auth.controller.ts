@@ -3,7 +3,12 @@ import { Request, Response } from 'express';
 import { Public } from 'src/core/guard/public.decorator';
 import { ResponseHelper } from 'src/core/helper/response.helper';
 import { AuthService } from './auth.service';
-import { LoginDto, OperatorLoginDto, SendEmailDto } from './dto/auth.dto';
+import {
+  EmployeeLoginDto,
+  LoginDto,
+  OperatorLoginDto,
+  SendEmailDto,
+} from './dto/auth.dto';
 
 @Controller('api/auth')
 export class AuthController {
@@ -38,6 +43,21 @@ export class AuthController {
   ) {
     try {
       const data = await this.authService.operatorLogin(dto);
+      return res.status(200).json(data);
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
+  @Public()
+  @Post('employee-login')
+  async employeeLogin(
+    @Body() dto: EmployeeLoginDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const data = await this.authService.employeeLogin(dto);
       return res.status(200).json(data);
     } catch (error) {
       return ResponseHelper.error({ res, req, error });

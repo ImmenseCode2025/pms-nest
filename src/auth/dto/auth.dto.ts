@@ -40,3 +40,13 @@ export class OperatorLoginDto {
   @IsString()
   pin: string;
 }
+
+export class EmployeeLoginDto {
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+
+  @IsNotEmpty()
+  @IsString()
+  password: string;
+}

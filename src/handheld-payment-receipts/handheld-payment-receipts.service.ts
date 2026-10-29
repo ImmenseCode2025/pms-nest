@@ -680,8 +680,6 @@ export class HandheldPaymentReceiptsService {
   }
 
   async getShiftSummary(dto: ShiftSummaryDto, operatorId?: number) {
-    console.log(operatorId, 'operatorId');
-
     const hardWareData: any = await GlobalHelper.getHardwareByIpOrApi(
       dto.handheldId,
     );
