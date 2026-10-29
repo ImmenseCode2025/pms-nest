@@ -4,6 +4,7 @@
 /public/*
 /.agents/*
 /.agent/*
+/.claude/*
 !/public/seed/
 /client/node_modules
 /client/build
