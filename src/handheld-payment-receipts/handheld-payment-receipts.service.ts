@@ -795,6 +795,13 @@ export class HandheldPaymentReceiptsService {
       generation_datetime: GlobalHelper.getDateTime(),
       operator: operator?.username ?? '-',
 
+      rates: {
+        car_rate: `${carRate} PKR`,
+        van_rate: `${vanRate} PKR`,
+        bus_rate: `${busRate} PKR`,
+        bike_rate: `${bikeRate} PKR`,
+      },
+
       summary: {
         foc_tickets: focTickets,
         foc_car_tickets: focCarTickets,
