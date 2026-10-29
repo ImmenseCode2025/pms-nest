@@ -6,10 +6,12 @@ import {
   Res,
   UploadedFile,
   UploadedFiles,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { OperatorAuthId } from 'src/core/decorators/jwt-auth.decorator';
+import { OperatorJwtAuthGuard } from 'src/core/guard/operator-jwt-auth.guard';
 import { Public } from 'src/core/guard/public.decorator';
 import { FileExtensionsEnum } from 'src/core/helper/enum/global.enum';
 import { ResponseHelper } from 'src/core/helper/response.helper';
@@ -136,8 +138,7 @@ export class HandheldPaymentReceiptsController {
     }
   }
 
-  @Public()
-  // @UseGuards(OperatorJwtAuthGuard)
+  @UseGuards(OperatorJwtAuthGuard)
   @Post('/shift-summary')
   async shiftSummary(
     @Body() dto: ShiftSummaryDto,
@@ -150,7 +151,11 @@ export class HandheldPaymentReceiptsController {
         dto,
         operatorId,
       );
-      return res.status(200).json(data);
+      return ResponseHelper.success({
+        res,
+        data,
+        message: data.message,
+      });
     } catch (error) {
       return ResponseHelper.error({ res, req, error });
     }

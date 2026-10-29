@@ -2,6 +2,8 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import fs from 'fs';
 import moment from 'moment';
 import { join } from 'path';
+import { AppException } from '../exception/app-exception';
+import { Hardware } from '../orm/entities/hardware.entity';
 import { Users } from '../orm/entities/users.entity';
 
 var dotenv = require('dotenv');
@@ -149,10 +151,29 @@ export class GlobalHelper {
     return moment(date).format('YYYY-MM-DD');
   }
 
+  // 'today' -> today's date, 'yesterday' -> yesterday's date
+  static getDateByDay(
+    day: 'today' | 'yesterday' | string,
+    format: string = 'YYYY-MM-DD',
+  ): string {
+    const date = day === 'yesterday' ? moment().subtract(1, 'day') : moment();
+    return date.format(format);
+  }
+
   // Global relation filter helpers
   static selectIdName = (query: any) => query.select('id', 'name');
   static selectFields =
     (...fields: (string | string[])[]) =>
     (query: any) =>
       query.select(fields.flat());
+
+  static async getHardwareByIpOrApi(handheldId: string) {
+    let hardWareData: any = await Hardware.query()
+      .where('ipOrApi', handheldId)
+      .first();
+    if (!hardWareData) {
+      AppException.badRequest({ message: 'Handheld not found' });
+    }
+    return hardWareData;
+  }
 }

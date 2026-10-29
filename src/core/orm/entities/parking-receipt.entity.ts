@@ -7,18 +7,23 @@ export class ParkingReceipt extends Mapping {
     return 'parking_receipt';
   }
 
+  id?: number;
   vehicleNumber?: string;
+  creationDate?: Date | string;
   deviceId?: string;
   uploadDate?: Date | string;
-  vehicleTypeId?: number;
-  checkInOperatorId?: number;
-  checkOutOperatorId?: number;
-  siteId?: number;
-  createdAt?: Date | string;
+  vehicleType?: number;
   updatedAt?: Date | string;
   paymentMethod?: number;
-  onlinePaymentReference?: string;
   ticketNumber?: string;
+  sourceHandheld?: number;
+  sourceTicketEase?: number;
+  checkoutDateTime?: Date | string;
+  paymentReference?: string;
+  onlinePaymentReference?: string;
+  siteId?: number;
+  checkInOperatorId?: number;
+  checkOutOperatorId?: number;
 
   static get relationMappings() {
     return {

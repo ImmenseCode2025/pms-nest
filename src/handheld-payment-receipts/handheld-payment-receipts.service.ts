@@ -8,8 +8,9 @@ import {
   HandheldPaymentMethodIdMap,
   VehicleTypeIdMap,
 } from 'src/core/helper/enum/global.enum';
+import { GlobalHelper } from 'src/core/helper/global-helper';
 import { LodashHelper } from 'src/core/helper/lodash-helper';
-import { Hardware } from 'src/core/orm/entities';
+import { Operator } from 'src/core/orm/entities';
 import { ParkingPrice } from 'src/core/orm/entities/parking-price.entity';
 import { ParkingReceiptSummary } from 'src/core/orm/entities/parking-receipt-summary.entity';
 import { ParkingReceipt } from 'src/core/orm/entities/parking-receipt.entity';
@@ -636,7 +637,7 @@ export class HandheldPaymentReceiptsService {
       paymentReference: dto.paymentReference ?? null,
       onlinePaymentReference: onlinePaymentReferenceUrl,
       siteId: dto.siteId,
-      checkOutOperatorId: operatorId,
+      checkOutOperatorId: dto.checkOutOperatorId || 0,
     });
     return true;
   }
@@ -672,122 +673,24 @@ export class HandheldPaymentReceiptsService {
       paymentReference: dto.paymentReference ?? null,
       onlinePaymentReference: onlinePaymentReferenceUrl,
       siteId: dto.siteId ?? null,
-      checkInOperatorId: operatorId ?? 0,
+      checkInOperatorId: dto.checkInOperatorId ?? 0,
     } as any);
 
     return findOne;
   }
 
   async getShiftSummary(dto: ShiftSummaryDto, operatorId?: number) {
-    let hardWareData: any = await Hardware.query()
-      .where('ipOrApi', dto.handheldId)
-      .first();
-    if (!hardWareData) {
-      AppException.badRequest({ message: 'Handheld not found' });
-    }
-
-    const rawDate = String(dto.date || '').trim();
-    if (!rawDate || !moment(rawDate, 'YYYY-MM-DD', true).isValid()) {
-      AppException.badRequest({
-        message: 'Invalid date format! Use YYYY-MM-DD.',
-      });
-    }
-
-    const rawShift = String(dto.shiftTime || '')
-      .trim()
-      .toLowerCase();
-    if (rawShift !== 'morning' && rawShift !== 'evening') {
-      AppException.badRequest({
-        message:
-          "Invalid shiftTime! Allowed values are 'morning' or 'evening'.",
-      });
-    }
-
-    let shiftStartDateTime: string;
-    let shiftEndDateTime: string;
-
-    if (rawShift === 'morning') {
-      shiftStartDateTime = `${rawDate} 10:00:00`;
-      shiftEndDateTime = `${rawDate} 18:00:00`;
-    } else {
-      const nextDay = moment(rawDate, 'YYYY-MM-DD')
-        .add(1, 'day')
-        .format('YYYY-MM-DD');
-      shiftStartDateTime = `${rawDate} 18:00:00`;
-      shiftEndDateTime = `${nextDay} 02:00:00`;
-    }
-
-    const siteIdNum: any = dto.siteId;
-    const handheldIdNum = dto.handheldId;
-
-    // If summary for this shift is already generated, return the existing summary
-    const alreadyGenerated = await ParkingReceiptSummary.query()
-      .where('handheldId', handheldIdNum)
-      .where('siteId', Number(siteIdNum) || 0)
-      .where('shiftStartDateTime', shiftStartDateTime)
-      .first();
-
-    if (alreadyGenerated) {
-      const focTickets = Number(alreadyGenerated.focTickets) || 0;
-      const focCarTickets = Number(alreadyGenerated.focCarTickets) || 0;
-      const focVanTickets = Number(alreadyGenerated.focVanTickets) || 0;
-      const focBusTickets = Number(alreadyGenerated.focBusTickets) || 0;
-      const focBikeTickets = Number(alreadyGenerated.focBikeTickets) || 0;
-
-      const paidCarTickets = Number(alreadyGenerated.paidCarTickets) || 0;
-      const paidVanTickets = Number(alreadyGenerated.paidVanTickets) || 0;
-      const paidBusTickets = Number(alreadyGenerated.paidBusTickets) || 0;
-      const paidBikeTickets = Number(alreadyGenerated.paidBikeTickets) || 0;
-
-      const totalTickets = Number(alreadyGenerated.totalTickets) || 0;
-      const paidTickets =
-        paidCarTickets + paidVanTickets + paidBusTickets + paidBikeTickets;
-      const unpaidTickets =
-        (alreadyGenerated as any).unpaidTickets !== undefined
-          ? Number((alreadyGenerated as any).unpaidTickets) || 0
-          : Math.max(0, totalTickets - (paidTickets + focTickets));
-
-      const totalRevenue = Number(alreadyGenerated.totalRevenue) || 0;
-      const generationDateTime = alreadyGenerated.generationDateTime
-        ? moment(alreadyGenerated.generationDateTime).format(
-            'YYYY-MM-DD HH:mm:ss',
-          )
-        : moment().format('YYYY-MM-DD HH:mm:ss');
-
-      return {
-        message: 'Summary Retrieved Successfully!',
-        receipt_title: 'Shift-End Summary Receipt',
-        shift: rawShift,
-        shift_date: rawDate,
-        generation_datetime: generationDateTime,
-        summary: {
-          foc_tickets: focTickets,
-          foc_car_tickets: focCarTickets,
-          foc_van_tickets: focVanTickets,
-          foc_bus_tickets: focBusTickets,
-          foc_bike_tickets: focBikeTickets,
-          paid_car_tickets: paidCarTickets,
-          paid_van_tickets: paidVanTickets,
-          paid_bus_tickets: paidBusTickets,
-          paid_bike_tickets: paidBikeTickets,
-          unpaid_tickets: unpaidTickets,
-          total_tickets: totalTickets,
-          total_revenue: `${totalRevenue} PKR`,
-        },
-        response: 'success',
-      };
-    }
-
-    // 3. Query tickets from parking_receipt table
+    const hardWareData: any = await GlobalHelper.getHardwareByIpOrApi(
+      dto.handheldId,
+    );
+    const shiftDate = GlobalHelper.getDateByDay(dto.date);
     const tickets = await ParkingReceipt.query()
-      .where('deviceId', dto.handheldId)
-      .modify((qb) => {
-        if (siteIdNum !== null && !isNaN(siteIdNum)) {
-          qb.where('siteId', siteIdNum);
-        }
+      .where({
+        deviceId: dto.handheldId,
+        siteId: dto.siteId,
+        checkInOperatorId: operatorId,
       })
-      .where('creationDate', '>=', shiftStartDateTime)
-      .where('creationDate', '<=', shiftEndDateTime);
+      .whereRaw('DATE(creationDate) = ?', [shiftDate]);
 
     if (!tickets || tickets.length === 0) {
       AppException.badRequest({ message: 'No Summary Data Found!' });
@@ -834,8 +737,8 @@ export class HandheldPaymentReceiptsService {
     let bikeRate = 0;
     let vanRate = 0;
 
-    if (siteIdNum !== null && !isNaN(siteIdNum)) {
-      const prices = await ParkingPrice.query().where('siteId', siteIdNum);
+    if (dto.siteId) {
+      const prices = await ParkingPrice.query().where('siteId', dto.siteId);
       const priceMap = LodashHelper.keyBy(prices, (p: any) =>
         Number(p.vehicleType ?? p.vehicleTypeId),
       );
@@ -851,38 +754,45 @@ export class HandheldPaymentReceiptsService {
       paidVanTickets * vanRate +
       paidBusTickets * busRate +
       paidBikeTickets * bikeRate;
-
     const amountToSubmit = totalRevenue;
-    const generationDateTime = moment().format('YYYY-MM-DD HH:mm:ss');
 
-    // 5. Save summary to parking_receipt_summary table
-    await ParkingReceiptSummary.query().insert({
-      totalTickets,
-      paidCarTickets,
-      paidVanTickets,
-      paidBusTickets,
-      paidBikeTickets,
-      focTickets,
-      focCarTickets,
-      focVanTickets,
-      focBusTickets,
-      focBikeTickets,
-      totalRevenue,
-      amountToSubmit,
-      shiftStartDateTime,
-      shiftEndDateTime,
-      generationDateTime,
-      siteId: siteIdNum || 0,
+    let operator = await Operator.query().findById(operatorId);
+
+    const summaryKeys = {
+      siteId: dto.siteId,
       handheldId: hardWareData?.id,
+      operatorId: operatorId ?? null,
+      summary_date: shiftDate,
+    };
+
+    // 5. Save summary to parking_receipt_summary table (update if exists, else insert)
+    await ParkingReceiptSummary.upsert({
+      whereClause: summaryKeys,
+      data: {
+        ...summaryKeys,
+        totalTickets,
+        paidCarTickets,
+        paidVanTickets,
+        paidBusTickets,
+        paidBikeTickets,
+        focTickets,
+        focCarTickets,
+        focVanTickets,
+        focBusTickets,
+        focBikeTickets,
+        totalRevenue,
+        submittedAmount: 0,
+      },
     });
 
     // 6. Return thermal printer friendly JSON response
     return {
       message: 'Summary Retrieved Successfully!',
       receipt_title: 'Shift-End Summary Receipt',
-      shift: rawShift,
-      shift_date: rawDate,
-      generation_datetime: generationDateTime,
+      shift_date: shiftDate,
+      generation_datetime: GlobalHelper.getDateTime(),
+      operator: operator?.name ?? '-',
+
       summary: {
         foc_tickets: focTickets,
         foc_car_tickets: focCarTickets,
