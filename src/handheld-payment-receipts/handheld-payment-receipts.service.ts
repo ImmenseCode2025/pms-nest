@@ -767,7 +767,7 @@ export class HandheldPaymentReceiptsService {
     const totalTickets = tickets.length;
 
     // 4. Calculate Revenue from parking_price table using LodashHelper.keyBy
-    // Note: POS amount is not counted in totalRevenue as it is collected electronically via POS machine
+    // Note: Only FOC tickets are excluded from totalRevenue (paid + POS + online are counted)
     let carRate = 0;
     let busRate = 0;
     let bikeRate = 0;
@@ -785,14 +785,13 @@ export class HandheldPaymentReceiptsService {
       vanRate = Number(priceMap[5]?.amount) || 0;
     }
 
-    const totalRevenue =
+    const paidRevenue =
       paidCarTickets * carRate +
       paidVanTickets * vanRate +
       paidBusTickets * busRate +
       paidBikeTickets * bikeRate;
-    const amountToSubmit = totalRevenue;
+    const amountToSubmit = paidRevenue;
 
-    // POS / Online amounts are shown separately, not added to cash totalRevenue
     const posRevenue =
       posCarTickets * carRate +
       posVanTickets * vanRate +
@@ -808,6 +807,9 @@ export class HandheldPaymentReceiptsService {
       cashVanTickets * vanRate +
       cashBusTickets * busRate +
       cashBikeTickets * bikeRate;
+
+    // FOC is the only category left out of revenue
+    const totalRevenue = paidRevenue + posRevenue + onlineRevenue;
 
     let operator = await Operator.query().findById(operatorId);
 
