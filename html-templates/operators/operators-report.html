@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Operators Listing Report</title>
+    <style>
+      @page {
+        size: A4 landscape;
+        margin: 8mm 8mm 8mm 8mm;
+      }
+      :root {
+        --primary: #0f172a;
+        --primary-accent: #2563eb;
+        --secondary-accent: #0891b2;
+        --surface-bg: #ffffff;
+        --surface-subtle: #f8fafc;
+        --border: #e2e8f0;
+        --text-main: #0f172a;
+        --text-secondary: #475569;
+        --text-muted: #94a3b8;
+        
+        --badge-active-bg: #ecfdf5;
+        --badge-active-text: #047857;
+        --badge-active-border: #a7f3d0;
+
+        --badge-inactive-bg: #fef2f2;
+        --badge-inactive-text: #b91c1c;
+        --badge-inactive-border: #fecaca;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        color: var(--text-main);
+        background: #fff;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-size: 8.5px;
+        line-height: 1.35;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .report-header-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 16px;
+        margin-bottom: 8px;
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        position: relative;
+        overflow: hidden;
+      }
+      .report-header-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #2563eb 0%, #06b6d4 50%, #10b981 100%);
+      }
+      .brand-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .system-name {
+        font-size: 13px;
+        font-weight: 800;
+        color: var(--primary);
+        letter-spacing: 0.4px;
+      }
+      .system-subtitle {
+        font-size: 7.5px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin-top: 1px;
+      }
+      .report-title-section {
+        text-align: right;
+      }
+      .report-title {
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--primary-accent);
+        margin: 0;
+        letter-spacing: -0.2px;
+      }
+      .report-meta {
+        font-size: 7.5px;
+        color: var(--text-secondary);
+        margin-top: 2px;
+      }
+
+      /* KPI / Stats Section */
+      .stats-container {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .stat-card {
+        flex: 1;
+        padding: 6px 10px;
+        background: var(--surface-subtle);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .stat-label {
+        font-size: 7.5px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+      }
+      .stat-val {
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--primary);
+      }
+
+      /* Filter Badges */
+      .filters-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        align-items: center;
+        margin-bottom: 8px;
+        padding: 6px 10px;
+        background: #f8fafc;
+        border: 1px dashed var(--border);
+        border-radius: 4px;
+      }
+      .filters-title {
+        font-size: 7.5px;
+        font-weight: 700;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        margin-right: 4px;
+      }
+      .filter-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 1px 6px;
+        border-radius: 3px;
+        font-size: 7.5px;
+        font-weight: 600;
+        background: #ffffff;
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+      }
+      .filter-badge b {
+        color: var(--primary-accent);
+        margin-right: 3px;
+      }
+
+      /* Data Table */
+      table.data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 8px;
+      }
+      table.data-table thead tr {
+        background-color: #0f172a;
+        color: #ffffff;
+      }
+      table.data-table th {
+        padding: 5px 6px;
+        text-align: left;
+        font-weight: 700;
+        font-size: 7.5px;
+        letter-spacing: 0.3px;
+        border-top: 1px solid #0f172a;
+        border-bottom: 1px solid #0f172a;
+      }
+      table.data-table th.center, table.data-table td.center {
+        text-align: center;
+      }
+      table.data-table th.right, table.data-table td.right {
+        text-align: right;
+      }
+      table.data-table tbody tr {
+        border-bottom: 1px solid var(--border);
+      }
+      table.data-table tbody tr:nth-child(even) {
+        background-color: #f8fafc;
+      }
+      table.data-table td {
+        padding: 4px 6px;
+        vertical-align: middle;
+        color: var(--text-main);
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 1.5px 5px;
+        border-radius: 3px;
+        font-size: 7px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .badge-active {
+        background: var(--badge-active-bg);
+        color: var(--badge-active-text);
+        border: 1px solid var(--badge-active-border);
+      }
+      .badge-inactive {
+        background: var(--badge-inactive-bg);
+        color: var(--badge-inactive-text);
+        border: 1px solid var(--badge-inactive-border);
+      }
+
+      /* Footer */
+      .footer {
+        margin-top: 8px;
+        padding-top: 6px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        font-size: 7px;
+        color: var(--text-muted);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Top Header -->
+    <div class="report-header-card">
+      <div class="brand-container">
+        <div>
+          <div class="system-name">PARKING MANAGEMENT SYSTEM</div>
+          <div class="system-subtitle">Operators Operations & Attendants Record</div>
+        </div>
+      </div>
+      <div class="report-title-section">
+        <h1 class="report-title">Operators Directory Report</h1>
+        <div class="report-meta">Generated: {{generated_at}} | System Generated Export</div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-container">
+      <div class="stat-card">
+        <span class="stat-label">Total Operators</span>
+        <span class="stat-val">{{total_records}}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Active Operators</span>
+        <span class="stat-val">{{active_records}}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Inactive Operators</span>
+        <span class="stat-val">{{inactive_records}}</span>
+      </div>
+    </div>
+
+    <!-- Filters summary if any -->
+    {{#if has_filters}}
+    <div class="filters-container">
+      <span class="filters-title">Active Filters:</span>
+      {{#each filters}}
+      <span class="filter-badge"><b>{{this.label}}:</b> {{this.value}}</span>
+      {{/each}}
+    </div>
+    {{/if}}
+
+    <!-- Data Table -->
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th class="center" style="width: 4%;">#</th>
+          <th style="width: 14%;">Username</th>
+          <th class="center" style="width: 11%;">Mobile</th>
+          <th style="width: 15%;">Email</th>
+          <th class="center" style="width: 12%;">CNIC</th>
+          <th style="width: 14%;">Site Name</th>
+          <th style="width: 12%;">Supervisor</th>
+          <th class="center" style="width: 6%;">PIN</th>
+          <th class="center" style="width: 6%;">Status</th>
+          <th class="center" style="width: 6%;">Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each operators}}
+        <tr>
+          <td class="center">{{this.row_number}}</td>
+          <td><b>{{this.username}}</b></td>
+          <td class="center">{{this.mobile}}</td>
+          <td>{{this.email}}</td>
+          <td class="center">{{this.cnic}}</td>
+          <td>{{this.site_name}}</td>
+          <td>{{this.supervisor_name}}</td>
+          <td class="center" style="font-family: monospace; font-weight: bold;">{{this.password}}</td>
+          <td class="center">
+            <span class="badge {{this.status_class}}">{{this.status}}</span>
+          </td>
+          <td class="center">{{this.created_at}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <div class="footer">
+      <span>Confidential - For Internal PMS Administration Use Only</span>
+      <span>PMS Report Engine | Auto-Generated</span>
+    </div>
+  </body>
+</html>
+

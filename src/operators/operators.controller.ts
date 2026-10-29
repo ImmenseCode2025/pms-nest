@@ -65,6 +65,44 @@ export class OperatorsController {
     }
   }
 
+  // 2a. EXPORT PDF
+  @Post('/export-pdf')
+  async exportPdf(
+    @Body() dto: OperatorPaginatedDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const url = await this.operatorsService.exportPdf(dto);
+      return ResponseHelper.success({
+        res,
+        data: { url },
+        message: 'Operators PDF generated successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
+  // 2b. EXPORT EXCEL
+  @Post('/export-excel')
+  async exportExcel(
+    @Body() dto: OperatorPaginatedDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const url = await this.operatorsService.exportExcel(dto);
+      return ResponseHelper.success({
+        res,
+        data: { url },
+        message: 'Operators Excel generated successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
   // 3. READ BY ID
   @Get('/detail/:id')
   async findOne(
