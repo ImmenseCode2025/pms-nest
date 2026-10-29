@@ -50,7 +50,6 @@ export const JwtUser = createParamDecorator(
 export const OperatorAuthId = createParamDecorator(
   (data: unknown, ctx: ExecutionContext): number | undefined => {
     const request = ctx.switchToHttp().getRequest();
-    console.log(request.user, 'request.user');
     return request.user?.id || 0;
   },
 );

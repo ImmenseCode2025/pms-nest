@@ -6,7 +6,6 @@ import {
   Res,
   UploadedFile,
   UploadedFiles,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
@@ -14,7 +13,6 @@ import {
   OperatorAuth,
   OperatorAuthId,
 } from 'src/core/decorators/jwt-auth.decorator';
-import { OperatorJwtAuthGuard } from 'src/core/guard/operator-jwt-auth.guard';
 import { Public } from 'src/core/guard/public.decorator';
 import { FileExtensionsEnum } from 'src/core/helper/enum/global.enum';
 import { ResponseHelper } from 'src/core/helper/response.helper';

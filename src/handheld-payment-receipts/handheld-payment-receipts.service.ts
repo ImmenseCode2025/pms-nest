@@ -680,6 +680,8 @@ export class HandheldPaymentReceiptsService {
   }
 
   async getShiftSummary(dto: ShiftSummaryDto, operatorId?: number) {
+    console.log(operatorId, 'operatorId');
+
     const hardWareData: any = await GlobalHelper.getHardwareByIpOrApi(
       dto.handheldId,
     );
@@ -791,7 +793,7 @@ export class HandheldPaymentReceiptsService {
       receipt_title: 'Shift-End Summary Receipt',
       shift_date: shiftDate,
       generation_datetime: GlobalHelper.getDateTime(),
-      operator: operator?.name ?? '-',
+      operator: operator?.username ?? '-',
 
       summary: {
         foc_tickets: focTickets,
