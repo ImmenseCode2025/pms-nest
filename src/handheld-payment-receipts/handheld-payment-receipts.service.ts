@@ -698,12 +698,34 @@ export class HandheldPaymentReceiptsService {
 
     // Categorize tickets using LodashHelper
     const ticketsByCategory = LodashHelper.groupBy(tickets, (t: any) => {
-      const pMethod =
-        t.paymentMethod !== null && t.paymentMethod !== undefined
-          ? Number(t.paymentMethod)
-          : null;
-      if (pMethod === 14) return 'foc';
-      if (pMethod === null || pMethod === 0) return 'unpaid';
+      const rawMethod = t.paymentMethod;
+      if (
+        rawMethod === null ||
+        rawMethod === undefined ||
+        rawMethod === '' ||
+        rawMethod === 0
+      ) {
+        return 'unpaid';
+      }
+      const strMethod = String(rawMethod).trim().toLowerCase();
+      const numMethod = Number(rawMethod);
+
+      // FOC (Free of Cost) - ID 14
+      if (numMethod === 14 || strMethod === 'foc' || strMethod === 'free car') {
+        return 'foc';
+      }
+
+      // POS - ID 15 or 1
+      if (numMethod === 15 || numMethod === 1 || strMethod === 'pos') {
+        return 'pos';
+      }
+
+      // Skip / Unpaid
+      if (strMethod === 'skip' || strMethod === 'unpaid') {
+        return 'unpaid';
+      }
+
+      // Paid via Cash / Other (ID 16 or 'cash')
       return 'paid';
     });
 
@@ -715,9 +737,14 @@ export class HandheldPaymentReceiptsService {
       ticketsByCategory['paid'] || [],
       (t: any) => Number(t.vehicleType ?? t.vehicleTypeId),
     );
+    const posGroup = LodashHelper.groupBy(
+      ticketsByCategory['pos'] || [],
+      (t: any) => Number(t.vehicleType ?? t.vehicleTypeId),
+    );
 
     const focTickets = (ticketsByCategory['foc'] || []).length;
     const unpaidTickets = (ticketsByCategory['unpaid'] || []).length;
+    const posTickets = (ticketsByCategory['pos'] || []).length;
 
     const focCarTickets = (focGroup[1] || []).length;
     const focBusTickets = (focGroup[3] || []).length;
@@ -729,9 +756,18 @@ export class HandheldPaymentReceiptsService {
     const paidBikeTickets = (paidGroup[4] || []).length;
     const paidVanTickets = (paidGroup[5] || []).length;
 
+    const posCarTickets = (posGroup[1] || []).length;
+    const posBusTickets = (posGroup[3] || []).length;
+    const posBikeTickets = (posGroup[4] || []).length;
+    const posVanTickets = (posGroup[5] || []).length;
+
     const totalTickets = tickets.length;
 
     // 4. Calculate Revenue from parking_price table using LodashHelper.keyBy
+    // NOTE:
+    // - FOC (Free of Cost) tickets generate 0 PKR revenue (foc revenue is NOT counted).
+    // - POS amount is NOT counted in totalRevenue (collected electronically via card machine).
+    // - ONLY physical Cash paid tickets generate totalRevenue / operator cash amount to submit.
     let carRate = 0;
     let busRate = 0;
     let bikeRate = 0;
@@ -806,10 +842,16 @@ export class HandheldPaymentReceiptsService {
         foc_van_tickets: focVanTickets,
         foc_bus_tickets: focBusTickets,
         foc_bike_tickets: focBikeTickets,
+        foc_revenue: `0 PKR`,
         paid_car_tickets: paidCarTickets,
         paid_van_tickets: paidVanTickets,
         paid_bus_tickets: paidBusTickets,
         paid_bike_tickets: paidBikeTickets,
+        pos_tickets: posTickets,
+        pos_car_tickets: posCarTickets,
+        pos_van_tickets: posVanTickets,
+        pos_bus_tickets: posBusTickets,
+        pos_bike_tickets: posBikeTickets,
         unpaid_tickets: unpaidTickets,
         total_tickets: totalTickets,
         total_revenue: `${totalRevenue} PKR`,
