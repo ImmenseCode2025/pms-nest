@@ -605,6 +605,9 @@ export class HandheldPaymentReceiptsService {
     if (!findOne) {
       AppException.badRequest({ message: 'Ticket Number not found' });
     }
+    if (findOne.checkoutDateTime) {
+      AppException.badRequest({ message: 'Ticket is already checked out' });
+    }
     let onlinePaymentReferenceUrl = null;
     const proofFiles =
       files?.onlinePaymentReference || (Array.isArray(files) ? files : null);
