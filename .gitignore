@@ -39,6 +39,8 @@ lerna-debug.log*
 
 # IDE - VSCode
 .vscode/*
+.postman/*
+postman/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
