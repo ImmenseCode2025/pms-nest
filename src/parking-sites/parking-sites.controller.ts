@@ -11,9 +11,11 @@ import {
   Res,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { AuthId } from 'src/core/decorators/auth-id.decorator';
 import { Public } from 'src/core/guard/public.decorator';
 import { ResponseHelper } from 'src/core/helper/response.helper';
 import { GetHandheldInfoDto } from './dto/get-handheld-info.dto';
+import { RegisterParkingSiteDto } from './dto/register-parking-site.dto';
 import { SearchParkingSitesDto } from './dto/search-parking-sites.dto';
 import { ParkingSitesService } from './parking-sites.service';
 
@@ -82,6 +84,25 @@ export class ParkingSitesController {
         res,
         data,
         message: 'Parking sites dropdown fetched successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
+  @Post('/register')
+  async register(
+    @Body() dto: RegisterParkingSiteDto,
+    @Req() req: Request,
+    @Res() res: Response,
+    @AuthId() authId: number,
+  ) {
+    try {
+      const data = await this.parkingSitesService.register(dto, authId);
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Parking Site Registered Successfully!',
       });
     } catch (error) {
       return ResponseHelper.error({ res, req, error });

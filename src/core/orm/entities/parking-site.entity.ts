@@ -33,20 +33,26 @@ export class ParkingSite extends Mapping {
     );
   }
 
+  id?: number;
   name?: string;
-  siteCode?: string;
   sgi?: string;
-  addressId?: number;
-  status?: "pending" | "active" | "inactive" | "outOfService" | "blocked";
-  userId?: number;
+  address?: number;
+  status?: 'pending' | 'active' | 'inactive' | 'outOfService' | 'blocked' | string;
+  user?: number;
   area?: number;
-  unitOfMeasure?: "square feet" | "square meter" | "kilometer";
-  companyId?: number;
-  isValetParkingAvailable?: boolean;
-  collectionPoint?: boolean;
+  unitOfMeasure?: 'square feet' | 'square meter' | 'kilometer' | string;
+  company?: number;
+  isValetParkingAvailable?: boolean | number;
+  collectionPoint?: boolean | number;
   creationDateTime?: Date | string;
-  createdAt?: Date | string;
   updatedAt?: Date | string;
+
+  // Compatibility / Alias properties
+  siteCode?: string;
+  addressId?: number;
+  userId?: number;
+  companyId?: number;
+  createdAt?: Date | string;
 
     static get relationMappings() {
     return {

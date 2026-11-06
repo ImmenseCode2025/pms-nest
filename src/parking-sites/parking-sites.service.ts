@@ -26,9 +26,15 @@ import { ParkingSite } from 'src/core/orm/entities/parking-site.entity';
 import { ParkingToken } from 'src/core/orm/entities/parking-token.entity';
 import { PosQrCode } from 'src/core/orm/entities/pos-qr-code.entity';
 import { SearchParkingSitesDto } from './dto/search-parking-sites.dto';
+import { RegisterParkingSiteDto } from './dto/register-parking-site.dto';
+import { Address } from 'src/core/orm/entities/address.entity';
+import { Company } from 'src/core/orm/entities/company.entity';
+import { ExternalApiService } from 'src/core/external-api/external-api.service';
 
 @Injectable()
 export class ParkingSitesService {
+  constructor(private readonly externalApiService: ExternalApiService) {}
+
   async paginated(data: any = {}) {
     const dto: SearchParkingSitesDto = data.dto || {};
     const query = ParkingSite.query();
@@ -202,6 +208,122 @@ export class ParkingSitesService {
     });
 
     return { id, deleted: true };
+  }
+
+  async register(dto: RegisterParkingSiteDto, authId: number) {
+    const { site, block } = dto;
+
+    const company = await Company.query().findById(site.company);
+    if (!company) {
+      AppException.notFound({ message: `Company #${site.company} not found` });
+    }
+
+    // Reverse geocoding is an external HTTP call, so resolve addresses before the transaction
+    const siteAddressId = await this.resolveAddressId(site.latitude, site.longitude);
+    const blockAddressIds = [];
+    for (const row of block) {
+      blockAddressIds.push(await this.resolveAddressId(row.latitude, row.longitude));
+    }
+
+    const siteId = await ParkingSite.transaction(async (trx) => {
+      const siteCount = await ParkingSite.query(trx).resultSize();
+      const siteSgi = company.shortCode + 'PS' + (siteCount + 1);
+
+      const newSite = await ParkingSite.query(trx).insertAndFetch({
+        name: site.name,
+        sgi: siteSgi,
+        address: siteAddressId,
+        status: 'active',
+        area: site.area,
+        unitOfMeasure: site.uom,
+        company: site.company,
+        isValetParkingAvailable: 0,
+      });
+
+      for (const [i, row] of block.entries()) {
+        await this.registerBlock(trx, row, {
+          sgi: siteSgi + 'B' + (i + 1),
+          address: blockAddressIds[i],
+          site: newSite.id,
+          user: authId,
+        });
+      }
+
+      return newSite.id;
+    });
+
+    return ParkingSite.query()
+      .findById(siteId)
+      .withGraphFetched('[site_address, parkingSiteParkingBlocks.parkingBlocksFloor]');
+  }
+
+  private async registerBlock(trx, row, { sgi, address, site, user }) {
+    const newBlock = await ParkingBlock.query(trx).insertAndFetch({
+      name: row.name,
+      sgi,
+      address,
+      status: 'active',
+      user,
+      site,
+    });
+
+    for (const [j, floor] of (row.floor ?? []).entries()) {
+      const floorSgi = sgi + 'F' + (j + 1);
+      const newFloor = await ParkingBlockFloor.query(trx).insertAndFetch({
+        name: floor.name,
+        sgi: floorSgi,
+        status: 'active',
+        user,
+        block: newBlock.id,
+      });
+
+      const lots = [];
+      for (let k = 1; k <= Number(floor.noOfLots); k++) {
+        lots.push({
+          name: 'P' + k,
+          sgi: floorSgi + 'P' + k,
+          status: 'active',
+          user,
+          floor: newFloor.id,
+          availability: 'unoccupied',
+        });
+      }
+
+      if (lots.length > 0) {
+        await ParkingLot.knexQuery().transacting(trx).insert(lots);
+      }
+    }
+  }
+
+  private async resolveAddressId(latitude: number, longitude: number): Promise<number> {
+    const existing: any = await Address.query()
+      .where('latitude', latitude)
+      .where('longitude', longitude)
+      .first();
+
+    if (existing) return existing.id;
+
+    const geoData = await this.externalApiService.reverseGeocode(latitude, longitude);
+    const addr = geoData?.address ?? {};
+
+    const addressPayload = {
+      name: geoData?.display_name ?? geoData?.name ?? null,
+      city: addr.city ?? addr.town ?? addr.village ?? addr.municipality ?? addr.road ?? null,
+      state: addr.state ?? addr.state_district ?? addr.city_district ?? null,
+      country: addr.country ?? null,
+      zipCode: addr.postcode ?? null,
+      latitude,
+      longitude,
+    };
+
+    const doubleCheck: any = await Address.query()
+      .where('latitude', latitude)
+      .where('longitude', longitude)
+      .first();
+    if (doubleCheck) return doubleCheck.id;
+
+    const newAddress: any = await Address.query().insertAndFetch(addressPayload);
+    return newAddress.id;
   }
 
   async getHandheldInfo(dto: GetHandheldInfoDto) {
