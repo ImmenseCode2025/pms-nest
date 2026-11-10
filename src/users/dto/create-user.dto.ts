@@ -3,14 +3,10 @@ import {
   IsIn,
   IsInt,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
   Matches,
-  Max,
-  Min,
   MinLength,
-  ValidateIf,
 } from 'class-validator';
 import { IsMatch } from 'src/core/decorators/match.decorator';
 
@@ -52,16 +48,12 @@ export class CreateUserDto {
   @IsString()
   profile?: string;
 
-  // If latitude is provided, longitude is also required (and vice versa)
-  @ValidateIf((o) => o.longitude !== undefined)
-  @IsNumber()
-  @Min(-90)
-  @Max(90)
+  @IsNotEmpty()
+  location?: string;
+
+  @IsNotEmpty()
   latitude?: number;
 
-  @ValidateIf((o) => o.latitude !== undefined)
-  @IsNumber()
-  @Min(-180)
-  @Max(180)
+  @IsNotEmpty()
   longitude?: number;
 }

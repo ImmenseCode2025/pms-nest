@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { ExternalApiService } from 'src/core/external-api/external-api.service';
 import { FERNET_KEY } from 'src/auth/auth.service';
 import { AppException } from 'src/core/exception/app-exception';
+import { ExternalApiService } from 'src/core/external-api/external-api.service';
 import { Address, Users } from 'src/core/orm/entities';
 import { ParkingSite } from 'src/core/orm/entities/parking-site.entity';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -16,10 +16,16 @@ export class UsersService {
   // ─── GET PROFILE ─────────────────────────────────────────────────────────────
 
   async getProfile(userId: number) {
-    const user = await Users.query().withGraphFetched('[userAddress]').findById(userId);
+    const user = await Users.query()
+      .withGraphFetched('[userAddress]')
+      .findById(userId);
     if (!user) {
       throw new HttpException(
-        { statusCode: HttpStatus.NOT_FOUND, message: ['User not found'], error: 'Not Found' },
+        {
+          statusCode: HttpStatus.NOT_FOUND,
+          message: ['User not found'],
+          error: 'Not Found',
+        },
         HttpStatus.NOT_FOUND,
       );
     }
@@ -29,7 +35,7 @@ export class UsersService {
   // ─── CREATE USER (admin only) ────────────────────────────────────────────────
 
   async create(dto: CreateUserDto) {
-    const emailExists = await Users.query().where('email', dto.email.trim()).first();
+    const emailExists = await Users.query().where('email', dto.email).first();
     if (emailExists) {
       AppException.badRequest({ message: 'Email already exists' });
     }
@@ -46,7 +52,7 @@ export class UsersService {
 
     const payload: Record<string, any> = {
       username: dto.username,
-      email: dto.email.trim(),
+      email: dto.email,
       contact: dto.contact,
       cnic: dto.cnic,
       password: this.encryptPassword(dto.password),
@@ -54,18 +60,12 @@ export class UsersService {
       user_type: dto.access === 'admin' ? 'Admin' : 'User',
       site: dto.site,
       profile: dto.profile,
+      location: dto.location,
+      latitude: dto.latitude,
+      longitude: dto.longitude,
       status: 'completed',
       creationSource: 'manual',
     };
-
-    if (
-      dto?.latitude !== undefined &&
-      dto?.latitude !== null &&
-      dto?.longitude !== undefined &&
-      dto?.longitude !== null
-    ) {
-      payload.address = await this.resolveAddressId(dto.latitude, dto.longitude);
-    }
 
     return Users.query().insertAndFetch(payload);
   }
@@ -93,7 +93,10 @@ export class UsersService {
       dto?.longitude !== undefined &&
       dto?.longitude !== null
     ) {
-      const addressId = await this.resolveAddressId(dto.latitude, dto.longitude);
+      const addressId = await this.resolveAddressId(
+        dto.latitude,
+        dto.longitude,
+      );
       if (addressId) {
         patchPayload.address = addressId;
       }
@@ -102,7 +105,10 @@ export class UsersService {
     return Users.query().patchAndFetchById(userId, patchPayload);
   }
 
-  private async resolveAddressId(latitude: number, longitude: number): Promise<number> {
+  private async resolveAddressId(
+    latitude: number,
+    longitude: number,
+  ): Promise<number> {
     const existing: any = await Address.query()
       .where('latitude', latitude)
       .where('longitude', longitude)
@@ -111,12 +117,21 @@ export class UsersService {
     if (existing) return existing.id;
 
     // Step 2: reverse-geocode
-    const geoData = await this.externalApiService.reverseGeocode(latitude, longitude);
+    const geoData = await this.externalApiService.reverseGeocode(
+      latitude,
+      longitude,
+    );
     const addr = geoData.address ?? {};
 
     const addressPayload = {
       name: geoData.display_name ?? geoData.name ?? null,
-      city: addr.city ?? addr.town ?? addr.village ?? addr.municipality ?? addr.road ?? null,
+      city:
+        addr.city ??
+        addr.town ??
+        addr.village ??
+        addr.municipality ??
+        addr.road ??
+        null,
       state: addr.state ?? addr.state_district ?? addr.city_district ?? null,
       country: addr.country ?? null,
       zipCode: addr.postcode ?? null,
@@ -130,7 +145,8 @@ export class UsersService {
       .first();
     if (doubleCheck) return doubleCheck.id;
 
-    const newAddress: any = await Address.query().insertAndFetch(addressPayload);
+    const newAddress: any =
+      await Address.query().insertAndFetch(addressPayload);
     return newAddress?.id;
   }
 }

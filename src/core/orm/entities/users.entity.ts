@@ -26,13 +26,26 @@ import { PortalNotification } from './portal-notification.entity';
 import { PosQrCode } from './pos-qr-code.entity';
 
 export class Users extends Mapping {
-    static get tableName() {
+  static get tableName() {
     return 'user';
   }
 
-
-
-
+  id?: number;
+  username?: string;
+  password?: string;
+  email?: string;
+  contact?: string;
+  cnic?: string;
+  address?: number;
+  profile?: string;
+  status?: 'incomplete' | 'active' | 'inactive' | 'blocked' | 'completed' | string;
+  creationDateTime?: Date | string;
+  access?: 'employee' | 'admin' | 'supervisor' | string;
+  site?: number;
+  creationSource?: 'manual' | string;
+  user_type?: 'User' | 'Admin' | string;
+  updatedAt?: Date | string;
+  isDeleted?: boolean | number;
 
   $formatJson(json) {
     delete json.password;
