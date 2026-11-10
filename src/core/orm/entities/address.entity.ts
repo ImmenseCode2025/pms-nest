@@ -4,7 +4,6 @@ import { Company } from './company.entity';
 import { Customer } from './customer.entity';
 import { ParkingBlock } from './parking-block.entity';
 import { ParkingGate } from './parking-gate.entity';
-import { ParkingSite } from './parking-site.entity';
 import { Corporate } from './corporate.entity';
 
 export class Address extends Mapping {
@@ -62,14 +61,6 @@ export class Address extends Mapping {
         join: {
           from: 'address.id',
           to: 'parking_gate.address',
-        },
-      },
-      addressParkingSite: {
-        relation: Mapping.HasManyRelation,
-        modelClass: ParkingSite,
-        join: {
-          from: 'address.id',
-          to: 'parking_site.address',
         },
       },
       addressCorporate: {

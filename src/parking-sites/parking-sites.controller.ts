@@ -109,6 +109,24 @@ export class ParkingSitesController {
     }
   }
 
+  @Get('/detail/:id')
+  async detail(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const data = await this.parkingSitesService.detail(id);
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Parking site detail fetched successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
   @Delete('/delete/:id')
   async delete(
     @Param('id', ParseIntPipe) id: number,
@@ -120,7 +138,7 @@ export class ParkingSitesController {
       return ResponseHelper.success({
         res,
         data,
-        message: 'Parking site and related configuration deleted successfully',
+        message: 'Parking site deleted successfully',
       });
     } catch (error) {
       return ResponseHelper.error({ res, req, error });

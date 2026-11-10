@@ -1,7 +1,6 @@
 import { Mapping } from '../sql.model';
 import { ShiftClosingCollectionDetail } from './shift-closing-collection-detail.entity';
 import { ParkingToken } from './parking-token.entity';
-import { Users } from './users.entity';
 import { ParkingPrice } from './parking-price.entity';
 import { Discount } from './discount.entity';
 import { ParkingPriceLogs } from './parking-price-logs.entity';
@@ -13,9 +12,9 @@ export class VehicleType extends Mapping {
     return 'vehicle_type';
   }
 
+  id?: number;
   name?: string;
-  userId?: number;
-  registerDateTime?: Date | string;
+  user?: number;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 
@@ -35,14 +34,6 @@ export class VehicleType extends Mapping {
         join: {
           from: 'vehicle_type.id',
           to: 'parking_token.vehicleType',
-        },
-      },
-      typeUsers: {
-        relation: Mapping.BelongsToOneRelation,
-        modelClass: Users,
-        join: {
-          from: 'vehicle_type.user',
-          to: 'user.id',
         },
       },
       typeParkingPrices: {

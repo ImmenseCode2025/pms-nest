@@ -13,7 +13,6 @@ import { ParkingBlock } from './parking-block.entity';
 import { ParkingGate } from './parking-gate.entity';
 import { ParkingLot } from './parking-lot.entity';
 import { PaymentGateway } from './payment-gateway.entity';
-import { VehicleType } from './vehicle-type.entity';
 import { UserAccessToken } from './user-access-token.entity';
 import { EntranceExitMonitor } from './entrance-exit-monitor.entity';
 import { ParkingPrice } from './parking-price.entity';
@@ -176,14 +175,6 @@ export class Users extends Mapping {
         join: {
           from: 'user.id',
           to: 'payment_gateway.user',
-        },
-      },
-      userVehicleType: {
-        relation: Mapping.HasManyRelation,
-        modelClass: VehicleType,
-        join: {
-          from: 'user.id',
-          to: 'vehicle_type.user',
         },
       },
       userUserAccessToken: {

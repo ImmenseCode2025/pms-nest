@@ -32,6 +32,7 @@ import { HardwareModule } from './hardware/hardware.module';
 import { HandheldPaymentReceiptsModule } from './handheld-payment-receipts/handheld-payment-receipts.module';
 import { OperatorsModule } from './operators/operators.module';
 import { ParkingReceiptSummaryModule } from './parking-receipt-summary/parking-receipt-summary.module';
+import { VehicleTypesModule } from './vehicle-types/vehicle-types.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { ParkingReceiptSummaryModule } from './parking-receipt-summary/parking-r
     FilesUploadModule,
     OperatorsModule,
     ParkingReceiptSummaryModule,
+    VehicleTypesModule,
   ],
 
   controllers: [AppController],

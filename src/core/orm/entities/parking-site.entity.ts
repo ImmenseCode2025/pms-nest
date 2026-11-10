@@ -1,5 +1,4 @@
 import { Mapping } from '../sql.model';
-import { Address } from './address.entity';
 import { AppQrCode } from './app-qr-code.entity';
 import { CashQrCode } from './cash-qr-code.entity';
 import { CompanyCards } from './company-cards.entity';
@@ -36,15 +35,14 @@ export class ParkingSite extends Mapping {
   id?: number;
   name?: string;
   sgi?: string;
-  address?: number;
   status?: 'pending' | 'active' | 'inactive' | 'outOfService' | 'blocked' | string;
   user?: number;
   area?: number;
-  unitOfMeasure?: 'square feet' | 'square meter' | 'kilometer' | string;
+  location?: string;
+  latitude?: string;
+  longitude?: string;
   company?: number;
-  isValetParkingAvailable?: boolean | number;
-  collectionPoint?: boolean | number;
-  creationDateTime?: Date | string;
+  createdAt?: Date | string;
   updatedAt?: Date | string;
 
   // Compatibility / Alias properties
@@ -52,7 +50,6 @@ export class ParkingSite extends Mapping {
   addressId?: number;
   userId?: number;
   companyId?: number;
-  createdAt?: Date | string;
 
     static get relationMappings() {
     return {
@@ -94,15 +91,6 @@ export class ParkingSite extends Mapping {
         join: {
           from: 'parking_site.user',
           to: 'user.id',
-        },
-      },
-      site_address: {
-        relation: Mapping.BelongsToOneRelation,
-        modelClass: Address,
-        filter: Mapping.selectFields('id', 'name'),
-        join: {
-          from: 'parking_site.address',
-          to: 'address.id',
         },
       },
       siteParkingCompany: {
