@@ -6,6 +6,7 @@ import { Address, Users } from 'src/core/orm/entities';
 import { ParkingSite } from 'src/core/orm/entities/parking-site.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UsersPaginatedDto } from './dto/users-paginated.dto';
 
 const fernet = require('fernet');
 
@@ -30,6 +31,42 @@ export class UsersService {
       );
     }
     return user;
+  }
+
+  // ─── PAGINATED LIST (admin only) ─────────────────────────────────────────────
+
+  async paginated(data: any = {}) {
+    const dto: UsersPaginatedDto = data.dto || {};
+    const query = Users.query();
+
+    // Only admin / employee accounts that aren't soft-deleted
+    query.whereIn('access', ['admin', 'employee']);
+    query.where((builder) => {
+      builder.whereNull('isDeleted').orWhere('isDeleted', false);
+    });
+
+    if (dto.access) {
+      query.where('access', dto.access);
+    }
+
+    if (dto.search) {
+      const search = `%${dto.search}%`;
+      query.where((builder) => {
+        builder
+          .where('username', 'like', search)
+          .orWhere('email', 'like', search)
+          .orWhere('contact', 'like', search)
+          .orWhere('cnic', 'like', search);
+      });
+    }
+
+    // Site name for the table (password is stripped by Users.$formatJson)
+    query
+      .withGraphFetched('parkingSiteUser(siteName)')
+      .modifiers({ siteName: (builder) => builder.select('id', 'name') });
+    query.orderBy('id', 'desc');
+
+    return Users.pagination(query, data);
   }
 
   // ─── CREATE USER (admin only) ────────────────────────────────────────────────

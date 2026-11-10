@@ -46,3 +46,4 @@ export class CreateCorporateDto {
   @IsString()
   status?: 'pending' | 'approved' | 'rejected';
 }
+

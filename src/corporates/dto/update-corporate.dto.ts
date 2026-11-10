@@ -49,3 +49,4 @@ export class UpdateCorporateDto {
   @IsString()
   status?: 'pending' | 'approved' | 'rejected';
 }
+

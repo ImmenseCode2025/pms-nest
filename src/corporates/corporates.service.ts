@@ -5,6 +5,7 @@ import * as handlebars from 'handlebars';
 import moment from 'moment';
 import * as path from 'path';
 import * as puppeteer from 'puppeteer';
+import { FERNET_KEY } from 'src/auth/auth.service';
 import { AppConfigService } from 'src/core/config/app-config.service';
 import { AppException } from 'src/core/exception/app-exception';
 import { GlobalHelper } from 'src/core/helper/global-helper';
@@ -14,11 +15,10 @@ import { CorporateInvoice } from 'src/core/orm/entities/corporate-invoice.entity
 import { CorporateResetPassword } from 'src/core/orm/entities/corporate-reset-password.entity';
 import { Corporate } from 'src/core/orm/entities/corporate.entity';
 import { PortalNotification } from 'src/core/orm/entities/portal-notification.entity';
-import { FERNET_KEY } from 'src/auth/auth.service';
-import { CreateCorporateDto } from './dto/create-corporate.dto';
-import { UpdateCorporateDto } from './dto/update-corporate.dto';
 import { CorporatePaginatedDto } from './dto/corporate-paginated.dto';
+import { CreateCorporateDto } from './dto/create-corporate.dto';
 import { GenerateInvoiceDto } from './dto/generate-invoice.dto';
+import { UpdateCorporateDto } from './dto/update-corporate.dto';
 
 const fernet = require('fernet');
 
@@ -48,7 +48,7 @@ export class CorporatesService {
   // 1. CREATE
   async create(dto: CreateCorporateDto, req?: any) {
     const existingEmail = await Corporate.query()
-      .where('email', dto.email.trim())
+      .where('email', dto.email)
       .first();
     if (existingEmail) {
       AppException.badRequest({
@@ -196,7 +196,6 @@ export class CorporatesService {
       });
     }
 
-
     const existingInvoice = await CorporateInvoice.query()
       .where('corporateId', dto.corporateId)
       .where('billingPeriodStart', '<=', dto.billingPeriodEnd)
@@ -308,15 +307,26 @@ export class CorporatesService {
     return result ?? null;
   }
 
-  async generateInvoicePdf(invoiceId: number): Promise<{ url: string; invoiceNumber: string; id: number }> {
+  async generateInvoicePdf(
+    invoiceId: number,
+  ): Promise<{ url: string; invoiceNumber: string; id: number }> {
     const invoice: any = await CorporateInvoice.query().findById(invoiceId);
     if (!invoice) {
-      AppException.notFound({ message: `Corporate invoice #${invoiceId} not found` });
+      AppException.notFound({
+        message: `Corporate invoice #${invoiceId} not found`,
+      });
     }
 
-    const corporate: any = await Corporate.query().findById(invoice.corporateId);
+    const corporate: any = await Corporate.query().findById(
+      invoice.corporateId,
+    );
 
-    const logoPath = path.join(process.cwd(), 'html-templates', 'assets', 'ajcl-logo.png');
+    const logoPath = path.join(
+      process.cwd(),
+      'html-templates',
+      'assets',
+      'ajcl-logo.png',
+    );
     let logoBase64 = '';
     if (fs.existsSync(logoPath)) {
       logoBase64 = `data:image/png;base64,${fs.readFileSync(logoPath).toString('base64')}`;
@@ -332,9 +342,10 @@ export class CorporatesService {
     const invoiceMonth = invoice.billingPeriodStart
       ? moment(invoice.billingPeriodStart).format('MMMM YYYY')
       : moment().format('MMMM YYYY');
-    const billingPeriod = invoice.billingPeriodStart && invoice.billingPeriodEnd
-      ? `${moment(invoice.billingPeriodStart).format('DD MMM')} – ${moment(invoice.billingPeriodEnd).format('DD MMM YYYY')}`
-      : moment().format('MMMM YYYY');
+    const billingPeriod =
+      invoice.billingPeriodStart && invoice.billingPeriodEnd
+        ? `${moment(invoice.billingPeriodStart).format('DD MMM')} – ${moment(invoice.billingPeriodEnd).format('DD MMM YYYY')}`
+        : moment().format('MMMM YYYY');
     const status = String(invoice.status || 'pending').toLowerCase();
     const isPaid = status === 'paid';
     const isOverdue = status === 'overdue' || status === 'declined';
@@ -342,19 +353,27 @@ export class CorporatesService {
 
     const corporateName = corporate?.name || 'Customer Company Name';
     const contactPerson = corporate?.contactPersonName || 'Account Manager';
-    const billingAddress = corporate?.location || corporate?.address || 'Main Commercial Area';
+    const billingAddress =
+      corporate?.location || corporate?.address || 'Main Commercial Area';
     const cityCountry = 'Karachi, Pakistan';
-    const contactInfo = [corporate?.email, corporate?.contactNumber].filter(Boolean).join(' · ') || 'billing@company.com';
+    const contactInfo =
+      [corporate?.email, corporate?.contactNumber]
+        .filter(Boolean)
+        .join(' · ') || 'billing@company.com';
     const taxId = corporate?.registrationNumber || '—';
     const corporateId = corporate?.id || invoice.corporateId;
 
-    const rawUnit = String(invoice.unitType || corporate?.unitType || 'slots').toLowerCase();
+    const rawUnit = String(
+      invoice.unitType || corporate?.unitType || 'slots',
+    ).toLowerCase();
     const isSlot = rawUnit.includes('slot');
     const quantityHeader = isSlot ? 'Number of Slots' : 'Number of Vehicles';
     const priceHeader = isSlot ? 'Slot Price' : 'Vehicle Price';
     const unitType = isSlot ? 'Slots' : 'Vehicles';
     const unitTypeLower = isSlot ? 'slots' : 'vehicles';
-    const quantity = Number(invoice.quantity || invoice.billableVehicleCount || 1);
+    const quantity = Number(
+      invoice.quantity || invoice.billableVehicleCount || 1,
+    );
     const billingPlan = corporate?.billingPlan || '—';
     const notes = invoice.notes || `${invoiceMonth} monthly billing invoice`;
 
@@ -366,7 +385,10 @@ export class CorporatesService {
     const salesTaxAmount = Number(invoice.salesTaxAmount || 0);
     const whTaxPercentage = Number(invoice.whTaxPercentage || 0);
     const whTaxAmount = Number(invoice.whTaxAmount || 0);
-    const totalAmount = Number(invoice.totalAmount || (subtotal - discountAmount + salesTaxAmount + whTaxAmount).toFixed(2));
+    const totalAmount = Number(
+      invoice.totalAmount ||
+        (subtotal - discountAmount + salesTaxAmount + whTaxAmount).toFixed(2),
+    );
     const paidAmount = Number(invoice.paidAmount || 0);
     const arrears = Number(invoice.arrears || 0);
     const balanceDue = Number((totalAmount - paidAmount).toFixed(2));
@@ -419,9 +441,6 @@ export class CorporatesService {
       balanceDueFormatted: formatCurrency(balanceDue),
     };
 
-
-
-
     const html = await this.renderHtmlTemplate(
       'corporates/corporate-invoice.html',
       templateData,
@@ -441,7 +460,9 @@ export class CorporatesService {
 
     const publicUrl = this.appConfigService.getR2Url(fileKey);
 
-    await CorporateInvoice.query().findById(invoiceId).patch({ pdfPath: publicUrl });
+    await CorporateInvoice.query()
+      .findById(invoiceId)
+      .patch({ pdfPath: publicUrl });
 
     return {
       url: publicUrl,
@@ -450,7 +471,10 @@ export class CorporatesService {
     };
   }
 
-  private async htmlToPdfBuffer(html: string, landscape: boolean = false): Promise<Buffer> {
+  private async htmlToPdfBuffer(
+    html: string,
+    landscape: boolean = false,
+  ): Promise<Buffer> {
     const launchOptions: any = {
       headless: true,
       args: [
@@ -459,7 +483,10 @@ export class CorporatesService {
         '--disable-dev-shm-usage',
       ],
     };
-    if (process.env.CHROME_DRIVER_PATH && fs.existsSync(process.env.CHROME_DRIVER_PATH)) {
+    if (
+      process.env.CHROME_DRIVER_PATH &&
+      fs.existsSync(process.env.CHROME_DRIVER_PATH)
+    ) {
       launchOptions.executablePath = process.env.CHROME_DRIVER_PATH;
     }
 
@@ -491,11 +518,12 @@ export class CorporatesService {
     } finally {
       await browser.close();
     }
-
-
   }
 
-  private async renderHtmlTemplate(templatePath: string, data: any): Promise<string> {
+  private async renderHtmlTemplate(
+    templatePath: string,
+    data: any,
+  ): Promise<string> {
     const fullPath = path.join(process.cwd(), 'html-templates', templatePath);
     if (!fs.existsSync(fullPath)) {
       throw new Error(`Template file not found: ${fullPath}`);
@@ -504,7 +532,6 @@ export class CorporatesService {
     const compiledTemplate = handlebars.compile(htmlTemplate);
     return compiledTemplate(data);
   }
-
 
   async delete(id: number) {
     // 1. Check if Corporate exists

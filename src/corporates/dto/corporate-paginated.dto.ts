@@ -17,3 +17,4 @@ export class CorporatePaginatedDto {
   @IsString()
   registrationNumber?: string;
 }
+
