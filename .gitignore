@@ -46,3 +46,6 @@ postman/*
 !.vscode/launch.json
 !.vscode/extensions.json
 .vscode/settings.json
+
+# Database backups
+db-backup/
