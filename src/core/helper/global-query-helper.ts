@@ -167,7 +167,7 @@ export class GlobalQueryHelper {
     return query.select(
       `${siteTable}.*`,
       query.client.raw(
-        `((SELECT COUNT(id) FROM parking_token WHERE parking_token.site = ${siteTable}.id) + (SELECT COUNT(pr.id) FROM parking_receipt pr INNER JOIN hardware hw ON pr.deviceId = hw.ipOrApi WHERE hw.asignee = ${siteTable}.id)) AS totalEntries`,
+        `((SELECT COUNT(id) FROM parking_token WHERE parking_token.site = ${siteTable}.id) + (SELECT COUNT(pr.id) FROM parking_receipt pr WHERE pr.siteId = ${siteTable}.id)) AS totalEntries`,
       ),
     );
   }

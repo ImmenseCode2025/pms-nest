@@ -78,13 +78,12 @@ BEGIN
                 ELSE COALESCE(pp.amount, 0)
             END) AS total_revenue
         FROM parking_receipt pr
-        INNER JOIN hardware hw ON pr.deviceId = hw.ipOrApi
-        INNER JOIN parking_site ps ON hw.asignee = ps.id
+        INNER JOIN parking_site ps ON pr.siteId = ps.id
         LEFT JOIN vehicle_type vt ON vt.id = pr.vehicleType
         LEFT JOIN parking_price pp ON pp.vehicleType = pr.vehicleType AND pp.siteId = ps.id
         WHERE (v_device IS NULL OR v_device = 'handheld')
           AND (p_company_id IS NULL OR ps.company = p_company_id)
-          AND (p_site_id IS NULL OR ps.id = p_site_id)
+          AND (p_site_id IS NULL OR pr.siteId = p_site_id)
           AND (p_payment_method IS NULL OR pr.paymentMethod = p_payment_method)
           AND (p_vehicle_type IS NULL OR pr.vehicleType = p_vehicle_type)
           AND (v_start_date IS NULL OR DATE(pr.creationDate) >= DATE(v_start_date))
@@ -119,12 +118,11 @@ BEGIN
             DATE_FORMAT(pr.creationDate, '%Y-%m-%d') AS day,
             COUNT(1) AS total_count
         FROM parking_receipt pr
-        INNER JOIN hardware hw ON pr.deviceId = hw.ipOrApi
-        INNER JOIN parking_site ps ON hw.asignee = ps.id
+        INNER JOIN parking_site ps ON pr.siteId = ps.id
         WHERE (v_device IS NULL OR v_device = 'handheld')
           AND pr.creationDate IS NOT NULL
           AND (p_company_id IS NULL OR ps.company = p_company_id)
-          AND (p_site_id IS NULL OR ps.id = p_site_id)
+          AND (p_site_id IS NULL OR pr.siteId = p_site_id)
           AND (p_payment_method IS NULL OR pr.paymentMethod = p_payment_method)
           AND (p_vehicle_type IS NULL OR pr.vehicleType = p_vehicle_type)
           AND (v_start_date IS NULL OR DATE(pr.creationDate) >= DATE(v_start_date))
@@ -190,14 +188,13 @@ BEGIN
                 (CASE WHEN pr.checkOutDateTime IS NULL THEN 'Active' ELSE 'Expired' END) AS status,
                 pm.name AS payment_method
             FROM parking_receipt pr
-            INNER JOIN hardware hw ON pr.deviceId = hw.ipOrApi
-            INNER JOIN parking_site ps ON hw.asignee = ps.id
+            INNER JOIN parking_site ps ON pr.siteId = ps.id
             LEFT JOIN vehicle_type vt ON vt.id = pr.vehicleType
             LEFT JOIN parking_price pp ON pp.vehicleType = pr.vehicleType AND pp.siteId = ps.id
             LEFT JOIN payment_method pm ON pm.id = pr.paymentMethod
             WHERE (v_device IS NULL OR v_device = 'handheld')
               AND (p_company_id IS NULL OR ps.company = p_company_id)
-              AND (p_site_id IS NULL OR ps.id = p_site_id)
+              AND (p_site_id IS NULL OR pr.siteId = p_site_id)
               AND (p_payment_method IS NULL OR pr.paymentMethod = p_payment_method)
               AND (p_vehicle_type IS NULL OR pr.vehicleType = p_vehicle_type)
               AND (v_start_date IS NULL OR DATE(pr.creationDate) >= DATE(v_start_date))

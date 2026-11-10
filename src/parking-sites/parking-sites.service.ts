@@ -226,12 +226,9 @@ export class ParkingSitesService {
     }
 
     const siteId = await ParkingSite.transaction(async (trx) => {
-      const siteCount = await ParkingSite.query(trx).resultSize();
-      const siteSgi = company.shortCode + 'PS' + (siteCount + 1);
-
       const newSite = await ParkingSite.query(trx).insertAndFetch({
         name: site.name,
-        sgi: siteSgi,
+        sgi: '',
         address: siteAddressId,
         status: 'active',
         area: site.area,
@@ -239,6 +236,10 @@ export class ParkingSitesService {
         company: site.company,
         isValetParkingAvailable: 0,
       });
+
+      // SGI uses the auto-increment id, so numbers of deleted sites are never reused
+      const siteSgi = company.shortCode + 'PS' + newSite.id;
+      await ParkingSite.query(trx).patch({ sgi: siteSgi }).where('id', newSite.id);
 
       for (const [i, row] of block.entries()) {
         await this.registerBlock(trx, row, {

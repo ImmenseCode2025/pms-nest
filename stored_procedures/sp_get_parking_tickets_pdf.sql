@@ -100,13 +100,12 @@ BEGIN
                 CASE WHEN pr.checkOutDateTime IS NULL THEN 'Active' ELSE 'Expired' END AS status,
                 pm.name AS payment_method
             FROM parking_receipt pr
-            INNER JOIN hardware hw ON pr.deviceId = hw.ipOrApi
-            INNER JOIN parking_site ps ON hw.asignee = ps.id
+            INNER JOIN parking_site ps ON pr.siteId = ps.id
             LEFT JOIN vehicle_type vt ON vt.id = pr.vehicleType
             LEFT JOIN parking_price pp ON pp.vehicleType = pr.vehicleType AND pp.siteId = ps.id
             LEFT JOIN payment_method pm ON pm.id = pr.paymentMethod
             WHERE (v_device IS NULL OR v_device = 'handheld')
-              AND (p_site_id IS NULL OR ps.id = p_site_id)
+              AND (p_site_id IS NULL OR pr.siteId = p_site_id)
               AND (p_vehicle_type IS NULL OR pr.vehicleType = p_vehicle_type)
               AND (v_start IS NULL OR pr.creationDate >= v_start)
               AND (v_end   IS NULL OR pr.creationDate <= v_end)
