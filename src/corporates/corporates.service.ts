@@ -14,7 +14,13 @@ import { CorporateInvoice } from 'src/core/orm/entities/corporate-invoice.entity
 import { CorporateResetPassword } from 'src/core/orm/entities/corporate-reset-password.entity';
 import { Corporate } from 'src/core/orm/entities/corporate.entity';
 import { PortalNotification } from 'src/core/orm/entities/portal-notification.entity';
+import { FERNET_KEY } from 'src/auth/auth.service';
+import { CreateCorporateDto } from './dto/create-corporate.dto';
+import { UpdateCorporateDto } from './dto/update-corporate.dto';
+import { CorporatePaginatedDto } from './dto/corporate-paginated.dto';
 import { GenerateInvoiceDto } from './dto/generate-invoice.dto';
+
+const fernet = require('fernet');
 
 @Injectable()
 export class CorporatesService {
@@ -33,12 +39,147 @@ export class CorporatesService {
     });
   }
 
+  private encryptPassword(password: string): string {
+    const secret = new fernet.Secret(FERNET_KEY);
+    const token = new fernet.Token({ secret, time: Date.now() });
+    return token.encode(password);
+  }
+
+  // 1. CREATE
+  async create(dto: CreateCorporateDto, req?: any) {
+    const existingEmail = await Corporate.query()
+      .where('email', dto.email.trim())
+      .first();
+    if (existingEmail) {
+      AppException.badRequest({
+        message: 'Corporate with this email already exists',
+      });
+    }
+
+    const existingReg = await Corporate.query()
+      .where('registrationNumber', dto.registrationNumber.trim())
+      .first();
+    if (existingReg) {
+      AppException.badRequest({
+        message: 'Corporate with this registration number already exists',
+      });
+    }
+
+    const item = await Corporate.query().insertAndFetch({
+      name: dto.name,
+      registrationNumber: dto.registrationNumber.trim(),
+      email: dto.email.trim(),
+      contactPersonName: dto.contactPersonName,
+      contactNumber: dto.contactNumber,
+      password: this.encryptPassword(dto.password),
+      address: dto.address ?? null,
+      location: dto.location ?? null,
+      quantity: dto.quantity ?? null,
+      unitType: dto.unitType ?? null,
+      unitPrice: dto.unitPrice ?? null,
+      status: dto.status ?? 'pending',
+      creationDateTime: GlobalHelper.getDateTime(),
+      updatedAt: GlobalHelper.getDateTime(),
+    });
+
+    return item;
+  }
+
+  // 2. PAGINATED LISTING
+  async paginated(data: any = {}) {
+    const dto: CorporatePaginatedDto = data.dto || {};
+    const query = Corporate.query();
+
+    if (dto.search_text) {
+      const search = `%${dto.search_text}%`;
+      query.where((builder) => {
+        builder
+          .where('name', 'like', search)
+          .orWhere('contactPersonName', 'like', search)
+          .orWhere('email', 'like', search)
+          .orWhere('registrationNumber', 'like', search)
+          .orWhere('contactNumber', 'like', search);
+      });
+    }
+
+    if (dto.name) {
+      query.where('name', 'like', `%${dto.name}%`);
+    }
+
+    if (dto.status) {
+      query.where('status', dto.status);
+    }
+
+    if (dto.registrationNumber) {
+      query.where('registrationNumber', dto.registrationNumber);
+    }
+
+    query.withGraphFetched('[corporateAddresses]');
+    query.orderBy('id', 'desc');
+
+    return await Corporate.pagination(query, data);
+  }
+
+  // 3. READ BY ID
   async findOne(id: number) {
-    const corporate = await Corporate.query().findById(id);
+    const corporate = await Corporate.query()
+      .findById(id)
+      .withGraphFetched('[corporateAddresses, billingPlans]');
     if (!corporate) {
       AppException.notFound({ message: `Corporate #${id} not found` });
     }
     return corporate;
+  }
+
+  // 4. UPDATE
+  async update(dto: UpdateCorporateDto, authId?: number) {
+    await this.findOne(dto.id);
+
+    const existingEmail = await Corporate.query()
+      .where('email', dto.email.trim())
+      .whereNot('id', dto.id)
+      .first();
+    if (existingEmail) {
+      AppException.badRequest({
+        message: 'Another corporate with this email already exists',
+      });
+    }
+
+    const existingReg = await Corporate.query()
+      .where('registrationNumber', dto.registrationNumber.trim())
+      .whereNot('id', dto.id)
+      .first();
+    if (existingReg) {
+      AppException.badRequest({
+        message:
+          'Another corporate with this registration number already exists',
+      });
+    }
+
+    const patchPayload: Record<string, any> = {
+      name: dto.name,
+      registrationNumber: dto.registrationNumber.trim(),
+      email: dto.email.trim(),
+      contactPersonName: dto.contactPersonName,
+      contactNumber: dto.contactNumber,
+      address: dto.address ?? null,
+      location: dto.location ?? null,
+      quantity: dto.quantity ?? null,
+      unitType: dto.unitType ?? null,
+      unitPrice: dto.unitPrice ?? null,
+      status: dto.status ?? 'pending',
+      updatedAt: GlobalHelper.getDateTime(),
+    };
+
+    if (dto.password) {
+      patchPayload.password = this.encryptPassword(dto.password);
+    }
+
+    const updated = await Corporate.query().patchAndFetchById(
+      dto.id,
+      patchPayload,
+    );
+    return updated;
   }
 
   async generateInvoice(dto: GenerateInvoiceDto, req) {
