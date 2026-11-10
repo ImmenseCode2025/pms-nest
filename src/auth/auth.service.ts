@@ -17,7 +17,7 @@ import {
 } from './dto/auth.dto';
 
 const fernet = require('fernet');
-const FERNET_KEY = 'i3vVJAiA2-e6JIBoTBwvmQNmTXvVhbr60p5jOYVRVws=';
+export const FERNET_KEY = 'i3vVJAiA2-e6JIBoTBwvmQNmTXvVhbr60p5jOYVRVws=';
 
 @Injectable()
 export class AuthService {

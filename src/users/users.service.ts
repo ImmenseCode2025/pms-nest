@@ -1,7 +1,13 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ExternalApiService } from 'src/core/external-api/external-api.service';
+import { FERNET_KEY } from 'src/auth/auth.service';
+import { AppException } from 'src/core/exception/app-exception';
 import { Address, Users } from 'src/core/orm/entities';
+import { ParkingSite } from 'src/core/orm/entities/parking-site.entity';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+
+const fernet = require('fernet');
 
 @Injectable()
 export class UsersService {
@@ -18,6 +24,57 @@ export class UsersService {
       );
     }
     return user;
+  }
+
+  // ─── CREATE USER (admin only) ────────────────────────────────────────────────
+
+  async create(dto: CreateUserDto) {
+    const emailExists = await Users.query().where('email', dto.email.trim()).first();
+    if (emailExists) {
+      AppException.badRequest({ message: 'Email already exists' });
+    }
+
+    const cnicExists = await Users.query().where('cnic', dto.cnic).first();
+    if (cnicExists) {
+      AppException.badRequest({ message: 'CNIC already exists' });
+    }
+
+    const site = await ParkingSite.query().findById(dto.site);
+    if (!site) {
+      AppException.notFound({ message: `Parking site #${dto.site} not found` });
+    }
+
+    const payload: Record<string, any> = {
+      username: dto.username,
+      email: dto.email.trim(),
+      contact: dto.contact,
+      cnic: dto.cnic,
+      password: this.encryptPassword(dto.password),
+      access: dto.access,
+      user_type: dto.access === 'admin' ? 'Admin' : 'User',
+      site: dto.site,
+      profile: dto.profile,
+      status: 'completed',
+      creationSource: 'manual',
+    };
+
+    if (
+      dto?.latitude !== undefined &&
+      dto?.latitude !== null &&
+      dto?.longitude !== undefined &&
+      dto?.longitude !== null
+    ) {
+      payload.address = await this.resolveAddressId(dto.latitude, dto.longitude);
+    }
+
+    return Users.query().insertAndFetch(payload);
+  }
+
+  // Same Fernet scheme AuthService uses to verify passwords
+  private encryptPassword(password: string): string {
+    const secret = new fernet.Secret(FERNET_KEY);
+    const token = new fernet.Token({ secret, time: Date.now() });
+    return token.encode(password);
   }
 
   // ─── UPDATE PROFILE ───────────────────────────────────────────────────────────
