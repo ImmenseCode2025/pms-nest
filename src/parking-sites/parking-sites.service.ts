@@ -11,6 +11,7 @@ import { ParkingPrice } from 'src/core/orm/entities/parking-price.entity';
 import { ParkingReceipt } from 'src/core/orm/entities/parking-receipt.entity';
 import { ParkingSite } from 'src/core/orm/entities/parking-site.entity';
 import { ParkingToken } from 'src/core/orm/entities/parking-token.entity';
+import { VehicleType } from 'src/core/orm/entities/vehicle-type.entity';
 import { GetHandheldInfoDto } from './dto/get-handheld-info.dto';
 import { RegisterParkingSiteDto } from './dto/register-parking-site.dto';
 import { SearchParkingSitesDto } from './dto/search-parking-sites.dto';
@@ -63,7 +64,8 @@ export class ParkingSitesService {
   async detail(id: number) {
     const site = await ParkingSite.query()
       .findById(id)
-      .withGraphFetched('siteParkingPrices.price_vehicle_type');
+      .withGraphFetched('[siteParkingPrices.price_vehicle_type, siteParkingCompany]')
+      .modifyGraph('siteParkingCompany', (builder) => builder.select('id', 'name'));
 
     if (!site) {
       AppException.notFound({ message: `Parking site #${id} not found` });
@@ -296,44 +298,78 @@ export class ParkingSitesService {
     };
   }
 
-  // Upsert the price of one vehicle type for a site (Flask updateParkingPrice).
-  // Flask also copied the old row into parking_price_logs before updating;
-  // that table has been dropped, so no history row is written.
+  // Set the prices of ALL vehicle types for a site in one go.
+  // Body: { siteId, prices: [{ vehicleType, amount }] }. Every vehicle type in
+  // vehicle_type must have an amount; each row is upserted in one transaction.
+  // (parking_price_logs has been dropped, so no history row is written.)
   async updatePrice(dto: UpdateParkingPriceDto, authId: number) {
     const siteId = Number(dto.siteId);
-    const vehicleType = Number(dto.vehicleType);
-    const amount = Number(dto.amount);
 
     const site = await ParkingSite.query().findById(siteId);
     if (!site) {
       AppException.notFound({ message: `Parking site #${siteId} not found` });
     }
 
-    const now = GlobalHelper.getDateTime('YYYY-MM-DD HH:mm:ss');
-    const existing: any = await ParkingPrice.query()
-      .where('siteId', siteId)
-      .where('vehicleType', vehicleType)
-      .first();
-
-    if (existing) {
-      await ParkingPrice.query()
-        .patch({ amount, user: authId, updateDateTime: now, updatedAt: now } as any)
-        .where('siteId', siteId)
-        .where('vehicleType', vehicleType);
-    } else {
-      await ParkingPrice.query().insert({
-        vehicleType,
-        amount,
-        siteId,
-        user: authId,
-        createdAt: now,
-        updatedAt: now,
-      } as any);
+    // @Type(() => Number) turns "" into 0, so reject blank amounts on the raw body.
+    const blank = (dto.prices || []).filter(
+      (p: any) => p?.amount === '' || p?.amount === null || p?.amount === undefined,
+    );
+    if (blank.length) {
+      AppException.badRequest({ message: 'Amount is required for every vehicle type' });
     }
+
+    const prices = (dto.prices || []).map((p) => ({
+      vehicleType: Number(p.vehicleType),
+      amount: Number(p.amount),
+    }));
+
+    const ids = prices.map((p) => p.vehicleType);
+    if (new Set(ids).size !== ids.length) {
+      AppException.badRequest({ message: 'Duplicate vehicle type in prices' });
+    }
+
+    const vehicleTypes: any[] = await VehicleType.query().select('id', 'name');
+    const known = new Set(vehicleTypes.map((v) => Number(v.id)));
+    const unknown = ids.filter((id) => !known.has(id));
+    if (unknown.length) {
+      AppException.badRequest({ message: `Unknown vehicle type: ${unknown.join(', ')}` });
+    }
+    const missing = vehicleTypes.filter((v) => !ids.includes(Number(v.id)));
+    if (missing.length) {
+      AppException.badRequest({
+        message: `Amount is required for: ${missing.map((v) => v.name).join(', ')}`,
+      });
+    }
+
+    const now = GlobalHelper.getDateTime('YYYY-MM-DD HH:mm:ss');
+    await ParkingPrice.transaction(async (trx) => {
+      for (const { vehicleType, amount } of prices) {
+        const existing: any = await ParkingPrice.query(trx)
+          .where('siteId', siteId)
+          .where('vehicleType', vehicleType)
+          .first();
+
+        if (existing) {
+          await ParkingPrice.query(trx)
+            .patch({ amount, user: authId, updateDateTime: now, updatedAt: now } as any)
+            .where('siteId', siteId)
+            .where('vehicleType', vehicleType);
+        } else {
+          await ParkingPrice.query(trx).insert({
+            vehicleType,
+            amount,
+            siteId,
+            user: authId,
+            createdAt: now,
+            updatedAt: now,
+          } as any);
+        }
+      }
+    });
 
     return {
       response: 'success',
-      message: 'Parking Site Updated Successfully!',
+      message: 'Parking Site Prices Updated Successfully!',
     };
   }
 }

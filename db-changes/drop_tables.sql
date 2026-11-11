@@ -58,5 +58,6 @@ DROP TABLE IF EXISTS `reactivate_parking_card`;
 
 -- Parking price
 DROP TABLE IF EXISTS `parking_price_logs`;
+DROP TABLE IF EXISTS `bank_card`;
 
 SET FOREIGN_KEY_CHECKS = 1;

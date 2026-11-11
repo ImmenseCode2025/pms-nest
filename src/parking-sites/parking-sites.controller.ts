@@ -166,8 +166,8 @@ export class ParkingSitesController {
     }
   }
 
-  // Upsert one vehicle-type price for a site (Flask parkingApp/updateParkingPrice).
-  // Body: { siteId, vehicleType, amount } (legacy extra pricing fields ignored)
+  // Set the prices of ALL vehicle types for a site (each row upserted).
+  // Body: { siteId, prices: [{ vehicleType, amount }] } — every vehicle type required
   @Put('/update-price')
   async updatePrice(
     @Body() dto: UpdateParkingPriceDto,

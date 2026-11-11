@@ -1,36 +1,38 @@
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber, IsOptional, Min } from 'class-validator';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 
-// PUT parking-sites/update-price (Flask parkingApp/updateParkingPrice).
-// Legacy also sent defaultHour / additionalCharges / additionalChargesType /
-// additionalChargesCategoryCount — those columns were dropped from
-// parking_price, so they are accepted but ignored.
+export class ParkingPriceItemDto {
+  @IsNotEmpty({ message: 'vehicleType is required' })
+  @Type(() => Number)
+  @IsNumber()
+  vehicleType: number;
+
+  @IsNotEmpty({ message: 'amount is required for every vehicle type' })
+  @Type(() => Number)
+  @IsNumber({}, { message: 'amount must be a number' })
+  @Min(0)
+  amount: number;
+}
+
+// PUT parking-sites/update-price
+// Body: { siteId, prices: [{ vehicleType, amount }, ...] } — one row per vehicle type.
+// Every active vehicle type must be present (checked in the service); each row is upserted.
 export class UpdateParkingPriceDto {
   @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
   siteId: number;
 
-  @IsNotEmpty()
-  @Type(() => Number)
-  @IsNumber()
-  vehicleType: number;
-
-  @IsNotEmpty()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  amount: number;
-
-  @IsOptional()
-  defaultHour?: any;
-
-  @IsOptional()
-  additionalCharges?: any;
-
-  @IsOptional()
-  additionalChargesType?: any;
-
-  @IsOptional()
-  additionalChargesCategoryCount?: any;
+  @IsArray()
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => ParkingPriceItemDto)
+  prices: ParkingPriceItemDto[];
 }

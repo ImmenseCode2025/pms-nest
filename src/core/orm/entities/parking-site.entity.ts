@@ -45,12 +45,6 @@ export class ParkingSite extends Mapping {
   createdAt?: Date | string;
   updatedAt?: Date | string;
 
-  // Compatibility / Alias properties
-  siteCode?: string;
-  addressId?: number;
-  userId?: number;
-  companyId?: number;
-
     static get relationMappings() {
     return {
       usersAtParkingSite: {
