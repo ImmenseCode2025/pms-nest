@@ -33,6 +33,7 @@ import { HandheldPaymentReceiptsModule } from './handheld-payment-receipts/handh
 import { OperatorsModule } from './operators/operators.module';
 import { ParkingReceiptSummaryModule } from './parking-receipt-summary/parking-receipt-summary.module';
 import { VehicleTypesModule } from './vehicle-types/vehicle-types.module';
+import { FocModule } from './foc/foc.module';
 
 @Module({
   imports: [
@@ -79,6 +80,7 @@ import { VehicleTypesModule } from './vehicle-types/vehicle-types.module';
     OperatorsModule,
     ParkingReceiptSummaryModule,
     VehicleTypesModule,
+    FocModule,
   ],
 
   controllers: [AppController],
