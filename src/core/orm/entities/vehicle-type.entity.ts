@@ -2,8 +2,6 @@ import { Mapping } from '../sql.model';
 import { ShiftClosingCollectionDetail } from './shift-closing-collection-detail.entity';
 import { ParkingToken } from './parking-token.entity';
 import { ParkingPrice } from './parking-price.entity';
-import { Discount } from './discount.entity';
-import { ParkingPriceLogs } from './parking-price-logs.entity';
 import { ParkingReceipt } from './parking-receipt.entity';
 import { CorporateCards } from './corporate-cards.entity';
 
@@ -14,9 +12,10 @@ export class VehicleType extends Mapping {
 
   id?: number;
   name?: string;
+  registerDateTime?: Date | string;
   user?: number;
-  createdAt?: Date | string;
   updatedAt?: Date | string;
+  createdAt?: Date | string;
 
     static get relationMappings() {
     return {
@@ -42,22 +41,6 @@ export class VehicleType extends Mapping {
         join: {
           from: 'vehicle_type.id',
           to: 'parking_price.vehicleType',
-        },
-      },
-      typeDiscounts: {
-        relation: Mapping.HasManyRelation,
-        modelClass: Discount,
-        join: {
-          from: 'vehicle_type.id',
-          to: 'discount.vehicleType',
-        },
-      },
-      typeParkingPriceLogs: {
-        relation: Mapping.HasManyRelation,
-        modelClass: ParkingPriceLogs,
-        join: {
-          from: 'vehicle_type.id',
-          to: 'parking_price_logs.vehicleType',
         },
       },
       typeParkingReceipts: {

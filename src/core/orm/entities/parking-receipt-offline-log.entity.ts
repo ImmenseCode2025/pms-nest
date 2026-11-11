@@ -5,8 +5,9 @@ export class ParkingReceiptOfflineLog extends Mapping {
     return 'parking_receipt_offline_data_logs';
   }
 
+  id?: number;
   deviceId?: string;
-  createdAt?: Date | string;
+  creationDate?: Date | string;
   updatedAt?: Date | string;
 
   static get relationMappings() {

@@ -11,7 +11,7 @@ export class CorporateBillingPlan extends Mapping {
   corporateId?: number;
   pricePerVehicle?: number;
   effectiveFrom?: Date | string;
-  isActive?: boolean;
+  isActive?: boolean | number;
   notes?: string;
   createdAt?: Date | string;
   updatedAt?: Date | string;

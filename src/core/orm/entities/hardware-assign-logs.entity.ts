@@ -7,14 +7,15 @@ export class HardwareAssignLogs extends Mapping {
     return 'hardware_assign_logs';
   }
 
-  hardwareId?: number;
-  assigneeId?: number;
-  userId?: number;
+  id?: number;
+  hardware?: number;
+  assignee?: number;
+  assignDate?: Date | string;
+  user?: number;
   assignTo?: string;
   description?: string;
-  assignedUser?: number;
-  createdAt?: Date | string;
   updatedAt?: Date | string;
+  assignedUser?: number;
 
     static get relationMappings() {
     return {

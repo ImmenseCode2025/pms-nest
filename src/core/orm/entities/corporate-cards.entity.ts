@@ -9,13 +9,18 @@ export class CorporateCards extends Mapping {
     return 'corporate_cards';
   }
 
-  corporateId?: number;
+  id?: number;
+  corporate?: number;
   requestId?: string;
-  requestStatus?: "pending" | "approved" | "rejected";
-  cardStatus?: "active" | "inactive" | "revoked";
+  status?: 'pending' | 'approved' | 'rejected';
+  cardStatus?: 'active' | 'inactive' | 'revoked';
   requestDate?: Date | string;
   approvalRemarks?: string;
   vehicleNumber?: string;
+  approvedBy?: number;
+  approvedDate?: Date | string;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
   vehicleType?: number;
   ownerName?: string;
   email?: string;
@@ -24,13 +29,9 @@ export class CorporateCards extends Mapping {
   vehicleModel?: string;
   designation?: string;
   dob?: Date | string;
-  approvedBy?: number;
-  approvedDate?: Date | string;
   otpCode?: string;
   otpExpired?: Date | string;
   customer?: number;
-  createdAt?: Date | string;
-  updatedAt?: Date | string;
 
     static get relationMappings() {
     return {

@@ -23,34 +23,6 @@ export class HardwareService {
           .select('id', 'name')
           .orderBy('name', 'asc');
 
-      case 'parking block': {
-        const rows = await knex('parking_block as pb')
-          .innerJoin('parking_site as ps', 'ps.id', 'pb.site')
-          .select('pb.id', 'pb.name', 'ps.name as site_name')
-          .orderBy('pb.name', 'asc');
-        return rows.map((r: any) => ({
-          id: r.id,
-          name: r.name,
-          parkingBlockParkingSite: { name: r.site_name },
-        }));
-      }
-
-      case 'parking gate': {
-        const rows = await knex('parking_gate as pg')
-          .innerJoin('parking_block as pb', 'pb.id', 'pg.block')
-          .innerJoin('parking_site as ps', 'ps.id', 'pb.site')
-          .select('pg.id', 'pg.name', 'pb.name as block_name', 'ps.name as site_name')
-          .orderBy('pg.name', 'asc');
-        return rows.map((r: any) => ({
-          id: r.id,
-          name: r.name,
-          parkingBlockParkingGate: {
-            name: r.block_name,
-            parkingBlockParkingSite: { name: r.site_name },
-          },
-        }));
-      }
-
       case 'hardware':
         return await knex('hardware')
           .select('id', 'sku as name')
@@ -245,11 +217,7 @@ export class HardwareService {
   // assignedTo -> table holding the assignee's name
   private static readonly ASSIGNEE_TABLES: Record<string, { table: string; nameCol: string }> = {
     'parking site': { table: 'parking_site', nameCol: 'name' },
-    'parking gate': { table: 'parking_gate', nameCol: 'name' },
-    'parking lot': { table: 'parking_lot', nameCol: 'name' },
     hardware: { table: 'hardware', nameCol: 'sku' },
-    'parking block': { table: 'parking_block', nameCol: 'name' },
-    'parking floor': { table: 'parking_block_floor', nameCol: 'name' },
   };
 
   private deviceIssuanceBaseQuery() {
@@ -278,7 +246,7 @@ export class HardwareService {
             .whereIn('id', [...ids]);
           names[type] = new Map(found.map((f: any) => [Number(f.id), f.name]));
         } catch {
-          // e.g. table missing in this DB (parking_block/gate/lot) -> assignDetails null
+          // lookup failed -> assignDetails stays null
         }
       }),
     );

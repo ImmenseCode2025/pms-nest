@@ -6,16 +6,16 @@ export class UserAccessToken extends Mapping {
     return 'user_access_token';
   }
 
-  id: number;
-  user: number;
-  token: string;
-  macAddress: string;
-  status: 'active' | 'expired';
-  generatedDateTime: Date;
-  updatedAt: Date;
+  id?: number;
+  user?: number;
+  token?: string;
+  macAddress?: string;
+  generatedDateTime?: Date | string;
+  status?: 'active' | 'expired';
+  updatedAt?: Date | string;
+  user_detail?: Users;
 
   // Relations
-  user_detail?: Users;
 
   static get relationMappings() {
     return {

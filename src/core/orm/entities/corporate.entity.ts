@@ -11,21 +11,21 @@ export class Corporate extends Mapping {
     return 'corporates';
   }
 
+  id?: number;
   name?: string;
   registrationNumber?: string;
   email?: string;
-  addressId?: number;
-  quantity?: number;
-  unitType?: string;
-  unitPrice?: number;
+  address?: number;
   location?: string;
   contactPersonName?: string;
   contactNumber?: string;
   password?: string;
-  status?: "pending" | "approved" | "rejected";
-  statusCorporate?: "pending" | "approved" | "rejected";
-  createdAt?: Date | string;
+  creationDateTime?: Date | string;
   updatedAt?: Date | string;
+  status?: 'pending' | 'approved' | 'rejected';
+  quantity?: number;
+  unitType?: string;
+  unitPrice?: number;
 
     static get relationMappings() {
     return {

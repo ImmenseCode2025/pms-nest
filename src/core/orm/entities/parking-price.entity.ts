@@ -8,16 +8,14 @@ export class ParkingPrice extends Mapping {
     return 'parking_price';
   }
 
-  vehicleTypeId?: number;
+  id?: number;
+  vehicleType?: number;
   amount?: number;
-  defaultHour?: number;
-  additionalCharges?: number;
-  additionalChargesType?: "hourly" | "minutes" | "daily";
-  userId?: number;
-  parkingSiteId?: number;
-  additionalChargesCategoryCount?: number;
-  createdAt?: Date | string;
+  updateDateTime?: Date | string;
+  user?: number;
+  siteId?: number;
   updatedAt?: Date | string;
+  createdAt?: Date | string;
 
     static get relationMappings() {
     return {

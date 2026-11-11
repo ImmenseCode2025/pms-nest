@@ -13,6 +13,7 @@ export class AllParkingTransactions extends Mapping {
   vehicle_number?: string;
   site_id?: number;
   site_name?: string;
+  company_id?: number;
   vehicle_type_id?: number;
   vehicle_type_name?: string;
   amount?: number;

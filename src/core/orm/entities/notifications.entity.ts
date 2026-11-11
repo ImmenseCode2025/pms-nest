@@ -6,9 +6,10 @@ export class Notifications extends Mapping {
     return 'notification';
   }
 
+  id?: number;
   title?: string;
   message?: string;
-  customerId?: number;
+  customer?: number;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 

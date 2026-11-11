@@ -10,15 +10,17 @@ export class FOC extends Mapping {
     return 'foc_card';
   }
 
-  parkingSiteId?: number;
+  id?: number;
+  site?: number;
   employeeId?: string;
   employeeName?: string;
   dateJoining?: Date | string;
-  designationId?: number;
-  shiftTimeFrom?: Date | string;
-  shiftTimeTo?: Date | string;
-  profilePic?: string;
-  userId?: number;
+  company?: number;
+  designation?: number;
+  shiftTimeFrom?: string;
+  shiftTimeTo?: string;
+  profile?: string;
+  user?: number;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 

@@ -4,9 +4,6 @@ import { ExternalApiService } from 'src/core/external-api/external-api.service';
 import { GlobalHelper } from 'src/core/helper/global-helper';
 import { Address } from 'src/core/orm/entities/address.entity';
 import { Hardware } from 'src/core/orm/entities/hardware.entity';
-import { ParkingBlockFloor } from 'src/core/orm/entities/parking-block-floor.entity';
-import { ParkingBlock } from 'src/core/orm/entities/parking-block.entity';
-import { ParkingLot } from 'src/core/orm/entities/parking-lot.entity';
 import { ParkingPrice } from 'src/core/orm/entities/parking-price.entity';
 import { ParkingReceipt } from 'src/core/orm/entities/parking-receipt.entity';
 import { ParkingSite } from 'src/core/orm/entities/parking-site.entity';
@@ -175,44 +172,6 @@ export class ParkingSitesService {
     //   .withGraphFetched(
     //     '[site_address, parkingSiteParkingBlocks.parkingBlocksFloor]',
     //   );
-  }
-
-  private async registerBlock(trx, row, { sgi, address, site, user }) {
-    const newBlock = await ParkingBlock.query(trx).insertAndFetch({
-      name: row.name,
-      sgi,
-      address,
-      status: 'active',
-      user,
-      site,
-    });
-
-    for (const [j, floor] of (row.floor ?? []).entries()) {
-      const floorSgi = sgi + 'F' + (j + 1);
-      const newFloor = await ParkingBlockFloor.query(trx).insertAndFetch({
-        name: floor.name,
-        sgi: floorSgi,
-        status: 'active',
-        user,
-        block: newBlock.id,
-      });
-
-      const lots = [];
-      for (let k = 1; k <= Number(floor.noOfLots); k++) {
-        lots.push({
-          name: 'P' + k,
-          sgi: floorSgi + 'P' + k,
-          status: 'active',
-          user,
-          floor: newFloor.id,
-          availability: 'unoccupied',
-        });
-      }
-
-      if (lots.length > 0) {
-        await ParkingLot.knexQuery().transacting(trx).insert(lots);
-      }
-    }
   }
 
   private async resolveAddressId(

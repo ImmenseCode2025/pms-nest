@@ -10,18 +10,19 @@ export class ParkingShiftClosing extends Mapping {
     return 'parking_shift_closing';
   }
 
-  parkingSiteId?: number;
+  id?: number;
+  site?: number;
   shiftDate?: Date | string;
-  shiftTime?: Date | string;
-  shiftType?: "Morning Shift" | "Evening Shift";
-  userId?: number;
-  supervisorId?: number;
-  shiftClosingFor?: "Handheld" | "System";
-  deviceId?: number;
-  editRequest?: boolean;
+  shiftTime?: string;
+  shiftType?: 'Morning Shift' | 'Evening Shift';
+  user?: number;
+  supervisor?: number;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  shiftClosingFor?: 'Handheld' | 'System';
+  deviceId?: number;
   discrepancy?: string;
+  editRequest?: boolean | number;
 
     static get relationMappings() {
     return {

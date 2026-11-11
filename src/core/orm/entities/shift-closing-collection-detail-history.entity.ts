@@ -5,7 +5,8 @@ export class ShiftClosingCollectionDetailHistory extends Mapping {
     return 'shift_closing_collection_history';
   }
 
-  shiftClosingId?: number;
+  id?: number;
+  shiftClosing?: number;
   vehicleType?: number;
   paidVehicles?: number;
   focVehicles?: number;

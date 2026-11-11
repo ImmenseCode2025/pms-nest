@@ -3,7 +3,6 @@ import { AppQrCode } from './app-qr-code.entity';
 import { CashQrCode } from './cash-qr-code.entity';
 import { CompanyQrCode } from './company-qr-code.entity';
 import { CorporateQrCode } from './corporate-qr-code.entity';
-import { EntranceExitMonitor } from './entrance-exit-monitor.entity';
 import { FocQrCode } from './foc-qr-code.entity';
 import { HardwareAssignLogs } from './hardware-assign-logs.entity';
 import { ParkingShiftClosing } from './parking-shift-closing.entity';
@@ -17,20 +16,18 @@ export class Hardware extends Mapping {
     return 'hardware';
   }
 
-  partName?: string;
+  id?: number;
   sku?: string;
   description?: string;
-  configuration?: string;
   ipOrApi?: string;
-  type?: "camera" | "barrier" | "license plate recognizer" | "personal computer" | "handheld" | "pos";
-  status?: "active" | "inactive" | "outOfService" | "maintenance";
-  userId?: number;
+  type?: 'camera' | 'barrier' | 'license plate recognizer' | 'personal computer' | 'handheld' | 'pos';
+  status?: 'active' | 'inactive' | 'outOfService' | 'maintenance';
+  creationDateTime?: Date | string;
   user?: number;
-  assignedTo?: "parking site" | "parking gate" | "parking lot" | "hardware" | "parking block" | "parking floor";
+  assignedTo?: 'parking site' | 'parking gate' | 'parking lot' | 'hardware' | 'parking block' | 'parking floor';
   asignee?: number;
-  assignedUser?: number;
-  createdAt?: Date | string;
   updatedAt?: Date | string;
+  assignedUser?: number;
   uniqueId?: string;
 
     static get relationMappings() {
@@ -68,14 +65,6 @@ export class Hardware extends Mapping {
         join: {
           from: 'hardware.id',
           to: 'parking_token.hardware',
-        },
-      },
-      hardwareEntranceExitMonitor: {
-        relation: Mapping.HasManyRelation,
-        modelClass: EntranceExitMonitor,
-        join: {
-          from: 'hardware.id',
-          to: 'entrance_exit_monitor.hardware',
         },
       },
       hardwareAssignLogs: {

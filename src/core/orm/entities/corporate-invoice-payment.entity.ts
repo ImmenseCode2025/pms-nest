@@ -14,13 +14,13 @@ export class CorporateInvoicePayment extends Mapping {
   referenceNumber?: string;
   recordedBy?: number;
   notes?: string;
-  receiptUrl?: string;
-  receiptFile?: string;
-  paymentStatus?: "pending" | "approved" | "declined";
-  declineReason?: string;
-  submittedByCorporate?: boolean;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  receiptUrl?: string;
+  receiptFile?: string;
+  paymentStatus?: 'pending' | 'approved' | 'declined';
+  declineReason?: string;
+  submittedByCorporate?: boolean | number;
 
     static get relationMappings() {
     return {

@@ -1,8 +1,6 @@
 import { Mapping } from '../sql.model';
 import { Users } from './users.entity';
 import { Customer } from './customer.entity';
-import { ParkingBlock } from './parking-block.entity';
-import { ParkingGate } from './parking-gate.entity';
 import { Corporate } from './corporate.entity';
 
 export class Address extends Mapping {
@@ -10,11 +8,12 @@ export class Address extends Mapping {
     return 'address';
   }
 
+  id?: number;
   name?: string;
   city?: string;
   state?: string;
   country?: string;
-  zipCode?: number;
+  zipcode?: number;
   longitude?: number;
   latitude?: number;
   createdAt?: Date | string;
@@ -36,22 +35,6 @@ export class Address extends Mapping {
         join: {
           from: 'address.id',
           to: 'customer.address',
-        },
-      },
-      addressParkingBlock: {
-        relation: Mapping.HasManyRelation,
-        modelClass: ParkingBlock,
-        join: {
-          from: 'address.id',
-          to: 'parking_block.address',
-        },
-      },
-      addressParkingGate: {
-        relation: Mapping.HasManyRelation,
-        modelClass: ParkingGate,
-        join: {
-          from: 'address.id',
-          to: 'parking_gate.address',
         },
       },
       addressCorporate: {

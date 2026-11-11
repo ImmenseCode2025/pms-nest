@@ -1,5 +1,4 @@
 import { Mapping } from '../sql.model';
-import { Room } from './room.entity';
 import { Address } from './address.entity';
 import { ParkingSite } from './parking-site.entity';
 import { Designation } from './designation.entity';
@@ -7,20 +6,10 @@ import { FOC } from './foc.entity';
 import { ParkingShiftClosing } from './parking-shift-closing.entity';
 import { Hardware } from './hardware.entity';
 import { InstanceEntranceExit } from './instance-entrance-exit.entity';
-import { ParkingBlockFloor } from './parking-block-floor.entity';
-import { ParkingBlock } from './parking-block.entity';
-import { ParkingGate } from './parking-gate.entity';
-import { ParkingLot } from './parking-lot.entity';
 import { PaymentGateway } from './payment-gateway.entity';
 import { UserAccessToken } from './user-access-token.entity';
-import { EntranceExitMonitor } from './entrance-exit-monitor.entity';
 import { ParkingPrice } from './parking-price.entity';
-import { Discount } from './discount.entity';
 import { HardwareAssignLogs } from './hardware-assign-logs.entity';
-import { ParkingPriceLogs } from './parking-price-logs.entity';
-import { ScratchCard } from './scratch-card.entity';
-import { ScratchCards } from './scratch-cards.entity';
-import { ScratchCardsHistory } from './scratch-cards-history.entity';
 import { PortalNotification } from './portal-notification.entity';
 import { PosQrCode } from './pos-qr-code.entity';
 
@@ -36,13 +25,16 @@ export class Users extends Mapping {
   contact?: string;
   cnic?: string;
   address?: number;
+  location?: string;
+  latitude?: string;
+  longitude?: string;
   profile?: string;
-  status?: 'incomplete' | 'active' | 'inactive' | 'blocked' | 'completed' | string;
+  status?: 'incomplete' | 'completed' | 'block' | 'deleted';
   creationDateTime?: Date | string;
-  access?: 'employee' | 'admin' | 'supervisor' | string;
+  access?: 'employee' | 'admin' | 'master';
   site?: number;
-  creationSource?: 'manual' | string;
-  user_type?: 'User' | 'Admin' | string;
+  creationSource?: 'google' | 'microsoft' | 'facebook' | 'manual';
+  user_type?: 'Admin' | 'User' | 'Customer';
   updatedAt?: Date | string;
   isDeleted?: boolean | number;
 
@@ -53,14 +45,6 @@ export class Users extends Mapping {
 
     static get relationMappings() {
     return {
-      ownedRooms: {
-        relation: Mapping.HasManyRelation,
-        modelClass: Room,
-        join: {
-          from: 'user.id',
-          to: 'rooms.owner',
-        },
-      },
       userAddress: {
         relation: Mapping.BelongsToOneRelation,
         modelClass: Address,
@@ -133,38 +117,6 @@ export class Users extends Mapping {
           to: 'instance_entrance_or_exit.user',
         },
       },
-      userParkingBlockFloor: {
-        relation: Mapping.HasManyRelation,
-        modelClass: ParkingBlockFloor,
-        join: {
-          from: 'user.id',
-          to: 'parking_block_floor.user',
-        },
-      },
-      userParkingBlock: {
-        relation: Mapping.HasManyRelation,
-        modelClass: ParkingBlock,
-        join: {
-          from: 'user.id',
-          to: 'parking_block.user',
-        },
-      },
-      userParkingGate: {
-        relation: Mapping.HasManyRelation,
-        modelClass: ParkingGate,
-        join: {
-          from: 'user.id',
-          to: 'parking_gate.user',
-        },
-      },
-      userParkingLot: {
-        relation: Mapping.HasManyRelation,
-        modelClass: ParkingLot,
-        join: {
-          from: 'user.id',
-          to: 'parking_lot.user',
-        },
-      },
       userParkingSite: {
         relation: Mapping.HasManyRelation,
         modelClass: ParkingSite,
@@ -189,28 +141,12 @@ export class Users extends Mapping {
           to: 'user_access_token.user',
         },
       },
-      userEntranceExitMonitor: {
-        relation: Mapping.HasManyRelation,
-        modelClass: EntranceExitMonitor,
-        join: {
-          from: 'user.id',
-          to: 'entrance_exit_monitor.user',
-        },
-      },
       userParkingPrices: {
         relation: Mapping.HasManyRelation,
         modelClass: ParkingPrice,
         join: {
           from: 'user.id',
           to: 'parking_price.user',
-        },
-      },
-      userDiscounts: {
-        relation: Mapping.HasManyRelation,
-        modelClass: Discount,
-        join: {
-          from: 'user.id',
-          to: 'discount.user',
         },
       },
       userAssignLogs: {
@@ -227,46 +163,6 @@ export class Users extends Mapping {
         join: {
           from: 'user.id',
           to: 'hardware_assign_logs.assignedUser',
-        },
-      },
-      userParkingPriceLogs: {
-        relation: Mapping.HasManyRelation,
-        modelClass: ParkingPriceLogs,
-        join: {
-          from: 'user.id',
-          to: 'parking_price_logs.user',
-        },
-      },
-      scratchCardUsers: {
-        relation: Mapping.HasManyRelation,
-        modelClass: ScratchCard,
-        join: {
-          from: 'user.id',
-          to: 'scratch_card.user',
-        },
-      },
-      OperatorScratchCards: {
-        relation: Mapping.HasManyRelation,
-        modelClass: ScratchCards,
-        join: {
-          from: 'user.id',
-          to: 'scratch_cards.operator_id',
-        },
-      },
-      AssignedByScratchCard: {
-        relation: Mapping.HasManyRelation,
-        modelClass: ScratchCardsHistory,
-        join: {
-          from: 'user.id',
-          to: 'scratch_cards_history.assign_by',
-        },
-      },
-      AssignedUserScratchCard: {
-        relation: Mapping.HasManyRelation,
-        modelClass: ScratchCardsHistory,
-        join: {
-          from: 'user.id',
-          to: 'scratch_cards_history.assign_to',
         },
       },
       UserNotifications: {

@@ -6,8 +6,9 @@ export class ShiftClosingPaymentMethod extends Mapping {
     return 'shift_closing_payment_method';
   }
 
-  shiftClosingId?: number;
-  paymentMethodType?: "Scratch Card" | "Credit/Debit Card" | "Parking Receipt" | "App & Others";
+  id?: number;
+  shiftClosing?: number;
+  paymentMethodType?: 'Scratch Card' | 'Credit/Debit Card' | 'Parking Receipt' | 'App & Others';
   paymentAmount?: number;
   numberOfVehicles?: number;
   createdAt?: Date | string;

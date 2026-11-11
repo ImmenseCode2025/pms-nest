@@ -7,13 +7,14 @@ export class PaymentGateway extends Mapping {
     return 'payment_gateway';
   }
 
+  id?: number;
   name?: string;
-  userId?: number;
-  status?: "active" | "inactive" | "outOfService";
-  logo?: string;
   registerDateTime?: Date | string;
-  createdAt?: Date | string;
+  user?: number;
+  status?: 'active' | 'inactive' | 'outOfService';
+  logo?: string;
   updatedAt?: Date | string;
+  createdAt?: Date | string;
 
     static get relationMappings() {
     return {

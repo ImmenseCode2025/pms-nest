@@ -6,9 +6,11 @@ export class CorporateResetPassword extends Mapping {
     return 'corporate_reset_password_otp';
   }
 
-  resetCode?: string;
-  corporateId?: number;
-  createdAt?: Date | string;
+  id?: number;
+  code?: string;
+  corporate?: number;
+  status?: 'active' | 'inactive' | 'deleted';
+  generatedDateTime?: Date | string;
   updatedAt?: Date | string;
 
     static get relationMappings() {
