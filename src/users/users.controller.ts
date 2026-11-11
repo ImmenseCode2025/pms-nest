@@ -40,6 +40,30 @@ export class UsersController {
     }
   }
 
+  // Same body as /paginated: { search?, access? }
+  @Admin()
+  @Post('export-pdf')
+  async exportPdf(@Body() dto: UsersPaginatedDto, @Req() req: Request, @Res() res: Response) {
+    try {
+      const url = await this.usersService.exportPdf(dto);
+      return ResponseHelper.success({ res, data: { url }, message: 'Users PDF generated successfully' });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
+  // Same body as /paginated: { search?, access? }
+  @Admin()
+  @Post('export-excel')
+  async exportExcel(@Body() dto: UsersPaginatedDto, @Req() req: Request, @Res() res: Response) {
+    try {
+      const url = await this.usersService.exportExcel(dto);
+      return ResponseHelper.success({ res, data: { url }, message: 'Users Excel generated successfully' });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
   // Dropdown list: [{ id, username, access }]. Query: { access? }
   @Get('dropdown')
   async dropdown(@Query() dto: UsersDropdownDto, @Req() req: Request, @Res() res: Response) {
