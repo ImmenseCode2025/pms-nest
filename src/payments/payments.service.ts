@@ -4,13 +4,6 @@ import { SearchPaymentsDto } from './dto/search-payments.dto';
 
 @Injectable()
 export class PaymentsService {
-  private companiesFor(location?: string): number[] {
-    const loc = (location || 'karachi').trim().toLowerCase();
-    if (loc === 'islamabad') return [1];
-    if (loc === 'karachi') return [7];
-    return [1, 7];
-  }
-
   // Ticket payments list (Flask parkingApp/searchPayments).
   // Dates are returned as stored (Pakistan wall-clock), formatted in SQL.
   async search(dto: SearchPaymentsDto, query: any = {}) {
@@ -27,7 +20,6 @@ export class PaymentsService {
       )
       .leftJoin('payment_gateway', 'payment.paymentGateway', 'payment_gateway.id')
       .leftJoin('parking_token', 'payment.token', 'parking_token.id')
-      .whereIn('payment.company', this.companiesFor(dto.location))
       .orderBy('payment.transactionDateTime', 'desc')
       .orderBy('payment.id', 'desc');
 

@@ -24,7 +24,6 @@ export class ParkingSitesService {
   async paginated(data: any = {}) {
     const dto: SearchParkingSitesDto = data.dto || {};
     const query = ParkingSite.query();
-    query.where('company', 7);
 
     if (dto.search) {
       const searchText = `%${dto.search}%`;
@@ -42,9 +41,7 @@ export class ParkingSitesService {
 
   async siteDropdown() {
     const query = ParkingSite.query();
-    const company = 7;
     query.select('id', 'name');
-    query.where('company', company);
     query.orderBy('name', 'asc');
 
     const sites = await ParkingSite.findAllCustom(query);
@@ -53,8 +50,6 @@ export class ParkingSitesService {
 
   async dropdown() {
     const query = ParkingSite.query();
-    const company = 7;
-    query.where('company', company);
     query.orderBy('name', 'asc');
 
     const sites = await ParkingSite.findAllCustom(query);
@@ -64,8 +59,7 @@ export class ParkingSitesService {
   async detail(id: number) {
     const site = await ParkingSite.query()
       .findById(id)
-      .withGraphFetched('[siteParkingPrices.price_vehicle_type, siteParkingCompany]')
-      .modifyGraph('siteParkingCompany', (builder) => builder.select('id', 'name'));
+      .withGraphFetched('[siteParkingPrices.price_vehicle_type]');
 
     if (!site) {
       AppException.notFound({ message: `Parking site #${id} not found` });
@@ -121,11 +115,6 @@ export class ParkingSitesService {
   async register(dto: RegisterParkingSiteDto, authId: number) {
     // const { site, block } = dto;
 
-    // const company = await Company.query().findById(site.company);
-    // if (!company) {
-    //   AppException.notFound({ message: `Company #${site.company} not found` });
-    // }
-
     // Reverse geocoding is an external HTTP call, so resolve addresses before the transaction
     // const siteAddressId = await this.resolveAddressId(
     //   site.latitude,
@@ -146,7 +135,6 @@ export class ParkingSitesService {
       location: dto.location,
       latitude: dto.latitude,
       longitude: dto.longitude,
-      company: 7,
       user: authId,
       createdAt: GlobalHelper.getDateTime('YYYY-MM-DD HH:mm:ss'),
       updatedAt: GlobalHelper.getDateTime('YYYY-MM-DD HH:mm:ss'),

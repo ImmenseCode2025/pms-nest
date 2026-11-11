@@ -32,7 +32,6 @@ import { HandheldPaymentReceiptsModule } from './handheld-payment-receipts/handh
 import { OperatorsModule } from './operators/operators.module';
 import { ParkingReceiptSummaryModule } from './parking-receipt-summary/parking-receipt-summary.module';
 import { VehicleTypesModule } from './vehicle-types/vehicle-types.module';
-import { CompaniesModule } from './companies/companies.module';
 import { PortalNotificationsModule } from './portal-notifications/portal-notifications.module';
 import { CorporateFinanceModule } from './corporate-finance/corporate-finance.module';
 import { PaymentsModule } from './payments/payments.module';
@@ -81,7 +80,6 @@ import { PaymentsModule } from './payments/payments.module';
     OperatorsModule,
     ParkingReceiptSummaryModule,
     VehicleTypesModule,
-    CompaniesModule,
     PortalNotificationsModule,
     CorporateFinanceModule,
     PaymentsModule,

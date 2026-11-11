@@ -3,7 +3,6 @@ import { AppQrCode } from './app-qr-code.entity';
 import { CashQrCode } from './cash-qr-code.entity';
 import { CompanyCards } from './company-cards.entity';
 import { CompanyQrCode } from './company-qr-code.entity';
-import { Company } from './company.entity';
 import { Discount } from './discount.entity';
 import { ETAGLOGS } from './etaglogs.entity';
 import { FocQrCode } from './foc-qr-code.entity';
@@ -41,7 +40,6 @@ export class ParkingSite extends Mapping {
   location?: string;
   latitude?: string;
   longitude?: string;
-  company?: number;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 
@@ -85,14 +83,6 @@ export class ParkingSite extends Mapping {
         join: {
           from: 'parking_site.user',
           to: 'user.id',
-        },
-      },
-      siteParkingCompany: {
-        relation: Mapping.BelongsToOneRelation,
-        modelClass: Company,
-        join: {
-          from: 'parking_site.company',
-          to: 'company.id',
         },
       },
       siteParkingTokens: {

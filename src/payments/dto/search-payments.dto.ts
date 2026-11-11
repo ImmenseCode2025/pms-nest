@@ -1,6 +1,6 @@
 import { IsOptional, IsString } from 'class-validator';
 
-// GET payments/search — Query: { page?, limit?, search?, location? }
+// GET payments/search — Query: { page?, limit?, search? }
 export class SearchPaymentsDto {
   @IsOptional()
   page?: any;
@@ -12,9 +12,4 @@ export class SearchPaymentsDto {
   @IsOptional()
   @IsString()
   search?: string;
-
-  // 'karachi' (company 7, default) | 'islamabad' (company 1) | 'all' (both)
-  @IsOptional()
-  @IsString()
-  location?: string;
 }

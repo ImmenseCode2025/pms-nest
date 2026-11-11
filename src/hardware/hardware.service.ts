@@ -14,25 +14,19 @@ import { UpdateHardwareDto } from './dto/update-hardware.dto';
 
 @Injectable()
 export class HardwareService {
-  // Karachi (KMC) company id, same as parking-sites/site-dropdown
-  private static readonly KMC_COMPANY_ID = 7;
-
   async assignees(dto: HardwareAssigneesDto) {
     const knex = Hardware.knex();
-    const companyId = HardwareService.KMC_COMPANY_ID;
 
     switch (dto.assigned_to) {
       case 'parking site':
         return await knex('parking_site')
           .select('id', 'name')
-          .where('company', companyId)
           .orderBy('name', 'asc');
 
       case 'parking block': {
         const rows = await knex('parking_block as pb')
           .innerJoin('parking_site as ps', 'ps.id', 'pb.site')
           .select('pb.id', 'pb.name', 'ps.name as site_name')
-          .where('ps.company', companyId)
           .orderBy('pb.name', 'asc');
         return rows.map((r: any) => ({
           id: r.id,
@@ -46,7 +40,6 @@ export class HardwareService {
           .innerJoin('parking_block as pb', 'pb.id', 'pg.block')
           .innerJoin('parking_site as ps', 'ps.id', 'pb.site')
           .select('pg.id', 'pg.name', 'pb.name as block_name', 'ps.name as site_name')
-          .where('ps.company', companyId)
           .orderBy('pg.name', 'asc');
         return rows.map((r: any) => ({
           id: r.id,
@@ -311,25 +304,12 @@ export class HardwareService {
 
   // Paginated list of ALL hardware types for the device issuance table
   async deviceIssuanceList(dto: DeviceIssuanceListDto = {}) {
-    const knex = Hardware.knex();
     const page = Number(dto.page) > 0 ? Number(dto.page) : 1;
     const limitRaw = Number(dto.limit ?? dto.pageSize);
     const limit = limitRaw > 0 ? limitRaw : 10;
     const search = (dto.search || '').trim();
 
     const query = this.deviceIssuanceBaseQuery();
-
-    if (dto.location === 'karachi' || dto.location === 'islamabad') {
-      const siteIds = knex('parking_site as ps').select('ps.id');
-      if (dto.location === 'karachi') {
-        siteIds.where('ps.company', HardwareService.KMC_COMPANY_ID);
-      } else {
-        siteIds
-          .innerJoin('company as c', 'c.id', 'ps.company')
-          .whereRaw('LOWER(c.name) = ?', ['cda']);
-      }
-      query.where('hardware.assignedTo', 'parking site').whereIn('hardware.asignee', siteIds);
-    }
 
     if (search) {
       const like = `%${search}%`;

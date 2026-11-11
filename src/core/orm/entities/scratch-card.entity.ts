@@ -1,5 +1,4 @@
 import { Mapping } from '../sql.model';
-import { Company } from './company.entity';
 import { Users } from './users.entity';
 import { Customer } from './customer.entity';
 import { ParkingTokenReconciled } from './parking-token-reconciled.entity';
@@ -11,7 +10,6 @@ export class ScratchCard extends Mapping {
   }
 
   code?: string;
-  companyId?: number;
   amountOptions?: "50" | "100" | "200" | "500" | "1000";
   scratchCardStatus?: "active" | "inactive" | "expired" | "onhold";
   createdAt?: Date | string;
@@ -27,14 +25,6 @@ export class ScratchCard extends Mapping {
 
     static get relationMappings() {
     return {
-      companyScratchCards: {
-        relation: Mapping.BelongsToOneRelation,
-        modelClass: Company,
-        join: {
-          from: 'scratch_card.company',
-          to: 'company.id',
-        },
-      },
       userScratchCards: {
         relation: Mapping.BelongsToOneRelation,
         modelClass: Users,

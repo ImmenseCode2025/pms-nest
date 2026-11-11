@@ -1,4 +1,4 @@
-import { IsIn, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 // Query for GET api/hardware/device-issuance (all hardware types, paginated)
 export class DeviceIssuanceListDto {
@@ -16,9 +16,4 @@ export class DeviceIssuanceListDto {
   @IsOptional()
   @IsString()
   search?: string;
-
-  // Optional legacy location filter: only hardware assigned to a parking site of that company
-  @IsOptional()
-  @IsIn(['karachi', 'islamabad', ''])
-  location?: string;
 }

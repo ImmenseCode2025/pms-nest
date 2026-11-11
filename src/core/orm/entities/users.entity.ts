@@ -2,7 +2,6 @@ import { Mapping } from '../sql.model';
 import { Room } from './room.entity';
 import { Address } from './address.entity';
 import { ParkingSite } from './parking-site.entity';
-import { Company } from './company.entity';
 import { Designation } from './designation.entity';
 import { FOC } from './foc.entity';
 import { ParkingShiftClosing } from './parking-shift-closing.entity';
@@ -76,14 +75,6 @@ export class Users extends Mapping {
         join: {
           from: 'user.site',
           to: 'parking_site.id',
-        },
-      },
-      userCompany: {
-        relation: Mapping.HasManyRelation,
-        modelClass: Company,
-        join: {
-          from: 'user.id',
-          to: 'company.user',
         },
       },
       userDesignation: {

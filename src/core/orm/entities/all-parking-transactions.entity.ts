@@ -1,5 +1,4 @@
 import { Mapping } from '../sql.model';
-import { Company } from './company.entity';
 import { ParkingSite } from './parking-site.entity';
 import { VehicleType } from './vehicle-type.entity';
 
@@ -14,7 +13,6 @@ export class AllParkingTransactions extends Mapping {
   vehicle_number?: string;
   site_id?: number;
   site_name?: string;
-  company_id?: number;
   vehicle_type_id?: number;
   vehicle_type_name?: string;
   amount?: number;
@@ -35,14 +33,6 @@ export class AllParkingTransactions extends Mapping {
         join: {
           from: 'v_all_parking_transactions.site_id',
           to: 'parking_site.id',
-        },
-      },
-      company: {
-        relation: Mapping.BelongsToOneRelation,
-        modelClass: Company,
-        join: {
-          from: 'v_all_parking_transactions.company_id',
-          to: 'company.id',
         },
       },
       vehicleType: {

@@ -5,7 +5,6 @@ export * from './bank-card.entity';
 export * from './cash-qr-code.entity';
 export * from './company-cards.entity';
 export * from './company-qr-code.entity';
-export * from './company.entity';
 export * from './corporate-billing-plan.entity';
 export * from './corporate-cards.entity';
 export * from './corporate-invoice-log.entity';
