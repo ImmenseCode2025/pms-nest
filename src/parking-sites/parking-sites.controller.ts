@@ -6,6 +6,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Query,
   Req,
   Res,
@@ -17,6 +18,7 @@ import { ResponseHelper } from 'src/core/helper/response.helper';
 import { GetHandheldInfoDto } from './dto/get-handheld-info.dto';
 import { RegisterParkingSiteDto } from './dto/register-parking-site.dto';
 import { SearchParkingSitesDto } from './dto/search-parking-sites.dto';
+import { UpdateParkingPriceDto } from './dto/update-parking-price.dto';
 import { ParkingSitesService } from './parking-sites.service';
 
 @Controller('api/parking-sites')
@@ -159,6 +161,23 @@ export class ParkingSitesController {
         data,
         message: 'Parking site info fetched successfully',
       });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
+  // Upsert one vehicle-type price for a site (Flask parkingApp/updateParkingPrice).
+  // Body: { siteId, vehicleType, amount } (legacy extra pricing fields ignored)
+  @Put('/update-price')
+  async updatePrice(
+    @Body() dto: UpdateParkingPriceDto,
+    @Req() req: Request,
+    @Res() res: Response,
+    @AuthId() authId: number,
+  ) {
+    try {
+      const data = await this.parkingSitesService.updatePrice(dto, authId);
+      return ResponseHelper.success({ res, data, message: data.message });
     } catch (error) {
       return ResponseHelper.error({ res, req, error });
     }

@@ -46,6 +46,26 @@ export class VehicleTypesController {
     }
   }
 
+  // 1b. REGISTER (Flask parkingApp/registerVehicleType). Body: { name }
+  // Lowercases the name and rejects duplicates.
+  @Post('register')
+  async register(
+    @Body() dto: CreateVehicleTypeDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const data = await this.vehicleTypesService.register(dto);
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Vehicle Type Registered Successfully!',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
   // 2. PAGINATED LISTING
   @Post('/paginated')
   async paginated(

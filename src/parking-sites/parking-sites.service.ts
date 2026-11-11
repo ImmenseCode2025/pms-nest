@@ -14,6 +14,7 @@ import { ParkingToken } from 'src/core/orm/entities/parking-token.entity';
 import { GetHandheldInfoDto } from './dto/get-handheld-info.dto';
 import { RegisterParkingSiteDto } from './dto/register-parking-site.dto';
 import { SearchParkingSitesDto } from './dto/search-parking-sites.dto';
+import { UpdateParkingPriceDto } from './dto/update-parking-price.dto';
 
 @Injectable()
 export class ParkingSitesService {
@@ -292,6 +293,47 @@ export class ParkingSitesService {
       id: site.id,
       name: site.name,
       siteParkingPrices,
+    };
+  }
+
+  // Upsert the price of one vehicle type for a site (Flask updateParkingPrice).
+  // Flask also copied the old row into parking_price_logs before updating;
+  // that table has been dropped, so no history row is written.
+  async updatePrice(dto: UpdateParkingPriceDto, authId: number) {
+    const siteId = Number(dto.siteId);
+    const vehicleType = Number(dto.vehicleType);
+    const amount = Number(dto.amount);
+
+    const site = await ParkingSite.query().findById(siteId);
+    if (!site) {
+      AppException.notFound({ message: `Parking site #${siteId} not found` });
+    }
+
+    const now = GlobalHelper.getDateTime('YYYY-MM-DD HH:mm:ss');
+    const existing: any = await ParkingPrice.query()
+      .where('siteId', siteId)
+      .where('vehicleType', vehicleType)
+      .first();
+
+    if (existing) {
+      await ParkingPrice.query()
+        .patch({ amount, user: authId, updateDateTime: now, updatedAt: now } as any)
+        .where('siteId', siteId)
+        .where('vehicleType', vehicleType);
+    } else {
+      await ParkingPrice.query().insert({
+        vehicleType,
+        amount,
+        siteId,
+        user: authId,
+        createdAt: now,
+        updatedAt: now,
+      } as any);
+    }
+
+    return {
+      response: 'success',
+      message: 'Parking Site Updated Successfully!',
     };
   }
 }

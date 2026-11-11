@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class LoginDto {
   @IsNotEmpty()
@@ -49,4 +49,36 @@ export class EmployeeLoginDto {
   @IsNotEmpty()
   @IsString()
   password: string;
+}
+
+// POST auth/forgot-password (public)
+export class ForgotPasswordDto {
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+}
+
+// POST auth/reset-password (public). token = the Fernet token from the
+// emailed reset link (?token=...)
+export class ResetPasswordDto {
+  @IsNotEmpty()
+  @IsString()
+  token: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @MinLength(8, { message: 'Password must be at least 8 characters' })
+  password: string;
+}
+
+// PUT auth/change-password (logged-in user)
+export class ChangePasswordDto {
+  @IsNotEmpty()
+  @IsString()
+  oldPassword: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @MinLength(8, { message: 'New password must be at least 8 characters' })
+  newPassword: string;
 }

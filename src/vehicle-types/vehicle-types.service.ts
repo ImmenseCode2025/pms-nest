@@ -16,6 +16,27 @@ export class VehicleTypesService {
     return item;
   }
 
+  // 1b. REGISTER (Flask parkingApp/registerVehicleType): name is stored in
+  // lowercase and must be unique (case-insensitive).
+  async register(dto: CreateVehicleTypeDto) {
+    const name = String(dto.name).trim().toLowerCase();
+    if (!name) {
+      AppException.badRequest({ message: 'Vehicle type name is required' });
+    }
+    const exists = await VehicleType.query()
+      .whereRaw('LOWER(name) = ?', [name])
+      .first();
+    if (exists) {
+      AppException.conflict({ message: 'Vehicle Type Already Exist!' });
+    }
+    const now = GlobalHelper.getDateTime('YYYY-MM-DD HH:mm:ss');
+    return await VehicleType.query().insertAndFetch({
+      name,
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
   // 2. PAGINATED LISTING
   async paginated(data: any = {}) {
     const dto: VehicleTypePaginatedDto = data.dto || {};

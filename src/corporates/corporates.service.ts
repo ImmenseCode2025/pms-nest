@@ -19,6 +19,10 @@ import { CorporatePaginatedDto } from './dto/corporate-paginated.dto';
 import { CreateCorporateDto } from './dto/create-corporate.dto';
 import { GenerateInvoiceDto } from './dto/generate-invoice.dto';
 import { UpdateCorporateDto } from './dto/update-corporate.dto';
+import {
+  insertPortalNotification,
+  nowWallClock,
+} from './corporate-notification.helper';
 
 const fernet = require('fernet');
 
@@ -590,5 +594,116 @@ export class CorporatesService {
     });
 
     return { id, deleted: true };
+  }
+
+  // ─── Legacy-compatible endpoints (ported from cda-parking-chat-backend) ───
+
+  /** Maps a raw `corporates` row to the legacy Sequelize JSON shape (no password). */
+  private toLegacyCorporate(row: any) {
+    if (!row) return row;
+    const {
+      password,
+      status,
+      address,
+      creationDateTime,
+      ...rest
+    } = row;
+    return {
+      ...rest,
+      addressId: address ?? null,
+      statusCorporate: status,
+      createdAt: creationDateTime,
+    };
+  }
+
+  // GET api/corporates/:id  (legacy GET corporates/:id)
+  async getLegacyById(id: number) {
+    const corporate: any = await Corporate.query()
+      .findById(id)
+      .withGraphFetched('[corporateAddresses, billingPlans(orderByCreatedDesc)]')
+      .modifiers({
+        orderByCreatedDesc: (builder) => builder.orderBy('createdAt', 'desc'),
+      });
+    if (!corporate) {
+      AppException.notFound({ message: 'Corporate not found' });
+    }
+    return this.toLegacyCorporate(corporate);
+  }
+
+  // PUT api/corporates/:id/approve  (legacy approveCorporate)
+  async approveCorporate(id: number, pricePlan: any, authId?: number) {
+    const corporate: any = await Corporate.query().findById(id);
+    if (!corporate) {
+      AppException.notFound({ message: 'Corporate not found' });
+    }
+
+    await Corporate.query()
+      .findById(id)
+      .patch({ status: 'approved', updatedAt: nowWallClock() } as any);
+
+    await insertPortalNotification(Corporate.knex(), {
+      title: 'Registration Approved',
+      message:
+        'Your corporate account has been approved. You can now log in and submit card requests.',
+      portalType: 'corporate',
+      corporateId: id,
+      data: { type: 'corporateApproved', corporateId: id },
+      createdBy: authId ?? 16,
+    });
+
+    // Default billing plan (legacy corporateFinanceService.createBillingPlan):
+    // deactivate active plans, insert a new active one. Failures are logged only.
+    try {
+      const price = Number(pricePlan);
+      const now = nowWallClock();
+      await Corporate.transaction(async (trx) => {
+        await CorporateBillingPlan.query(trx)
+          .where('corporateId', id)
+          .where('isActive', true)
+          .patch({ isActive: false, updatedAt: now } as any);
+        await CorporateBillingPlan.query(trx).insert({
+          corporateId: id,
+          pricePerVehicle: Number.isFinite(price) ? price : 0,
+          effectiveFrom: moment().format('YYYY-MM-DD'),
+          isActive: true,
+          notes: 'Default plan',
+          createdAt: now,
+          updatedAt: now,
+        } as any);
+      });
+    } catch (planErr) {
+      console.error(
+        '[approveCorporate] Could not create default billing plan:',
+        planErr?.message,
+      );
+    }
+
+    const updated = await Corporate.query().findById(id);
+    return this.toLegacyCorporate(updated);
+  }
+
+  // PUT api/corporates/:id/reject  (legacy rejectCorporate)
+  async rejectCorporate(id: number, authId?: number) {
+    const corporate: any = await Corporate.query().findById(id);
+    if (!corporate) {
+      AppException.notFound({ message: 'Corporate not found' });
+    }
+
+    await Corporate.query()
+      .findById(id)
+      .patch({ status: 'rejected', updatedAt: nowWallClock() } as any);
+
+    await insertPortalNotification(Corporate.knex(), {
+      title: 'Registration Rejected',
+      message:
+        'Your corporate account registration has been rejected. Please contact support for more information.',
+      portalType: 'corporate',
+      corporateId: id,
+      data: { type: 'corporateRejected', corporateId: id },
+      createdBy: authId ?? 16,
+    });
+
+    const updated = await Corporate.query().findById(id);
+    return this.toLegacyCorporate(updated);
   }
 }
