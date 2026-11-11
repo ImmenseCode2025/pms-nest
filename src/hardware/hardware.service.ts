@@ -3,6 +3,8 @@ import { LodashHelper } from 'src/core/helper/lodash-helper';
 import { HardwareAssignLogs } from 'src/core/orm/entities/hardware-assign-logs.entity';
 import { Hardware } from 'src/core/orm/entities/hardware.entity';
 import { CreateHardwareDto } from './dto/create-hardware.dto';
+import { HardwareAssigneesDto } from './dto/hardware-assignees.dto';
+import { HardwareDropdownDto } from './dto/hardware-dropdown.dto';
 import { HardwareFilterDto } from './dto/hardware-filter.dto';
 import { HardwarePaginatedDto } from './dto/hardware-paginated.dto';
 import { TagHardwareDto } from './dto/tag-hardware.dto';
@@ -11,6 +13,70 @@ import { UpdateHardwareDto } from './dto/update-hardware.dto';
 
 @Injectable()
 export class HardwareService {
+  async dropdown(dto: HardwareDropdownDto = {}) {
+    const query = Hardware.query()
+      .select('id', 'ipOrApi as configuration', 'type', 'status', 'asignee')
+      .orderBy('id', 'desc');
+    if (dto.type) {
+      query.where('type', dto.type);
+    }
+    return await query;
+  }
+
+  // Karachi (KMC) company id, same as parking-sites/site-dropdown
+  private static readonly KMC_COMPANY_ID = 7;
+
+  async assignees(dto: HardwareAssigneesDto) {
+    const knex = Hardware.knex();
+    const companyId = HardwareService.KMC_COMPANY_ID;
+
+    switch (dto.assigned_to) {
+      case 'parking site':
+        return await knex('parking_site')
+          .select('id', 'name')
+          .where('company', companyId)
+          .orderBy('name', 'asc');
+
+      case 'parking block': {
+        const rows = await knex('parking_block as pb')
+          .innerJoin('parking_site as ps', 'ps.id', 'pb.site')
+          .select('pb.id', 'pb.name', 'ps.name as site_name')
+          .where('ps.company', companyId)
+          .orderBy('pb.name', 'asc');
+        return rows.map((r: any) => ({
+          id: r.id,
+          name: r.name,
+          parkingBlockParkingSite: { name: r.site_name },
+        }));
+      }
+
+      case 'parking gate': {
+        const rows = await knex('parking_gate as pg')
+          .innerJoin('parking_block as pb', 'pb.id', 'pg.block')
+          .innerJoin('parking_site as ps', 'ps.id', 'pb.site')
+          .select('pg.id', 'pg.name', 'pb.name as block_name', 'ps.name as site_name')
+          .where('ps.company', companyId)
+          .orderBy('pg.name', 'asc');
+        return rows.map((r: any) => ({
+          id: r.id,
+          name: r.name,
+          parkingBlockParkingGate: {
+            name: r.block_name,
+            parkingBlockParkingSite: { name: r.site_name },
+          },
+        }));
+      }
+
+      case 'hardware':
+        return await knex('hardware')
+          .select('id', 'sku as name')
+          .orderBy('id', 'desc');
+
+      default:
+        return [];
+    }
+  }
+
   async getHandheldList(dto?: HardwareFilterDto) {
     const query = Hardware.query();
     query.select('id', 'ipOrApi', 'type', 'status', 'asignee');

@@ -6,6 +6,7 @@ import { Address, Users } from 'src/core/orm/entities';
 import { ParkingSite } from 'src/core/orm/entities/parking-site.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UsersDropdownDto } from './dto/users-dropdown.dto';
 import { UsersPaginatedDto } from './dto/users-paginated.dto';
 
 const fernet = require('fernet');
@@ -13,6 +14,21 @@ const fernet = require('fernet');
 @Injectable()
 export class UsersService {
   constructor(private readonly externalApiService: ExternalApiService) {}
+
+  // ─── DROPDOWN ────────────────────────────────────────────────────────────────
+
+  async dropdown(dto: UsersDropdownDto = {}) {
+    const query = Users.query()
+      .select('id', 'username', 'access')
+      .where((builder) => {
+        builder.whereNull('isDeleted').orWhere('isDeleted', false);
+      })
+      .orderBy('username', 'asc');
+    if (dto.access) {
+      query.where('access', dto.access);
+    }
+    return await query;
+  }
 
   // ─── GET PROFILE ─────────────────────────────────────────────────────────────
 

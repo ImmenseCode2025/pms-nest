@@ -34,6 +34,8 @@ import { OperatorsModule } from './operators/operators.module';
 import { ParkingReceiptSummaryModule } from './parking-receipt-summary/parking-receipt-summary.module';
 import { VehicleTypesModule } from './vehicle-types/vehicle-types.module';
 import { FocModule } from './foc/foc.module';
+import { DesignationsModule } from './designations/designations.module';
+import { CompaniesModule } from './companies/companies.module';
 
 @Module({
   imports: [
@@ -81,6 +83,8 @@ import { FocModule } from './foc/foc.module';
     ParkingReceiptSummaryModule,
     VehicleTypesModule,
     FocModule,
+    DesignationsModule,
+    CompaniesModule,
   ],
 
   controllers: [AppController],

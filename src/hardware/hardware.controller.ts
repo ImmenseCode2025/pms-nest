@@ -15,6 +15,8 @@ import { AuthId } from 'src/core/decorators/auth-id.decorator';
 import { Public } from 'src/core/guard/public.decorator';
 import { ResponseHelper } from 'src/core/helper/response.helper';
 import { CreateHardwareDto } from './dto/create-hardware.dto';
+import { HardwareAssigneesDto } from './dto/hardware-assignees.dto';
+import { HardwareDropdownDto } from './dto/hardware-dropdown.dto';
 import { HardwareFilterDto } from './dto/hardware-filter.dto';
 import { HardwarePaginatedDto } from './dto/hardware-paginated.dto';
 import { TagHardwareDto } from './dto/tag-hardware.dto';
@@ -25,6 +27,48 @@ import { HardwareService } from './hardware.service';
 @Controller('api/hardware')
 export class HardwareController {
   constructor(private readonly hardwareService: HardwareService) {}
+
+  // Dropdown list: [{ id, configuration, type, status, asignee }]. Query: { type? }
+  @Get('/dropdown')
+  async dropdown(
+    @Query() dto: HardwareDropdownDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const data = await this.hardwareService.dropdown(dto);
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Hardware dropdown fetched successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
+  // Assignee dropdown for device issuance. Query: { assigned_to }
+  // -> parking site: [{ id, name }]
+  // -> parking block: [{ id, name, parkingBlockParkingSite: { name } }]
+  // -> parking gate: [{ id, name, parkingBlockParkingGate: { name, parkingBlockParkingSite: { name } } }]
+  // -> hardware: [{ id, name (sku) }]
+  @Get('/assignees')
+  async assignees(
+    @Query() dto: HardwareAssigneesDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const data = await this.hardwareService.assignees(dto);
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Hardware assignees fetched successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
 
   @Public()
   @Get('/handheld-list-by-site')

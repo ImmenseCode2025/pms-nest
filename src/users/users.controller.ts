@@ -4,6 +4,7 @@ import { Admin } from 'src/core/guard/admin.decorator';
 import { ResponseHelper } from 'src/core/helper/response.helper';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UsersDropdownDto } from './dto/users-dropdown.dto';
 import { UsersPaginatedDto } from './dto/users-paginated.dto';
 import { UsersService } from './users.service';
 
@@ -34,6 +35,17 @@ export class UsersController {
     try {
       const data = await this.usersService.paginated({ dto, query, req });
       return ResponseHelper.success({ res, data, message: 'Users fetched successfully' });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
+  // Dropdown list: [{ id, username, access }]. Query: { access? }
+  @Get('dropdown')
+  async dropdown(@Query() dto: UsersDropdownDto, @Req() req: Request, @Res() res: Response) {
+    try {
+      const data = await this.usersService.dropdown(dto);
+      return ResponseHelper.success({ res, data, message: 'Users dropdown fetched successfully' });
     } catch (error) {
       return ResponseHelper.error({ res, req, error });
     }
