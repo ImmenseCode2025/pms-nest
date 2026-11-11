@@ -46,23 +46,7 @@ export class CreateHardwareDto {
   @IsEnum(['active', 'inactive', 'outOfService', 'maintenance'])
   status?: 'active' | 'inactive' | 'outOfService' | 'maintenance';
 
-  @IsNotEmpty()
-  @IsEnum([
-    'parking site',
-    'parking gate',
-    'parking lot',
-    'hardware',
-    'parking block',
-    'parking floor',
-  ])
-  assignedTo:
-    | 'parking site'
-    | 'parking gate'
-    | 'parking lot'
-    | 'hardware'
-    | 'parking block'
-    | 'parking floor';
-
+  // Parking site id
   @IsNotEmpty()
   asignee: number;
 

@@ -24,7 +24,6 @@ export class Hardware extends Mapping {
   status?: 'active' | 'inactive' | 'outOfService' | 'maintenance';
   creationDateTime?: Date | string;
   user?: number;
-  assignedTo?: 'parking site' | 'parking gate' | 'parking lot' | 'hardware' | 'parking block' | 'parking floor';
   asignee?: number;
   updatedAt?: Date | string;
   assignedUser?: number;

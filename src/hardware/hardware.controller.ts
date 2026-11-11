@@ -17,7 +17,6 @@ import { Public } from 'src/core/guard/public.decorator';
 import { ResponseHelper } from 'src/core/helper/response.helper';
 import { CreateHardwareDto } from './dto/create-hardware.dto';
 import { DeviceIssuanceListDto } from './dto/device-issuance-list.dto';
-import { HardwareAssigneesDto } from './dto/hardware-assignees.dto';
 import { HardwareFilterDto } from './dto/hardware-filter.dto';
 import { HardwarePaginatedDto } from './dto/hardware-paginated.dto';
 import { TagHardwareDto } from './dto/tag-hardware.dto';
@@ -29,11 +28,11 @@ import { HardwareService } from './hardware.service';
 export class HardwareController {
   constructor(private readonly hardwareService: HardwareService) {}
 
-  // Device issuance table (all hardware types). Query: { page, limit|pageSize, search?, location? }
+  // Device issuance table (all hardware types). Query: { page, limit|pageSize, search? }
   // -> { results: [{ id, partName, configuration, description, type, status, userId, user,
-  //      assignedTo, asignee, assignedUser, createdAt, updatedAt, uniqueId,
+  //      asignee (parking site id), assignedUser, createdAt, updatedAt, uniqueId,
   //      hardwareUsers: { username } | null, hardwareAssignedUsers: { name } | null,
-  //      assignDetails: { name } | null }], total, page, meta, links }
+  //      assignDetails: { name } (parking site) | null }], total, page, meta, links }
   @Get('/device-issuance')
   async deviceIssuanceList(
     @Query() dto: DeviceIssuanceListDto,
@@ -53,7 +52,7 @@ export class HardwareController {
   }
 
   // Issue new hardware (+ assign log). Body: { partName, configuration, description, type,
-  // assignedTo, asignee, assignedUser }. 400 if configuration (ipOrApi) already exists.
+  // asignee (parking site id), assignedUser }. 400 if configuration (ipOrApi) already exists.
   @Post('/device-issuance')
   async deviceIssuanceCreate(
     @Body() dto: CreateHardwareDto,
@@ -94,19 +93,11 @@ export class HardwareController {
     }
   }
 
-  // Assignee dropdown for device issuance. Query: { assigned_to }
-  // -> parking site: [{ id, name }]
-  // -> parking block: [{ id, name, parkingBlockParkingSite: { name } }]
-  // -> parking gate: [{ id, name, parkingBlockParkingGate: { name, parkingBlockParkingSite: { name } } }]
-  // -> hardware: [{ id, name (sku) }]
+  // Assignee dropdown for device issuance (parking sites) -> [{ id, name }]
   @Get('/assignees')
-  async assignees(
-    @Query() dto: HardwareAssigneesDto,
-    @Req() req: Request,
-    @Res() res: Response,
-  ) {
+  async assignees(@Req() req: Request, @Res() res: Response) {
     try {
-      const data = await this.hardwareService.assignees(dto);
+      const data = await this.hardwareService.assignees();
       return ResponseHelper.success({
         res,
         data,
