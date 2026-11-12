@@ -123,6 +123,8 @@ export class ParkingTicketsService {
         site_name: row.site_name || '-',
         vehicle_type: row.vehicle_type || '-',
         payment_method: row.payment_method || '-',
+        operator_name: row.operator_name || '-',
+        handheld_device: row.handheld_device || '-',
         check_in_date_time: GlobalHelper.formatDateTime(row?.check_in_date_time),
         check_out_date_time: GlobalHelper.formatDateTime(row?.check_out_date_time),
         status: row.status || 'Active',
@@ -229,6 +231,8 @@ export class ParkingTicketsService {
       { key: 'site_name', name: 'Site Name', width: 28, align: 'left' },
       { key: 'vehicle_type', name: 'Vehicle Type', width: 18, align: 'center' },
       { key: 'payment_method', name: 'Payment Method', width: 18, align: 'center' },
+      { key: 'operator_name', name: 'Operator', width: 18, align: 'center' },
+      { key: 'handheld_device', name: 'Handheld Device', width: 20, align: 'center' },
       { key: 'check_in_date_time', name: 'Check-In Time', width: 22, align: 'center' },
       { key: 'check_out_date_time', name: 'Check-Out Time', width: 22, align: 'center' },
       { key: 'status', name: 'Status', width: 14, align: 'center' },
@@ -304,6 +308,8 @@ export class ParkingTicketsService {
         site_name: row.site_name || '-',
         vehicle_type: row.vehicle_type || '-',
         payment_method: row.payment_method || '-',
+        operator_name: row.operator_name || '-',
+        handheld_device: row.handheld_device || '-',
         check_in_date_time: GlobalHelper.formatDateTime(row.check_in_date_time),
         check_out_date_time: GlobalHelper.formatDateTime(row.check_out_date_time),
         status: row.status || 'Active',
@@ -344,28 +350,21 @@ export class ParkingTicketsService {
     if (cleanRows.length > 0) {
       const totalRow = worksheet.addRow([
         'Total Revenue',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
+        ...Array(totalColumns - 2).fill(''),
         totalRevenue.toLocaleString('en-US', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         }),
       ]);
       const totalRowNum = totalRow.number;
-      worksheet.mergeCells(`A${totalRowNum}:J${totalRowNum}`);
+      const secondLastColLetter = String.fromCharCode(65 + totalColumns - 2);
+      worksheet.mergeCells(`A${totalRowNum}:${secondLastColLetter}${totalRowNum}`);
       totalRow.height = 22;
       const totalLabelCell = worksheet.getCell(`A${totalRowNum}`);
       totalLabelCell.alignment = { horizontal: 'right', vertical: 'middle' };
       totalLabelCell.font = { bold: true, size: 10, color: { argb: '1447B1' } };
 
-      const totalValCell = worksheet.getCell(`K${totalRowNum}`);
+      const totalValCell = worksheet.getCell(`${lastColLetter}${totalRowNum}`);
       totalValCell.alignment = { horizontal: 'right', vertical: 'middle' };
       totalValCell.font = { bold: true, size: 10, color: { argb: '1447B1' } };
 

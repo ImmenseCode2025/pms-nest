@@ -62,7 +62,9 @@ BEGIN
                 pt.checkInDateTime AS check_in_date_time,
                 pt.checkOutDateTime AS check_out_date_time,
                 pt.status AS status,
-                pm.name AS payment_method
+                pm.name AS payment_method,
+                NULL AS operator_name,
+                NULL AS handheld_device
             FROM parking_token pt
             INNER JOIN parking_site ps ON pt.site = ps.id
             LEFT JOIN vehicle_type vt ON vt.id = pt.vehicleType
@@ -98,12 +100,15 @@ BEGIN
                 pr.creationDate AS check_in_date_time,
                 pr.checkOutDateTime AS check_out_date_time,
                 CASE WHEN pr.checkOutDateTime IS NULL THEN 'Active' ELSE 'Expired' END AS status,
-                pm.name AS payment_method
+                pm.name AS payment_method,
+                op.username AS operator_name,
+                pr.deviceId AS handheld_device
             FROM parking_receipt pr
             INNER JOIN parking_site ps ON pr.siteId = ps.id
             LEFT JOIN vehicle_type vt ON vt.id = pr.vehicleType
             LEFT JOIN parking_price pp ON pp.vehicleType = pr.vehicleType AND pp.siteId = ps.id
             LEFT JOIN payment_method pm ON pm.id = pr.paymentMethod
+            LEFT JOIN operators op ON op.id = pr.checkInOperatorId
             WHERE (v_device IS NULL OR v_device = 'handheld')
               AND (p_site_id IS NULL OR pr.siteId = p_site_id)
               AND (p_vehicle_type IS NULL OR pr.vehicleType = p_vehicle_type)

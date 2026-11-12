@@ -397,14 +397,16 @@
         <thead>
           <tr>
             <th style="width: 24px;" class="text-center">#</th>
-            <th style="width: 82px;">Slip / Token #</th>
-            <th style="width: 72px;">Vehicle #</th>
-            <th style="width: 65px;">Source</th>
-            <th style="width: 105px;">Site Name</th>
-            <th style="width: 55px;">Vehicle Type</th>
-            <th style="width: 70px;">Payment Method</th>
-            <th style="width: 85px;">Check-In Time</th>
-            <th style="width: 85px;">Check-Out Time</th>
+            <th style="width: 72px;">Slip / Token #</th>
+            <th style="width: 62px;">Vehicle #</th>
+            <th style="width: 55px;">Source</th>
+            <th style="width: 90px;">Site Name</th>
+            <th style="width: 52px;">Vehicle Type</th>
+            <th style="width: 58px;">Payment Method</th>
+            <th style="width: 62px;">Operator</th>
+            <th style="width: 70px;">Handheld Device</th>
+            <th style="width: 75px;">Check-In Time</th>
+            <th style="width: 75px;">Check-Out Time</th>
             <th style="width: 44px;" class="text-center">Status</th>
             <th style="width: 58px;" class="text-right">Amount (PKR)</th>
           </tr>
@@ -422,6 +424,8 @@
                 <td style="font-weight: 500;">{{this.site_name}}</td>
                 <td>{{this.vehicle_type}}</td>
                 <td>{{this.payment_method}}</td>
+                <td>{{this.operator_name}}</td>
+                <td>{{this.handheld_device}}</td>
                 <td class="tabular-num">{{this.check_in_date_time}}</td>
                 <td class="tabular-num">{{this.check_out_date_time}}</td>
                 <td class="text-center">
@@ -434,7 +438,7 @@
             {{/each}}
           {{else}}
             <tr>
-              <td colspan="11" class="no-data-cell">No parking ticket records found matching the specified filter criteria.</td>
+              <td colspan="13" class="no-data-cell">No parking ticket records found matching the specified filter criteria.</td>
             </tr>
           {{/if}}
         </tbody>
