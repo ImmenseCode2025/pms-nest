@@ -1,6 +1,6 @@
 import { IsInt, IsNotEmpty, Max, Min } from 'class-validator';
 
-export class SyncCorporatesDto {
+export class SyncDto {
   @IsNotEmpty()
   @IsInt()
   site_id: number;
