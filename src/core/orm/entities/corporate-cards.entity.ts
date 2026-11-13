@@ -29,6 +29,7 @@ export class CorporateCards extends Mapping {
   otpCode?: string;
   otpExpired?: Date | string;
   customer?: number;
+  site_id?: number;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 

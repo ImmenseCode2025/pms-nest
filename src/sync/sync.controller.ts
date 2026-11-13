@@ -55,4 +55,27 @@ export class SyncController {
       return ResponseHelper.error({ res, req, error });
     }
   }
+
+  @Public()
+  @Post('/operators')
+  async operators(
+    @Body() body: SyncDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const data = await this.syncService.operators(
+        body.site_id,
+        body.after_id,
+        body.limit,
+      );
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Operators sync retrieved successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
 }

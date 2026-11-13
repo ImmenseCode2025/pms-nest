@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Corporate } from 'src/core/orm/entities/corporate.entity';
 import { CorporateCards } from 'src/core/orm/entities/corporate-cards.entity';
+import { Operator } from 'src/core/orm/entities/operator.entity';
 import { SyncChanges } from 'src/core/orm/entities/sync-changes.entity';
 
 // Abhi commit ho rahi transactions ki IDs miss na hon — itne second purani changes hi do
@@ -11,6 +12,22 @@ const CORPORATE_FIELDS = ['id', 'name', 'status', 'site_id'];
 
 // Local `vip_vehicles` table jaisi shape (company_id = corporate id)
 const CARD_FIELDS = ['id', 'site_id', 'company_id', 'owner_name', 'vehicle_number'];
+
+// operators table k saare columns
+const OPERATOR_FIELDS = [
+  'id',
+  'username',
+  'mobile',
+  'email',
+  'cnic',
+  'site_id',
+  'supervisor_id',
+  'password',
+  'profile_image',
+  'status',
+  'created_at',
+  'updated_at',
+];
 
 export interface SyncResponse {
   full: boolean; // true = poori list (pehli sync), false = sirf changes
@@ -74,6 +91,23 @@ export class SyncService {
     const recordIds = [...new Set(cardIds)];
     const current: any[] = recordIds.length ? await query().whereIn('corporate_cards.id', recordIds) : [];
     return this.delta(changes, limit, recordIds, current, CARD_FIELDS);
+  }
+
+  // ---------------- operators (saare columns) ----------------
+
+  async operators(siteId: number, afterId: number, limit: number): Promise<SyncResponse> {
+    const tables = ['operators'];
+    const query = () => Operator.query().where('site_id', siteId).select(OPERATOR_FIELDS);
+
+    if (!afterId) return this.full(tables, query(), OPERATOR_FIELDS);
+
+    const changes = await this.changes(tables, afterId, limit);
+    if (!changes.length) return this.empty(afterId);
+
+    // Operator delete hua ya kisi aur site par gaya — deleted_ids mein jayega
+    const recordIds = [...new Set(changes.map((c) => Number(c.record_id)))];
+    const current: any[] = await query().whereIn('id', recordIds);
+    return this.delta(changes, limit, recordIds, current, OPERATOR_FIELDS);
   }
 
   // ---------------- common ----------------
