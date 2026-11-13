@@ -21,6 +21,7 @@ import { SocketGatewayModule } from './core/socket-gateway/socket-gateway.module
 import { TasksModule } from './core/tasks/tasks.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { CorporateCardsModule } from './corporate-cards/corporate-cards.module';
+import { SyncModule } from './sync/sync.module';
 import { FilesUploadModule } from './files-upload/files-upload.module';
 import { ParkingTicketsModule } from './parking-tickets/parking-tickets.module';
 import { ParkingShiftClosingModule } from './parking-shift-closing/parking-shift-closing.module';
@@ -61,6 +62,7 @@ import { ParkingReceiptSummaryModule } from './parking-receipt-summary/parking-r
     UsersModule,
     AuthModule,
     CorporateCardsModule,
+    SyncModule,
     ParkingTicketsModule,
     ParkingShiftClosingModule,
     ParkingSitesModule,
