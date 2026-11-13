@@ -17,6 +17,7 @@ import { ParkingToken } from './parking-token.entity';
 import { PosQrCode } from './pos-qr-code.entity';
 import { Reservation } from './reservation.entity';
 import { ScratchCardsHistory } from './scratch-cards-history.entity';
+import { SiteConnectivity } from './site-connectivity.entity';
 import { Users } from './users.entity';
 
 export class ParkingSite extends Mapping {
@@ -215,6 +216,14 @@ export class ParkingSite extends Mapping {
         join: {
           from: 'parking_site.id',
           to: 'pos_qr_code.site',
+        },
+      },
+      siteConnectivity: {
+        relation: Mapping.HasOneRelation,
+        modelClass: SiteConnectivity,
+        join: {
+          from: 'parking_site.id',
+          to: 'site_connectivity.site_id',
         },
       },
     };
