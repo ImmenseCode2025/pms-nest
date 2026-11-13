@@ -1,7 +1,7 @@
 -- =====================================================================
 -- Sync triggers: corporates
 -- `corporates` mein koi bhi insert / update / delete (NestJS ya Python service sy)
--- `sync_changes` mein log hota hai -> site servers GET /api/sync/corporates sy uthate hain.
+-- `sync_changes` mein log hota hai -> site servers POST /api/sync/corporates sy uthate hain.
 --
 -- Pehle `sync_changes` table chahiye (migration 20261112160000_sync_changes.js).
 -- Dobara chalana safe hai (DROP IF EXISTS).

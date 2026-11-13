@@ -24,6 +24,7 @@ export class Corporate extends Mapping {
   password?: string;
   status?: "pending" | "approved" | "rejected";
   statusCorporate?: "pending" | "approved" | "rejected";
+  site_id?: number;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 
