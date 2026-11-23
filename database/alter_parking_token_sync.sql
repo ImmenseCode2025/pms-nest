@@ -5,7 +5,7 @@
 --   localId     : site server par token ka id (reference / debug)
 -- MySQL 8: ADD COLUMN instant hai, UNIQUE KEY online banti hai (table lock nahi hota)
 ALTER TABLE `parking_token`
-  ADD COLUMN `syncUuid` CHAR(36) NULL DEFAULT NULL,
+  ADD COLUMN `syncUuid` CHAR(250) NULL DEFAULT NULL,
   ADD COLUMN `syncVersion` INT NULL DEFAULT NULL,
   ADD COLUMN `localId` BIGINT NULL DEFAULT NULL,
   ADD COLUMN `amount` DECIMAL(10, 2) NULL DEFAULT NULL,
