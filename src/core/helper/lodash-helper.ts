@@ -10,6 +10,8 @@ import {
   flatten,
   isPlainObject,
   chunk,
+  isNil,
+  isEmpty,
 } from 'lodash';
 
 export class LodashHelper {
@@ -75,5 +77,13 @@ export class LodashHelper {
 
   static map<T, R>(array: T[], iteratee: (item: T, index: number) => R): R[] {
     return (array || []).map(iteratee);
+  }
+
+  static isNil(value: any): boolean {
+    return isNil(value);
+  }
+
+  static isEmpty(value: any): boolean {
+    return isEmpty(value);
   }
 }

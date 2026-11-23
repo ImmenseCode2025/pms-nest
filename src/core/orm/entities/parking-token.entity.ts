@@ -10,10 +10,11 @@ import { VehicleType } from './vehicle-type.entity';
 import { ParkingReceipt } from './parking-receipt.entity';
 
 export class ParkingToken extends Mapping {
-    static get tableName() {
+  static get tableName() {
     return 'parking_token';
   }
 
+  id?: number;
   tokenNumber?: string;
   qrCode?: string;
   checkInDateTime?: Date | string;
@@ -30,6 +31,13 @@ export class ParkingToken extends Mapping {
   isExited?: boolean;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  // Site server push (realpark local tokens) — sab nullable
+  syncUuid?: string | null;
+  syncVersion?: number | null;
+  localId?: number | null;
+  amount?: number | null;
+  checkInOperatorId?: number | null;
+  checkOutOperatorId?: number | null;
 
     static get relationMappings() {
     return {

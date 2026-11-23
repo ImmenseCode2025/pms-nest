@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { LodashHelper } from 'src/core/helper/lodash-helper';
 import { ParkingSite } from 'src/core/orm/entities/parking-site.entity';
 import { PosDeviceLogs } from 'src/core/orm/entities/pos-device-logs.entity';
 import { Users } from 'src/core/orm/entities/users.entity';
@@ -14,14 +15,14 @@ export class PosDeviceLogsHelper {
   async logCreated(device: any, authId: number) {
     const username = await this.username(authId);
     const siteName = await this.siteName(device.site_id);
-    await PosDeviceLogs.query().insert({
+    await PosDeviceLogs.query().insertAndFetch({
       pos_device_id: device.id,
       user_id: authId,
       action: 'created',
       field: 'site_id',
       old_value: null,
       new_value: device.site_id ? String(device.site_id) : null,
-      description: `${username} added POS device ${device.serial_number} and assigned it to ${siteName}.`,
+      description: `[[${username}]] added POS device ${device.serial_number} and assigned it to ${siteName}.`,
     });
   }
 
@@ -37,13 +38,13 @@ export class PosDeviceLogsHelper {
       let description: string;
       if (field === 'site_id') {
         action = 'assigned';
-        description = `${username} assigned POS device ${after.serial_number} from ${await this.siteName(oldVal)} to ${await this.siteName(newVal)}.`;
+        description = `[[${username}]] assigned POS device ${after.serial_number} from ${await this.siteName(oldVal)} to ${await this.siteName(newVal)}.`;
       } else {
         action = 'updated';
-        description = `${username} changed ${FIELD_LABELS[field]} from ${this.display(oldVal)} to ${this.display(newVal)}.`;
+        description = `[[${username}]] changed ${FIELD_LABELS[field]} from ${this.display(oldVal)} to ${this.display(newVal)}.`;
       }
 
-      await PosDeviceLogs.query().insert({
+      await PosDeviceLogs.query().insertAndFetch({
         pos_device_id: before.id,
         user_id: authId,
         action,
@@ -57,16 +58,18 @@ export class PosDeviceLogsHelper {
 
   async logDeleted(device: any, authId: number) {
     const username = await this.username(authId);
-    await PosDeviceLogs.query().insert({
+    await PosDeviceLogs.query().insertAndFetch({
       pos_device_id: device.id,
       user_id: authId,
       action: 'deleted',
-      description: `${username} deleted POS device ${device.serial_number}.`,
+      description: `[[${username}]] deleted POS device ${device.serial_number}.`,
     });
   }
 
   private async username(authId: number) {
-    const user: any = authId ? await Users.query().findById(authId).select('username') : null;
+    const user: any = authId
+      ? await Users.query().findById(authId).select('username')
+      : null;
     return user?.username || 'Unknown user';
   }
 
@@ -77,6 +80,8 @@ export class PosDeviceLogsHelper {
   }
 
   private display(val: any) {
-    return val === null || val === undefined || val === '' ? 'N/A' : String(val);
+    return LodashHelper.isNil(val) || val === ''
+      ? 'N/A'
+      : String(val);
   }
 }
