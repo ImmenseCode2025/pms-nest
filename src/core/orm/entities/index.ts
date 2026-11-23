@@ -72,3 +72,4 @@ export * from './vehicle-type.entity';
 export * from './wallet.entity';
 export * from './operator.entity';
 export * from './pos-device.entity';
+export * from './pos-device-logs.entity';

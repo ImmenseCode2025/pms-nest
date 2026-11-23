@@ -12,8 +12,10 @@ import {
   Res,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { AuthId } from 'src/core/decorators/auth-id.decorator';
 import { ResponseHelper } from 'src/core/helper/response.helper';
 import { CreatePosDeviceDto } from './dto/create-pos-device.dto';
+import { PosDeviceLogsDto } from './dto/pos-device-logs.dto';
 import { PosDevicePaginatedDto } from './dto/pos-device-paginated.dto';
 import { UpdatePosDeviceDto } from './dto/update-pos-device.dto';
 import { PosDevicesService } from './pos-devices.service';
@@ -27,9 +29,10 @@ export class PosDevicesController {
     @Body() dto: CreatePosDeviceDto,
     @Req() req: Request,
     @Res() res: Response,
+    @AuthId() authId: number,
   ) {
     try {
-      const data = await this.posDevicesService.create(dto);
+      const data = await this.posDevicesService.create(dto, authId);
       return ResponseHelper.success({
         res,
         data,
@@ -82,9 +85,10 @@ export class PosDevicesController {
     @Body() dto: UpdatePosDeviceDto,
     @Req() req: Request,
     @Res() res: Response,
+    @AuthId() authId: number,
   ) {
     try {
-      const data = await this.posDevicesService.update(dto);
+      const data = await this.posDevicesService.update(dto, authId);
       return ResponseHelper.success({
         res,
         data,
@@ -100,13 +104,32 @@ export class PosDevicesController {
     @Param('id', ParseIntPipe) id: number,
     @Req() req: Request,
     @Res() res: Response,
+    @AuthId() authId: number,
   ) {
     try {
-      const data = await this.posDevicesService.delete(id);
+      const data = await this.posDevicesService.delete(id, authId);
       return ResponseHelper.success({
         res,
         data,
         message: 'POS device deleted successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
+  @Post('/logs')
+  async logs(
+    @Body() dto: PosDeviceLogsDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const data = await this.posDevicesService.logs(dto.pos_device_id);
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'POS device logs retrieved successfully',
       });
     } catch (error) {
       return ResponseHelper.error({ res, req, error });

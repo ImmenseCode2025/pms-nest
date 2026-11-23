@@ -1,17 +1,23 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { PosDeviceLogs } from 'src/core/orm/entities/pos-device-logs.entity';
 import { PosDevice } from 'src/core/orm/entities/pos-device.entity';
 import { CreatePosDeviceDto } from './dto/create-pos-device.dto';
 import { PosDevicePaginatedDto } from './dto/pos-device-paginated.dto';
 import { UpdatePosDeviceDto } from './dto/update-pos-device.dto';
+import { PosDeviceLogsHelper } from './helpers/pos-device-logs.helper';
 
 @Injectable()
 export class PosDevicesService {
-  async create(dto: CreatePosDeviceDto) {
-    return await PosDevice.query().insertAndFetch({
+  constructor(private readonly posDeviceLogsHelper: PosDeviceLogsHelper) {}
+
+  async create(dto: CreatePosDeviceDto, authId: number) {
+    const device = await PosDevice.query().insertAndFetch({
       serial_number: dto.serial_number,
       bank: dto.bank,
       site_id: dto.site_id,
     });
+    await this.posDeviceLogsHelper.logCreated(device, authId);
+    return device;
   }
 
   async paginated(data: any = {}) {
@@ -46,15 +52,25 @@ export class PosDevicesService {
     return item;
   }
 
-  async update(dto: UpdatePosDeviceDto) {
+  async update(dto: UpdatePosDeviceDto, authId: number) {
     const { id, ...payload } = dto;
-    await this.findOne(id);
-    return await PosDevice.query().patchAndFetchById(id, payload);
+    const before = await this.findOne(id);
+    const after = await PosDevice.query().patchAndFetchById(id, payload);
+    await this.posDeviceLogsHelper.logUpdated(before, after, authId);
+    return after;
   }
 
-  async delete(id: number) {
-    await this.findOne(id);
+  async delete(id: number, authId: number) {
+    const device = await this.findOne(id);
     await PosDevice.query().deleteById(id);
+    await this.posDeviceLogsHelper.logDeleted(device, authId);
     return true;
+  }
+
+  async logs(posDeviceId: number) {
+    return await PosDeviceLogs.query()
+      .where('pos_device_id', posDeviceId)
+      .withGraphFetched('user')
+      .orderBy('id', 'desc');
   }
 }
