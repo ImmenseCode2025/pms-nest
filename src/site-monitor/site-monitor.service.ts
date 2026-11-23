@@ -3,7 +3,7 @@ import { fn } from 'objection';
 import { ParkingSite } from 'src/core/orm/entities/parking-site.entity';
 import { SiteConnectivity } from 'src/core/orm/entities/site-connectivity.entity';
 
-const SITE_FIELDS = ['parking_site.id', 'parking_site.name'];
+const SITE_FIELDS = ['parking_site.id', 'parking_site.name', 'parking_site.sgi'];
 const CONNECTIVITY_FIELDS = ['site_id', 'status', 'connected_at', 'disconnected_at', 'last_seen_at'];
 
 @Injectable()

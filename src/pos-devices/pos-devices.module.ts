@@ -1,0 +1,10 @@
+import { Module } from '@nestjs/common';
+import { PosDevicesController } from './pos-devices.controller';
+import { PosDevicesService } from './pos-devices.service';
+
+@Module({
+  controllers: [PosDevicesController],
+  providers: [PosDevicesService],
+  exports: [PosDevicesService],
+})
+export class PosDevicesModule {}

@@ -1,7 +1,4 @@
 /**
- * Site desktop app ka live connection status — har site ki ek row.
- * Socket connect = online, disconnect (grace k baad) = offline. Bharne wala: src/site-monitor/
- *
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
