@@ -6,6 +6,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Query,
   Req,
   Res,
@@ -17,6 +18,7 @@ import { ResponseHelper } from 'src/core/helper/response.helper';
 import { GetHandheldInfoDto } from './dto/get-handheld-info.dto';
 import { RegisterParkingSiteDto } from './dto/register-parking-site.dto';
 import { SearchParkingSitesDto } from './dto/search-parking-sites.dto';
+import { UpdateParkingPriceDto } from './dto/update-parking-price.dto';
 import { ParkingSitesService } from './parking-sites.service';
 
 @Controller('api/parking-sites')
@@ -109,6 +111,24 @@ export class ParkingSitesController {
     }
   }
 
+  @Get('/detail/:id')
+  async detail(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      const data = await this.parkingSitesService.detail(id);
+      return ResponseHelper.success({
+        res,
+        data,
+        message: 'Parking site detail fetched successfully',
+      });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
   @Delete('/delete/:id')
   async delete(
     @Param('id', ParseIntPipe) id: number,
@@ -120,7 +140,7 @@ export class ParkingSitesController {
       return ResponseHelper.success({
         res,
         data,
-        message: 'Parking site and related configuration deleted successfully',
+        message: 'Parking site deleted successfully',
       });
     } catch (error) {
       return ResponseHelper.error({ res, req, error });
@@ -141,6 +161,23 @@ export class ParkingSitesController {
         data,
         message: 'Parking site info fetched successfully',
       });
+    } catch (error) {
+      return ResponseHelper.error({ res, req, error });
+    }
+  }
+
+  // Set the prices of ALL vehicle types for a site (each row upserted).
+  // Body: { siteId, prices: [{ vehicleType, amount }] } — every vehicle type required
+  @Put('/update-price')
+  async updatePrice(
+    @Body() dto: UpdateParkingPriceDto,
+    @Req() req: Request,
+    @Res() res: Response,
+    @AuthId() authId: number,
+  ) {
+    try {
+      const data = await this.parkingSitesService.updatePrice(dto, authId);
+      return ResponseHelper.success({ res, data, message: data.message });
     } catch (error) {
       return ResponseHelper.error({ res, req, error });
     }

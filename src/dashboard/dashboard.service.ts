@@ -2,8 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { ParkingToken } from 'src/core/orm/entities';
 import { DashboardFilterDto } from './dto/dashboard-filter.dto';
 
-const COMPANY_ID = 7;
-
 @Injectable()
 export class DashboardService {
   async getDashboardData(dto: DashboardFilterDto = {}) {
@@ -15,8 +13,8 @@ export class DashboardService {
     const endDate = dto.endDate?.trim() || null;
 
     const dbResult: any = await ParkingToken.knex().raw(
-      `CALL sp_get_admin_dashboard(?, ?, ?, ?, ?, ?, ?)`,
-      [COMPANY_ID, siteId, paymentMethod, vehicleType, deviceType, startDate, endDate],
+      `CALL sp_get_admin_dashboard(?, ?, ?, ?, ?, ?)`,
+      [siteId, paymentMethod, vehicleType, deviceType, startDate, endDate],
     );
 
     const resultSets = dbResult?.[0] || [];

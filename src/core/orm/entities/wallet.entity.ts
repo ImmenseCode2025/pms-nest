@@ -7,11 +7,13 @@ export class Wallet extends Mapping {
     return 'wallet';
   }
 
-  customerId?: number;
+  id?: number;
+  customer?: number;
   cent?: number;
   topUpDateTime?: Date | string;
-  createdAt?: Date | string;
   updatedAt?: Date | string;
+  createdAt?: Date | string;
+  company?: number;
 
     static get relationMappings() {
     return {

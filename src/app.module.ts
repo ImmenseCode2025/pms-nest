@@ -25,7 +25,6 @@ import { SyncModule } from './sync/sync.module';
 import { SiteMonitorModule } from './site-monitor/site-monitor.module';
 import { FilesUploadModule } from './files-upload/files-upload.module';
 import { ParkingTicketsModule } from './parking-tickets/parking-tickets.module';
-import { ParkingShiftClosingModule } from './parking-shift-closing/parking-shift-closing.module';
 import { ParkingSitesModule } from './parking-sites/parking-sites.module';
 import { CorporatesModule } from './corporates/corporates.module';
 import { PaymentGatewayModule } from './payment-gateway/payment-gateway.module';
@@ -35,6 +34,10 @@ import { HandheldPaymentReceiptsModule } from './handheld-payment-receipts/handh
 import { OperatorsModule } from './operators/operators.module';
 import { ParkingReceiptSummaryModule } from './parking-receipt-summary/parking-receipt-summary.module';
 import { PosDevicesModule } from './pos-devices/pos-devices.module';
+import { VehicleTypesModule } from './vehicle-types/vehicle-types.module';
+import { PortalNotificationsModule } from './portal-notifications/portal-notifications.module';
+import { CorporateFinanceModule } from './corporate-finance/corporate-finance.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -67,7 +70,6 @@ import { PosDevicesModule } from './pos-devices/pos-devices.module';
     SyncModule,
     SiteMonitorModule,
     ParkingTicketsModule,
-    ParkingShiftClosingModule,
     ParkingSitesModule,
     CorporatesModule,
     DashboardModule,
@@ -83,6 +85,10 @@ import { PosDevicesModule } from './pos-devices/pos-devices.module';
     OperatorsModule,
     ParkingReceiptSummaryModule,
     PosDevicesModule,
+    VehicleTypesModule,
+    PortalNotificationsModule,
+    CorporateFinanceModule,
+    PaymentsModule,
   ],
 
   controllers: [AppController],

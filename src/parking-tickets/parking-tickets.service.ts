@@ -9,7 +9,10 @@ import { AppConfigService } from 'src/core/config/app-config.service';
 import { GlobalHelper } from 'src/core/helper/global-helper';
 import { LodashHelper } from 'src/core/helper/lodash-helper';
 import { ParkingSite, ParkingToken, VehicleType } from 'src/core/orm/entities';
-import { ParkingTicketsPaginatedDto } from './dto/parking-tickets-paginated.dto';
+import {
+  GeneralInquiryDto,
+  ParkingTicketsPaginatedDto,
+} from './dto/parking-tickets-paginated.dto';
 
 type PdfFilterItem = {
   label: string;
@@ -47,6 +50,18 @@ export class ParkingTicketsService {
     const dbResult: any = await ParkingToken.knex().raw(
       `CALL sp_get_parking_tickets(?, ?, ?, ?, ?, ?, ?, ?)`,
       [currentPage, perPage, search, siteId, vehicleType, deviceType, startDate, endDate],
+    );
+
+    return ParkingToken.paginationResponse(dbResult, data);
+  }
+
+  async generalInquiry(data: any = {}) {
+    const dto: GeneralInquiryDto = data.dto;
+    const { currentPage, perPage } = ParkingToken.getPaginationParams(data);
+
+    const dbResult: any = await ParkingToken.knex().raw(
+      `CALL sp_general_inquiry(?, ?, ?, ?)`,
+      [currentPage, perPage, dto.search_text.trim(), dto.type],
     );
 
     return ParkingToken.paginationResponse(dbResult, data);

@@ -1,24 +1,38 @@
 import { Mapping } from '../sql.model';
-import { ScratchCard } from './scratch-card.entity';
 
 export class ParkingTokenReconciled extends Mapping {
     static get tableName() {
-    return 'parking_token_reconciled_5';
+    return 'parking_token_reconciled';
   }
 
+  id?: number;
+  checkInDateTime?: string;
+  checkOutDateTime?: string;
+  site?: number;
+  status?: string;
+  hardware?: number;
+  lot?: number;
+  generatedDateTime?: string;
+  customer?: number;
+  vehicleType?: number;
+  siteIdRealPark?: number;
+  entryLaneId?: number;
+  exitLaneId?: number;
+  carNo?: string;
+  paymentMethod?: number;
+  uploadedDateTime?: Date | string;
+  server?: number;
   tokenNumber?: string;
   paymentReference?: string;
+  reconciliationStatus?: 'known' | 'unknown';
+  vehicleCategory?: 'goverment' | 'company' | 'public';
+  temp?: string;
+  stay?: 'day' | 'night';
+  paymentReference2?: string;
+  type?: string;
 
     static get relationMappings() {
     return {
-      scratchCardToken: {
-        relation: Mapping.BelongsToOneRelation,
-        modelClass: ScratchCard,
-        join: {
-          from: 'parking_token_reconciled_5.paymentReference',
-          to: 'scratch_card.id',
-        },
-      },
     };
   }
 }

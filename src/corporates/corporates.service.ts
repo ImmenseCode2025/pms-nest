@@ -5,6 +5,7 @@ import * as handlebars from 'handlebars';
 import moment from 'moment';
 import * as path from 'path';
 import * as puppeteer from 'puppeteer';
+import { FERNET_KEY } from 'src/auth/auth.service';
 import { AppConfigService } from 'src/core/config/app-config.service';
 import { AppException } from 'src/core/exception/app-exception';
 import { GlobalHelper } from 'src/core/helper/global-helper';
@@ -14,7 +15,16 @@ import { CorporateInvoice } from 'src/core/orm/entities/corporate-invoice.entity
 import { CorporateResetPassword } from 'src/core/orm/entities/corporate-reset-password.entity';
 import { Corporate } from 'src/core/orm/entities/corporate.entity';
 import { PortalNotification } from 'src/core/orm/entities/portal-notification.entity';
+import { CorporatePaginatedDto } from './dto/corporate-paginated.dto';
+import { CreateCorporateDto } from './dto/create-corporate.dto';
 import { GenerateInvoiceDto } from './dto/generate-invoice.dto';
+import { UpdateCorporateDto } from './dto/update-corporate.dto';
+import {
+  insertPortalNotification,
+  nowWallClock,
+} from './corporate-notification.helper';
+
+const fernet = require('fernet');
 
 @Injectable()
 export class CorporatesService {
@@ -33,12 +43,147 @@ export class CorporatesService {
     });
   }
 
+  private encryptPassword(password: string): string {
+    const secret = new fernet.Secret(FERNET_KEY);
+    const token = new fernet.Token({ secret, time: Date.now() });
+    return token.encode(password);
+  }
+
+  // 1. CREATE
+  async create(dto: CreateCorporateDto, req?: any) {
+    const existingEmail = await Corporate.query()
+      .where('email', dto.email)
+      .first();
+    if (existingEmail) {
+      AppException.badRequest({
+        message: 'Corporate with this email already exists',
+      });
+    }
+
+    const existingReg = await Corporate.query()
+      .where('registrationNumber', dto.registrationNumber.trim())
+      .first();
+    if (existingReg) {
+      AppException.badRequest({
+        message: 'Corporate with this registration number already exists',
+      });
+    }
+
+    const item = await Corporate.query().insertAndFetch({
+      name: dto.name,
+      registrationNumber: dto.registrationNumber.trim(),
+      email: dto.email.trim(),
+      contactPersonName: dto.contactPersonName,
+      contactNumber: dto.contactNumber,
+      password: this.encryptPassword(dto.password),
+      address: dto.address ?? null,
+      location: dto.location ?? null,
+      quantity: dto.quantity ?? null,
+      unitType: dto.unitType ?? null,
+      unitPrice: dto.unitPrice ?? null,
+      status: dto.status ?? 'pending',
+      creationDateTime: GlobalHelper.getDateTime(),
+      updatedAt: GlobalHelper.getDateTime(),
+    });
+
+    return item;
+  }
+
+  // 2. PAGINATED LISTING
+  async paginated(data: any = {}) {
+    const dto: CorporatePaginatedDto = data.dto || {};
+    const query = Corporate.query();
+
+    if (dto.search_text) {
+      const search = `%${dto.search_text}%`;
+      query.where((builder) => {
+        builder
+          .where('name', 'like', search)
+          .orWhere('contactPersonName', 'like', search)
+          .orWhere('email', 'like', search)
+          .orWhere('registrationNumber', 'like', search)
+          .orWhere('contactNumber', 'like', search);
+      });
+    }
+
+    if (dto.name) {
+      query.where('name', 'like', `%${dto.name}%`);
+    }
+
+    if (dto.status) {
+      query.where('status', dto.status);
+    }
+
+    if (dto.registrationNumber) {
+      query.where('registrationNumber', dto.registrationNumber);
+    }
+
+    query.withGraphFetched('[corporateAddresses]');
+    query.orderBy('id', 'desc');
+
+    return await Corporate.pagination(query, data);
+  }
+
+  // 3. READ BY ID
   async findOne(id: number) {
-    const corporate = await Corporate.query().findById(id);
+    const corporate = await Corporate.query()
+      .findById(id)
+      .withGraphFetched('[corporateAddresses, billingPlans]');
     if (!corporate) {
       AppException.notFound({ message: `Corporate #${id} not found` });
     }
     return corporate;
+  }
+
+  // 4. UPDATE
+  async update(dto: UpdateCorporateDto, authId?: number) {
+    await this.findOne(dto.id);
+
+    const existingEmail = await Corporate.query()
+      .where('email', dto.email.trim())
+      .whereNot('id', dto.id)
+      .first();
+    if (existingEmail) {
+      AppException.badRequest({
+        message: 'Another corporate with this email already exists',
+      });
+    }
+
+    const existingReg = await Corporate.query()
+      .where('registrationNumber', dto.registrationNumber.trim())
+      .whereNot('id', dto.id)
+      .first();
+    if (existingReg) {
+      AppException.badRequest({
+        message:
+          'Another corporate with this registration number already exists',
+      });
+    }
+
+    const patchPayload: Record<string, any> = {
+      name: dto.name,
+      registrationNumber: dto.registrationNumber.trim(),
+      email: dto.email.trim(),
+      contactPersonName: dto.contactPersonName,
+      contactNumber: dto.contactNumber,
+      address: dto.address ?? null,
+      location: dto.location ?? null,
+      quantity: dto.quantity ?? null,
+      unitType: dto.unitType ?? null,
+      unitPrice: dto.unitPrice ?? null,
+      status: dto.status ?? 'pending',
+      updatedAt: GlobalHelper.getDateTime(),
+    };
+
+    if (dto.password) {
+      patchPayload.password = this.encryptPassword(dto.password);
+    }
+
+    const updated = await Corporate.query().patchAndFetchById(
+      dto.id,
+      patchPayload,
+    );
+    return updated;
   }
 
   async generateInvoice(dto: GenerateInvoiceDto, req) {
@@ -54,7 +199,6 @@ export class CorporatesService {
         message: 'billingPeriodStart cannot be after billingPeriodEnd',
       });
     }
-
 
     const existingInvoice = await CorporateInvoice.query()
       .where('corporateId', dto.corporateId)
@@ -167,15 +311,26 @@ export class CorporatesService {
     return result ?? null;
   }
 
-  async generateInvoicePdf(invoiceId: number): Promise<{ url: string; invoiceNumber: string; id: number }> {
+  async generateInvoicePdf(
+    invoiceId: number,
+  ): Promise<{ url: string; invoiceNumber: string; id: number }> {
     const invoice: any = await CorporateInvoice.query().findById(invoiceId);
     if (!invoice) {
-      AppException.notFound({ message: `Corporate invoice #${invoiceId} not found` });
+      AppException.notFound({
+        message: `Corporate invoice #${invoiceId} not found`,
+      });
     }
 
-    const corporate: any = await Corporate.query().findById(invoice.corporateId);
+    const corporate: any = await Corporate.query().findById(
+      invoice.corporateId,
+    );
 
-    const logoPath = path.join(process.cwd(), 'html-templates', 'assets', 'ajcl-logo.png');
+    const logoPath = path.join(
+      process.cwd(),
+      'html-templates',
+      'assets',
+      'ajcl-logo.png',
+    );
     let logoBase64 = '';
     if (fs.existsSync(logoPath)) {
       logoBase64 = `data:image/png;base64,${fs.readFileSync(logoPath).toString('base64')}`;
@@ -191,9 +346,10 @@ export class CorporatesService {
     const invoiceMonth = invoice.billingPeriodStart
       ? moment(invoice.billingPeriodStart).format('MMMM YYYY')
       : moment().format('MMMM YYYY');
-    const billingPeriod = invoice.billingPeriodStart && invoice.billingPeriodEnd
-      ? `${moment(invoice.billingPeriodStart).format('DD MMM')} – ${moment(invoice.billingPeriodEnd).format('DD MMM YYYY')}`
-      : moment().format('MMMM YYYY');
+    const billingPeriod =
+      invoice.billingPeriodStart && invoice.billingPeriodEnd
+        ? `${moment(invoice.billingPeriodStart).format('DD MMM')} – ${moment(invoice.billingPeriodEnd).format('DD MMM YYYY')}`
+        : moment().format('MMMM YYYY');
     const status = String(invoice.status || 'pending').toLowerCase();
     const isPaid = status === 'paid';
     const isOverdue = status === 'overdue' || status === 'declined';
@@ -201,19 +357,27 @@ export class CorporatesService {
 
     const corporateName = corporate?.name || 'Customer Company Name';
     const contactPerson = corporate?.contactPersonName || 'Account Manager';
-    const billingAddress = corporate?.location || corporate?.address || 'Main Commercial Area';
+    const billingAddress =
+      corporate?.location || corporate?.address || 'Main Commercial Area';
     const cityCountry = 'Karachi, Pakistan';
-    const contactInfo = [corporate?.email, corporate?.contactNumber].filter(Boolean).join(' · ') || 'billing@company.com';
+    const contactInfo =
+      [corporate?.email, corporate?.contactNumber]
+        .filter(Boolean)
+        .join(' · ') || 'billing@company.com';
     const taxId = corporate?.registrationNumber || '—';
     const corporateId = corporate?.id || invoice.corporateId;
 
-    const rawUnit = String(invoice.unitType || corporate?.unitType || 'slots').toLowerCase();
+    const rawUnit = String(
+      invoice.unitType || corporate?.unitType || 'slots',
+    ).toLowerCase();
     const isSlot = rawUnit.includes('slot');
     const quantityHeader = isSlot ? 'Number of Slots' : 'Number of Vehicles';
     const priceHeader = isSlot ? 'Slot Price' : 'Vehicle Price';
     const unitType = isSlot ? 'Slots' : 'Vehicles';
     const unitTypeLower = isSlot ? 'slots' : 'vehicles';
-    const quantity = Number(invoice.quantity || invoice.billableVehicleCount || 1);
+    const quantity = Number(
+      invoice.quantity || invoice.billableVehicleCount || 1,
+    );
     const billingPlan = corporate?.billingPlan || '—';
     const notes = invoice.notes || `${invoiceMonth} monthly billing invoice`;
 
@@ -225,7 +389,10 @@ export class CorporatesService {
     const salesTaxAmount = Number(invoice.salesTaxAmount || 0);
     const whTaxPercentage = Number(invoice.whTaxPercentage || 0);
     const whTaxAmount = Number(invoice.whTaxAmount || 0);
-    const totalAmount = Number(invoice.totalAmount || (subtotal - discountAmount + salesTaxAmount + whTaxAmount).toFixed(2));
+    const totalAmount = Number(
+      invoice.totalAmount ||
+        (subtotal - discountAmount + salesTaxAmount + whTaxAmount).toFixed(2),
+    );
     const paidAmount = Number(invoice.paidAmount || 0);
     const arrears = Number(invoice.arrears || 0);
     const balanceDue = Number((totalAmount - paidAmount).toFixed(2));
@@ -278,9 +445,6 @@ export class CorporatesService {
       balanceDueFormatted: formatCurrency(balanceDue),
     };
 
-
-
-
     const html = await this.renderHtmlTemplate(
       'corporates/corporate-invoice.html',
       templateData,
@@ -300,7 +464,9 @@ export class CorporatesService {
 
     const publicUrl = this.appConfigService.getR2Url(fileKey);
 
-    await CorporateInvoice.query().findById(invoiceId).patch({ pdfPath: publicUrl });
+    await CorporateInvoice.query()
+      .findById(invoiceId)
+      .patch({ pdfPath: publicUrl });
 
     return {
       url: publicUrl,
@@ -309,7 +475,10 @@ export class CorporatesService {
     };
   }
 
-  private async htmlToPdfBuffer(html: string, landscape: boolean = false): Promise<Buffer> {
+  private async htmlToPdfBuffer(
+    html: string,
+    landscape: boolean = false,
+  ): Promise<Buffer> {
     const launchOptions: any = {
       headless: true,
       args: [
@@ -318,7 +487,10 @@ export class CorporatesService {
         '--disable-dev-shm-usage',
       ],
     };
-    if (process.env.CHROME_DRIVER_PATH && fs.existsSync(process.env.CHROME_DRIVER_PATH)) {
+    if (
+      process.env.CHROME_DRIVER_PATH &&
+      fs.existsSync(process.env.CHROME_DRIVER_PATH)
+    ) {
       launchOptions.executablePath = process.env.CHROME_DRIVER_PATH;
     }
 
@@ -350,11 +522,12 @@ export class CorporatesService {
     } finally {
       await browser.close();
     }
-
-
   }
 
-  private async renderHtmlTemplate(templatePath: string, data: any): Promise<string> {
+  private async renderHtmlTemplate(
+    templatePath: string,
+    data: any,
+  ): Promise<string> {
     const fullPath = path.join(process.cwd(), 'html-templates', templatePath);
     if (!fs.existsSync(fullPath)) {
       throw new Error(`Template file not found: ${fullPath}`);
@@ -363,7 +536,6 @@ export class CorporatesService {
     const compiledTemplate = handlebars.compile(htmlTemplate);
     return compiledTemplate(data);
   }
-
 
   async delete(id: number) {
     // 1. Check if Corporate exists
@@ -422,5 +594,116 @@ export class CorporatesService {
     });
 
     return { id, deleted: true };
+  }
+
+  // ─── Legacy-compatible endpoints (ported from cda-parking-chat-backend) ───
+
+  /** Maps a raw `corporates` row to the legacy Sequelize JSON shape (no password). */
+  private toLegacyCorporate(row: any) {
+    if (!row) return row;
+    const {
+      password,
+      status,
+      address,
+      creationDateTime,
+      ...rest
+    } = row;
+    return {
+      ...rest,
+      addressId: address ?? null,
+      statusCorporate: status,
+      createdAt: creationDateTime,
+    };
+  }
+
+  // GET api/corporates/:id  (legacy GET corporates/:id)
+  async getLegacyById(id: number) {
+    const corporate: any = await Corporate.query()
+      .findById(id)
+      .withGraphFetched('[corporateAddresses, billingPlans(orderByCreatedDesc)]')
+      .modifiers({
+        orderByCreatedDesc: (builder) => builder.orderBy('createdAt', 'desc'),
+      });
+    if (!corporate) {
+      AppException.notFound({ message: 'Corporate not found' });
+    }
+    return this.toLegacyCorporate(corporate);
+  }
+
+  // PUT api/corporates/:id/approve  (legacy approveCorporate)
+  async approveCorporate(id: number, pricePlan: any, authId?: number) {
+    const corporate: any = await Corporate.query().findById(id);
+    if (!corporate) {
+      AppException.notFound({ message: 'Corporate not found' });
+    }
+
+    await Corporate.query()
+      .findById(id)
+      .patch({ status: 'approved', updatedAt: nowWallClock() } as any);
+
+    await insertPortalNotification(Corporate.knex(), {
+      title: 'Registration Approved',
+      message:
+        'Your corporate account has been approved. You can now log in and submit card requests.',
+      portalType: 'corporate',
+      corporateId: id,
+      data: { type: 'corporateApproved', corporateId: id },
+      createdBy: authId ?? 16,
+    });
+
+    // Default billing plan (legacy corporateFinanceService.createBillingPlan):
+    // deactivate active plans, insert a new active one. Failures are logged only.
+    try {
+      const price = Number(pricePlan);
+      const now = nowWallClock();
+      await Corporate.transaction(async (trx) => {
+        await CorporateBillingPlan.query(trx)
+          .where('corporateId', id)
+          .where('isActive', true)
+          .patch({ isActive: false, updatedAt: now } as any);
+        await CorporateBillingPlan.query(trx).insert({
+          corporateId: id,
+          pricePerVehicle: Number.isFinite(price) ? price : 0,
+          effectiveFrom: moment().format('YYYY-MM-DD'),
+          isActive: true,
+          notes: 'Default plan',
+          createdAt: now,
+          updatedAt: now,
+        } as any);
+      });
+    } catch (planErr) {
+      console.error(
+        '[approveCorporate] Could not create default billing plan:',
+        planErr?.message,
+      );
+    }
+
+    const updated = await Corporate.query().findById(id);
+    return this.toLegacyCorporate(updated);
+  }
+
+  // PUT api/corporates/:id/reject  (legacy rejectCorporate)
+  async rejectCorporate(id: number, authId?: number) {
+    const corporate: any = await Corporate.query().findById(id);
+    if (!corporate) {
+      AppException.notFound({ message: 'Corporate not found' });
+    }
+
+    await Corporate.query()
+      .findById(id)
+      .patch({ status: 'rejected', updatedAt: nowWallClock() } as any);
+
+    await insertPortalNotification(Corporate.knex(), {
+      title: 'Registration Rejected',
+      message:
+        'Your corporate account registration has been rejected. Please contact support for more information.',
+      portalType: 'corporate',
+      corporateId: id,
+      data: { type: 'corporateRejected', corporateId: id },
+      createdBy: authId ?? 16,
+    });
+
+    const updated = await Corporate.query().findById(id);
+    return this.toLegacyCorporate(updated);
   }
 }

@@ -7,14 +7,18 @@ export class PortalNotification extends Mapping {
     return 'portal_notifications';
   }
 
+  id?: number;
   title?: string;
   message?: string;
-  userId?: number;
+  user?: number;
   corporateId?: number;
   createdBy?: number;
   portalType?: string;
   data?: any;
-  read?: boolean;
+  read?: boolean | number;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+  deletedAt?: Date | string;
 
     static get relationMappings() {
     return {

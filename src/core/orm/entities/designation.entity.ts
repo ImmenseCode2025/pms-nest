@@ -8,8 +8,9 @@ export class Designation extends Mapping {
     return 'designation';
   }
 
+  id?: number;
   name?: string;
-  userId?: number;
+  user?: number;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 

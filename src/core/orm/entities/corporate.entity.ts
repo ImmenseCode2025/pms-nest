@@ -7,28 +7,30 @@ import { CorporateResetPassword } from './corporate-reset-password.entity';
 import { PortalNotification } from './portal-notification.entity';
 
 export class Corporate extends Mapping {
-    static get tableName() {
+  static get tableName() {
     return 'corporates';
   }
 
+  id?: number;
   name?: string;
   registrationNumber?: string;
   email?: string;
-  addressId?: number;
-  quantity?: number;
-  unitType?: string;
-  unitPrice?: number;
+  address?: number;
   location?: string;
   contactPersonName?: string;
   contactNumber?: string;
   password?: string;
-  status?: "pending" | "approved" | "rejected";
-  statusCorporate?: "pending" | "approved" | "rejected";
+  status?: 'pending' | 'approved' | 'rejected';
+  statusCorporate?: 'pending' | 'approved' | 'rejected';
   site_id?: number;
   createdAt?: Date | string;
+  creationDateTime?: Date | string;
   updatedAt?: Date | string;
+  quantity?: number;
+  unitType?: string;
+  unitPrice?: number;
 
-    static get relationMappings() {
+  static get relationMappings() {
     return {
       corporateResetPasswords: {
         relation: Mapping.HasManyRelation,

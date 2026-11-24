@@ -2,32 +2,32 @@ import { Mapping } from '../sql.model';
 import { TopUp } from './top-up.entity';
 import { Customer } from './customer.entity';
 import { PaymentGateway } from './payment-gateway.entity';
-import { ParkingCard } from './parking-card.entity';
-import { ReactivateParkingCard } from './reactivate-parking-card.entity';
 
 export class Payment extends Mapping {
     static get tableName() {
     return 'payment';
   }
 
-  customerId?: number;
-  parkingTokenId?: number;
+  id?: number;
+  customer?: number;
+  token?: number;
   amount?: number;
   transactionDateTime?: Date | string;
-  status?: "pending" | "success" | "failed";
-  paymentGatewayId?: number;
-  savePaymentInfo?: boolean;
-  paidThroughSavedInfo?: boolean;
+  status?: 'pending' | 'success' | 'failed';
+  paymentGateway?: number;
+  savePaymentInfo?: boolean | number;
+  paidThroughSavedInfo?: boolean | number;
   invoice?: string;
-  discountID?: number;
-  category?: "parking" | "topup" | "parkingCard" | "parkingFine" | "scratchCard";
+  discount?: number;
+  category?: 'parking' | 'topup' | 'parkingCard' | 'parkingFine' | 'scratchCard';
   longitude?: number;
   latitude?: number;
   orderId?: string;
   instanceId?: number;
   receiptNumber?: string;
-  createdAt?: Date | string;
   updatedAt?: Date | string;
+  createdAt?: Date | string;
+  company?: number;
 
     static get relationMappings() {
     return {
@@ -53,22 +53,6 @@ export class Payment extends Mapping {
         join: {
           from: 'payment.paymentGateway',
           to: 'payment_gateway.id',
-        },
-      },
-      paymentParkingCards: {
-        relation: Mapping.HasManyRelation,
-        modelClass: ParkingCard,
-        join: {
-          from: 'payment.id',
-          to: 'parking_card.payment',
-        },
-      },
-      paymentReactivationCard: {
-        relation: Mapping.HasManyRelation,
-        modelClass: ReactivateParkingCard,
-        join: {
-          from: 'payment.id',
-          to: 'reactivate_parking_card.payment',
         },
       },
     };

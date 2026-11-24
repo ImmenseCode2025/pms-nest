@@ -6,10 +6,12 @@ export class CustomerResetPassword extends Mapping {
     return 'customer_reset_password_otp';
   }
 
-  resetCode?: string;
-  customerId?: number;
-  createdAt?: Date | string;
+  id?: number;
+  code?: string;
+  customer?: number;
+  generatedDateTime?: Date | string;
   updatedAt?: Date | string;
+  status?: 'active' | 'inactive' | 'deleted';
 
     static get relationMappings() {
     return {

@@ -6,11 +6,12 @@ export class PaymentMethod extends Mapping {
     return 'payment_method';
   }
 
+  id?: number;
   name?: string;
   status?: string;
+  generatedDateTime?: Date | string;
   uploadedDateTime?: Date | string;
-  serverId?: number;
-  createdAt?: Date | string;
+  server?: number;
   updatedAt?: Date | string;
 
     static get relationMappings() {

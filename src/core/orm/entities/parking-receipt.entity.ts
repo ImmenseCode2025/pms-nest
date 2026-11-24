@@ -16,8 +16,8 @@ export class ParkingReceipt extends Mapping {
   updatedAt?: Date | string;
   paymentMethod?: number;
   ticketNumber?: string;
-  sourceHandheld?: number;
-  sourceTicketEase?: number;
+  sourceHandheld?: boolean | number;
+  sourceTicketEase?: boolean | number;
   checkoutDateTime?: Date | string;
   paymentReference?: string;
   onlinePaymentReference?: string;

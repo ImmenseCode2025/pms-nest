@@ -5,19 +5,20 @@ export class ParkingShiftClosingHistory extends Mapping {
     return 'parking_shift_closing_history';
   }
 
-  shiftClosingId?: number;
-  parkingSiteId?: number;
+  id?: number;
+  site?: number;
   shiftDate?: Date | string;
-  shiftTime?: Date | string;
-  shiftType?: "Morning Shift" | "Evening Shift";
-  userId?: number;
-  supervisorId?: number;
-  shiftClosingFor?: "Handheld" | "System";
+  shiftTime?: string;
+  shiftType?: 'Morning Shift' | 'Evening Shift';
+  user?: number;
+  supervisor?: number;
+  shiftClosingFor?: 'Handheld' | 'System';
   deviceId?: number;
   operatorSignature?: string;
   supervisorSignature?: string;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  shiftClosingId?: number;
 
   static get relationMappings() {
     return {};

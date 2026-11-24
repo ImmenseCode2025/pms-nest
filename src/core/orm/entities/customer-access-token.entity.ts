@@ -6,12 +6,13 @@ export class CustomerAccessToken extends Mapping {
     return 'customer_access_token';
   }
 
-  customerId?: number;
+  id?: number;
+  customer?: number;
   token?: string;
   macAddress?: string;
   generatedDateTime?: Date | string;
-  tokenStatus?: "active" | "expired";
-  createdAt?: Date | string;
+  status?: 'active' | 'expired';
+  creationDateTime?: Date | string;
   updatedAt?: Date | string;
 
     static get relationMappings() {

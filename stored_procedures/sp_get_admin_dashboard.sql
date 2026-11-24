@@ -3,7 +3,6 @@ DROP PROCEDURE IF EXISTS sp_get_admin_dashboard;
 DELIMITER $$
 
 CREATE PROCEDURE sp_get_admin_dashboard(
-    IN p_company_id INT,
     IN p_site_id INT,
     IN p_payment_method INT,
     IN p_vehicle_type INT,
@@ -31,8 +30,7 @@ BEGIN
     -- 1. Total Sites
     SELECT COUNT(DISTINCT ps.id) AS total_sites
     FROM parking_site ps
-    WHERE (p_company_id IS NULL OR ps.company = p_company_id)
-      AND (p_site_id IS NULL OR ps.id = p_site_id);
+    WHERE (p_site_id IS NULL OR ps.id = p_site_id);
  
     -- 2. Vehicle Types Breakdown (Total Parking, Total FOC, Total Revenue)
     SELECT 
@@ -59,7 +57,6 @@ BEGIN
         LEFT JOIN vehicle_type vt ON vt.id = pt.vehicleType
         LEFT JOIN parking_price pp ON pp.vehicleType = pt.vehicleType AND pp.siteId = pt.site
         WHERE (v_device IS NULL OR v_device = 'system')
-          AND (p_company_id IS NULL OR ps.company = p_company_id)
           AND (p_site_id IS NULL OR pt.site = p_site_id)
           AND (p_payment_method IS NULL OR pt.paymentMethod = p_payment_method)
           AND (p_vehicle_type IS NULL OR pt.vehicleType = p_vehicle_type)
@@ -82,7 +79,6 @@ BEGIN
         LEFT JOIN vehicle_type vt ON vt.id = pr.vehicleType
         LEFT JOIN parking_price pp ON pp.vehicleType = pr.vehicleType AND pp.siteId = ps.id
         WHERE (v_device IS NULL OR v_device = 'handheld')
-          AND (p_company_id IS NULL OR ps.company = p_company_id)
           AND (p_site_id IS NULL OR pr.siteId = p_site_id)
           AND (p_payment_method IS NULL OR pr.paymentMethod = p_payment_method)
           AND (p_vehicle_type IS NULL OR pr.vehicleType = p_vehicle_type)
@@ -106,7 +102,6 @@ BEGIN
         INNER JOIN parking_site ps ON pt.site = ps.id
         WHERE (v_device IS NULL OR v_device = 'system')
           AND pt.checkInDateTime IS NOT NULL
-          AND (p_company_id IS NULL OR ps.company = p_company_id)
           AND (p_site_id IS NULL OR pt.site = p_site_id)
           AND (p_payment_method IS NULL OR pt.paymentMethod = p_payment_method)
           AND (p_vehicle_type IS NULL OR pt.vehicleType = p_vehicle_type)
@@ -121,7 +116,6 @@ BEGIN
         INNER JOIN parking_site ps ON pr.siteId = ps.id
         WHERE (v_device IS NULL OR v_device = 'handheld')
           AND pr.creationDate IS NOT NULL
-          AND (p_company_id IS NULL OR ps.company = p_company_id)
           AND (p_site_id IS NULL OR pr.siteId = p_site_id)
           AND (p_payment_method IS NULL OR pr.paymentMethod = p_payment_method)
           AND (p_vehicle_type IS NULL OR pr.vehicleType = p_vehicle_type)
@@ -159,7 +153,6 @@ BEGIN
             LEFT JOIN parking_price pp ON pp.vehicleType = pt.vehicleType AND pp.siteId = pt.site
             LEFT JOIN payment_method pm ON pm.id = pt.paymentMethod
             WHERE (v_device IS NULL OR v_device = 'system')
-              AND (p_company_id IS NULL OR ps.company = p_company_id)
               AND (p_site_id IS NULL OR pt.site = p_site_id)
               AND (p_payment_method IS NULL OR pt.paymentMethod = p_payment_method)
               AND (p_vehicle_type IS NULL OR pt.vehicleType = p_vehicle_type)
@@ -193,7 +186,6 @@ BEGIN
             LEFT JOIN parking_price pp ON pp.vehicleType = pr.vehicleType AND pp.siteId = ps.id
             LEFT JOIN payment_method pm ON pm.id = pr.paymentMethod
             WHERE (v_device IS NULL OR v_device = 'handheld')
-              AND (p_company_id IS NULL OR ps.company = p_company_id)
               AND (p_site_id IS NULL OR pr.siteId = p_site_id)
               AND (p_payment_method IS NULL OR pr.paymentMethod = p_payment_method)
               AND (p_vehicle_type IS NULL OR pr.vehicleType = p_vehicle_type)

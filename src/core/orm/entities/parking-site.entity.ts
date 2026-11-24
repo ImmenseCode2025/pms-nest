@@ -1,22 +1,14 @@
 import { Mapping } from '../sql.model';
-import { Address } from './address.entity';
 import { AppQrCode } from './app-qr-code.entity';
 import { CashQrCode } from './cash-qr-code.entity';
 import { CompanyCards } from './company-cards.entity';
 import { CompanyQrCode } from './company-qr-code.entity';
-import { Company } from './company.entity';
-import { Discount } from './discount.entity';
-import { ETAGLOGS } from './etaglogs.entity';
 import { FocQrCode } from './foc-qr-code.entity';
 import { FOC } from './foc.entity';
-import { ParkingBlock } from './parking-block.entity';
-import { ParkingPriceLogs } from './parking-price-logs.entity';
 import { ParkingPrice } from './parking-price.entity';
 import { ParkingShiftClosing } from './parking-shift-closing.entity';
 import { ParkingToken } from './parking-token.entity';
 import { PosQrCode } from './pos-qr-code.entity';
-import { Reservation } from './reservation.entity';
-import { ScratchCardsHistory } from './scratch-cards-history.entity';
 import { SiteConnectivity } from './site-connectivity.entity';
 import { Users } from './users.entity';
 
@@ -38,22 +30,15 @@ export class ParkingSite extends Mapping {
   name?: string;
   sgi?: string;
   address?: number;
-  status?: 'pending' | 'active' | 'inactive' | 'outOfService' | 'blocked' | string;
+  status?: 'pending' | 'active' | 'inactive' | 'outOfService' | 'blocked';
   user?: number;
   area?: number;
-  unitOfMeasure?: 'square feet' | 'square meter' | 'kilometer' | string;
+  location?: string;
+  latitude?: string;
+  longitude?: string;
   company?: number;
-  isValetParkingAvailable?: boolean | number;
-  collectionPoint?: boolean | number;
-  creationDateTime?: Date | string;
-  updatedAt?: Date | string;
-
-  // Compatibility / Alias properties
-  siteCode?: string;
-  addressId?: number;
-  userId?: number;
-  companyId?: number;
   createdAt?: Date | string;
+  updatedAt?: Date | string;
 
     static get relationMappings() {
     return {
@@ -81,37 +66,12 @@ export class ParkingSite extends Mapping {
           to: 'parking_shift_closing.site',
         },
       },
-      parkingSiteParkingBlocks: {
-        relation: Mapping.HasManyRelation,
-        modelClass: ParkingBlock,
-        join: {
-          from: 'parking_site.id',
-          to: 'parking_block.site',
-        },
-      },
       parkingSiteUsers: {
         relation: Mapping.BelongsToOneRelation,
         modelClass: Users,
         join: {
           from: 'parking_site.user',
           to: 'user.id',
-        },
-      },
-      site_address: {
-        relation: Mapping.BelongsToOneRelation,
-        modelClass: Address,
-        filter: Mapping.selectFields('id', 'name'),
-        join: {
-          from: 'parking_site.address',
-          to: 'address.id',
-        },
-      },
-      siteParkingCompany: {
-        relation: Mapping.BelongsToOneRelation,
-        modelClass: Company,
-        join: {
-          from: 'parking_site.company',
-          to: 'company.id',
         },
       },
       siteParkingTokens: {
@@ -122,52 +82,12 @@ export class ParkingSite extends Mapping {
           to: 'parking_token.site',
         },
       },
-      siteReservations: {
-        relation: Mapping.HasManyRelation,
-        modelClass: Reservation,
-        join: {
-          from: 'parking_site.id',
-          to: 'reservation.site',
-        },
-      },
       siteParkingPrices: {
         relation: Mapping.HasManyRelation,
         modelClass: ParkingPrice,
         join: {
           from: 'parking_site.id',
           to: 'parking_price.siteId',
-        },
-      },
-      siteDiscounts: {
-        relation: Mapping.HasManyRelation,
-        modelClass: Discount,
-        join: {
-          from: 'parking_site.id',
-          to: 'discount.site',
-        },
-      },
-      siteParkingPriceLogs: {
-        relation: Mapping.HasManyRelation,
-        modelClass: ParkingPriceLogs,
-        join: {
-          from: 'parking_site.id',
-          to: 'parking_price_logs.siteId',
-        },
-      },
-      ParkingSitesEtagLogs: {
-        relation: Mapping.HasManyRelation,
-        modelClass: ETAGLOGS,
-        join: {
-          from: 'parking_site.id',
-          to: 'etag_logs.site',
-        },
-      },
-      EventSiteScratchCard: {
-        relation: Mapping.HasManyRelation,
-        modelClass: ScratchCardsHistory,
-        join: {
-          from: 'parking_site.id',
-          to: 'scratch_cards_history.site_id',
         },
       },
       siteCompanyCards: {

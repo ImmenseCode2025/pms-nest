@@ -7,13 +7,14 @@ export class CompanyCards extends Mapping {
     return 'company_cards';
   }
 
-  parkingSiteId?: number;
+  id?: number;
+  site?: number;
   employeeName?: string;
   vehicleNumber?: string;
   companyName?: string;
-  designationId?: number;
-  shiftTimeFrom?: Date | string;
-  shiftTimeTo?: Date | string;
+  shiftTimeFrom?: string;
+  shiftTimeTo?: string;
+  designation?: number;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 

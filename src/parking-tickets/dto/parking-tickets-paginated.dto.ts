@@ -1,4 +1,4 @@
-import { IsOptional } from 'class-validator';
+import { IsIn, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class ParkingTicketsPaginatedDto {
   @IsOptional()
@@ -21,4 +21,13 @@ export class ParkingTicketsPaginatedDto {
 
   @IsOptional()
   endDate?: string;
+}
+
+export class GeneralInquiryDto {
+  @IsNotEmpty()
+  search_text: string;
+
+  @IsNotEmpty()
+  @IsIn(['vehicle', 'ticket'])
+  type: string;
 }

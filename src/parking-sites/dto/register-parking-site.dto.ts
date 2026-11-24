@@ -1,16 +1,29 @@
-import { IsArray, IsObject } from 'class-validator';
+import { IsArray, IsNotEmpty } from 'class-validator';
+
+class ParkingSitePricingDto {
+  @IsNotEmpty()
+  vehicle_type_id: number;
+
+  @IsNotEmpty()
+  amount: string;
+}
 
 export class RegisterParkingSiteDto {
-  @IsObject()
-  site: {
-    name: string;
-    latitude: number;
-    longitude: number;
-    area?: number | null;
-    uom?: string;
-    company: number;
-  };
+  @IsNotEmpty()
+  name: string;
+
+  @IsNotEmpty()
+  latitude: string;
+
+  @IsNotEmpty()
+  longitude: string;
+
+  @IsNotEmpty()
+  location: string;
+
+  @IsNotEmpty()
+  area: string;
 
   @IsArray()
-  block: any[];
+  pricing: ParkingSitePricingDto[];
 }

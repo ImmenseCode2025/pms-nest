@@ -7,13 +7,14 @@ export class TopUp extends Mapping {
     return 'topup';
   }
 
-  walletId?: number;
+  id?: number;
+  wallet?: number;
   quantity?: number;
-  paymentId?: number;
+  payment?: number;
   transactionDateTime?: Date | string;
   receiptNumber?: string;
-  createdAt?: Date | string;
   updatedAt?: Date | string;
+  createdAt?: Date | string;
 
     static get relationMappings() {
     return {

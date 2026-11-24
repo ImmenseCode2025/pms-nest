@@ -1,21 +1,26 @@
 import { Mapping } from '../sql.model';
 import { CorporateQrCode } from './corporate-qr-code.entity';
 import { Corporate } from './corporate.entity';
-import { VehicleType } from './vehicle-type.entity';
 import { Customer } from './customer.entity';
+import { VehicleType } from './vehicle-type.entity';
 
 export class CorporateCards extends Mapping {
-    static get tableName() {
+  static get tableName() {
     return 'corporate_cards';
   }
 
-  corporateId?: number;
+  id?: number;
+  corporate?: number;
   requestId?: string;
-  requestStatus?: "pending" | "approved" | "rejected";
-  cardStatus?: "active" | "inactive" | "revoked";
+  status?: 'pending' | 'approved' | 'rejected';
+  cardStatus?: 'active' | 'inactive' | 'revoked';
   requestDate?: Date | string;
   approvalRemarks?: string;
   vehicleNumber?: string;
+  approvedBy?: number;
+  approvedDate?: Date | string;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
   vehicleType?: number;
   ownerName?: string;
   email?: string;
@@ -24,16 +29,11 @@ export class CorporateCards extends Mapping {
   vehicleModel?: string;
   designation?: string;
   dob?: Date | string;
-  approvedBy?: number;
-  approvedDate?: Date | string;
   otpCode?: string;
   otpExpired?: Date | string;
   customer?: number;
   site_id?: number;
-  createdAt?: Date | string;
-  updatedAt?: Date | string;
-
-    static get relationMappings() {
+  static get relationMappings() {
     return {
       corporateCardCorporateQrCodes: {
         relation: Mapping.HasManyRelation,

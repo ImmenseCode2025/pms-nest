@@ -2,7 +2,6 @@ import { Mapping } from '../sql.model';
 import { Users } from './users.entity';
 import { Designation } from './designation.entity';
 import { ParkingSite } from './parking-site.entity';
-import { Company } from './company.entity';
 import { FocQrCode } from './foc-qr-code.entity';
 import { CashQrCode } from './cash-qr-code.entity';
 
@@ -11,16 +10,17 @@ export class FOC extends Mapping {
     return 'foc_card';
   }
 
-  parkingSiteId?: number;
+  id?: number;
+  site?: number;
   employeeId?: string;
   employeeName?: string;
   dateJoining?: Date | string;
-  companyId?: number;
-  designationId?: number;
-  shiftTimeFrom?: Date | string;
-  shiftTimeTo?: Date | string;
-  profilePic?: string;
-  userId?: number;
+  company?: number;
+  designation?: number;
+  shiftTimeFrom?: string;
+  shiftTimeTo?: string;
+  profile?: string;
+  user?: number;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 
@@ -48,14 +48,6 @@ export class FOC extends Mapping {
         join: {
           from: 'foc_card.site',
           to: 'parking_site.id',
-        },
-      },
-      focCompanies: {
-        relation: Mapping.BelongsToOneRelation,
-        modelClass: Company,
-        join: {
-          from: 'foc_card.company',
-          to: 'company.id',
         },
       },
       qrCodesFOC: {
